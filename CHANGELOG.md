@@ -6,6 +6,33 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.9.0] - 2026-06-17
+
+### Added
+- Automatic failed-image recovery for Quantum ESPRESSO image calculations.
+- Generic recovery layer: FailureType, RecoveryAttempt,
+  NoOpRecoveryStrategy, RecoveryExhausted, and 
+un_with_recovery.
+- QE-specific recovery strategy: classify convergence failures, geometry
+  instabilities, process failures, and unknown failures from QE output.
+- Retry policy for QE convergence failures: reduce mixing_beta on retries
+  and increase degauss on the final retry.
+- Retry policy for QE geometry instabilities: deterministic bounded
+  displacement with seed control and post-recovery geometry validation.
+- Optional recovery-log serialization in reproducibility bundles.
+- Recovery test suite covering retry taxonomy, QE strategy behavior,
+  recovered-geometry synchronization, and stale-result clearing.
+
+### Changed
+- QE calculator factories now attach QERecoveryStrategy by default while
+  preserving default no-op recovery behavior for non-QE calculators.
+- NEB optimization threads recovery strategy and 
+ecovery_log through
+  per-image evaluation.
+- Public API exports recovery primitives and QERecoveryStrategy.
+
+---
+
 ## [0.8.0] — 2026-06-13
 
 ### Added

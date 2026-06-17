@@ -16,7 +16,7 @@ calculators, while remaining compatible with DFT backends through ASE.
 pip install nebwalk
 ```
 
-Current source version: **v0.8.0**.
+Current source version: **v0.9.0**.
 
 ---
 
@@ -57,6 +57,9 @@ around ASE calculators and atomic structures.
 - Restart from ASE `.traj` files with fresh calculator instances.
 - Energy-profile plotting, CSV export, and `.traj` output.
 - Quantum ESPRESSO helper layer through ASE calculator construction.
+- Automatic failed-image recovery for Quantum ESPRESSO image calculations:
+  convergence failures and geometry instabilities can be retried with logged
+  recovery attempts; non-retryable process failures stop immediately.
 
 ### MLIP-assisted workflow (v0.7.0+)
 
@@ -513,10 +516,10 @@ pip install -e ".[test]"
 pytest tests/ -v
 ```
 
-The test suite (132 tests) covers interpolation, NEB force projection, tangent
+The test suite covers interpolation, NEB force projection, tangent
 construction, minimum-image convention handling, variable springs, parallel
 image evaluation, restart helpers, calculator-factory workflows, and
-reproducibility bundles.
+reproducibility bundles, active-workflow helpers, and QE failed-image recovery.
 
 ---
 
@@ -524,7 +527,7 @@ reproducibility bundles.
 
 Short-term priorities:
 
-1. Keep PyPI, GitHub tags, and source metadata synchronized for v0.7.x releases.
+1. Keep PyPI, GitHub tags, and source metadata synchronized for v0.9.x releases.
 2. Add H/Cu(111) benchmark scripts, static output CSVs, and profile plots.
 3. Expand DFT-backed Quantum ESPRESSO benchmarks with small inputs and clear cost warnings.
 4. Add post-NEB transition-state refinement using a dimer method.
@@ -558,7 +561,7 @@ rm -rf dist/ build/ *.egg-info
 python -m build
 python -m twine check dist/*
 python -m twine upload dist/*
-VERSION=v0.8.0
+VERSION=v0.9.0
 git tag -a "$VERSION" -m "nebwalk $VERSION"
 git push origin main "$VERSION"
 ```
@@ -593,6 +596,17 @@ The scientific direction, algorithmic design, implementation decisions, validati
 ## License
 
 MIT License. See [LICENSE](LICENSE).
+
+## Features in v0.9.0
+
+In addition to the v0.8.0 reproducibility workflow, v0.9.0 adds:
+
+- Automatic failed-image recovery for Quantum ESPRESSO image calculations.
+- Generic recovery primitives in `nebwalk.recovery`.
+- QE-specific `QERecoveryStrategy` with retryable convergence and geometry
+  failure handling.
+- Recovery-attempt logging through `neb.recovery_log`.
+- Optional recovery-log serialization in reproducibility bundles.
 
 ## Features in v0.8.0
 

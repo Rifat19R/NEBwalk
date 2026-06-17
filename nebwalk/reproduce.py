@@ -15,6 +15,7 @@ from ase import Atoms
 from ase.io import write
 
 from .engine import NEBRunConfig, NEBRunResult
+from .recovery import RecoveryAttempt
 
 __all__ = ["ReproBundle", "save_bundle"]
 
@@ -40,6 +41,7 @@ def save_bundle(
     calc_params: dict[str, Any] | None = None,
     compress: bool = True,
     include_env: bool = True,
+    recovery_log: list[RecoveryAttempt] | None = None,
 ) -> ReproBundle:
     """Write a self-contained reproducibility bundle for a completed NEB run."""
     from . import __version__
@@ -56,7 +58,14 @@ def save_bundle(
     _write_structures(initial, final, result.neb, out)
     _write_config_json(config, out, __version__)
     _write_calc_params_json(calc_params, out, __version__)
-    _write_results_json(result, result.neb, out, __version__, timestamp)
+    _write_results_json(
+        result,
+        result.neb,
+        out,
+        __version__,
+        timestamp,
+        recovery_log=recovery_log,
+    )
     _write_convergence_history(result.neb, out)
 
     env_text = _capture_env(include_env)
@@ -138,6 +147,7 @@ def _write_results_json(
     output_dir: Path,
     version: str,
     timestamp: str,
+    recovery_log: list[RecoveryAttempt] | None = None,
 ) -> None:
     energies = [float(energy) for energy in neb.get_energies()]
     reference = energies[0] if energies else 0.0
@@ -154,6 +164,8 @@ def _write_results_json(
             float(energy - reference) for energy in energies
         ],
     }
+    if recovery_log:
+        payload["recovery_log"] = [attempt.to_json() for attempt in recovery_log]
     _write_json(output_dir / "results.json", payload)
 
 

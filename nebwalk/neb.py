@@ -30,6 +30,7 @@ class NEB:
         climb: bool = False,
         climb_delay: int = 100,
         n_workers: int = 1,
+        recovery_strategy: Any | None = None,
     ) -> None:
         if len(images) < 3:
             raise ValueError(
@@ -48,6 +49,8 @@ class NEB:
         self.climb = bool(climb)
         self.climb_delay = int(climb_delay)
         self.n_workers = int(n_workers)
+        self.recovery_strategy = recovery_strategy
+        self.recovery_log: list[Any] = []
         self.history: list[dict[str, Any]] = []
 
     @classmethod
@@ -61,6 +64,7 @@ class NEB:
         climb: bool = False,
         climb_delay: int = 100,
         n_workers: int = 1,
+        recovery_strategy: Any | None = None,
     ) -> "NEB":
         """Build a ready-to-run NEB object from an ASE trajectory file."""
         images = read(path, index=":")
@@ -68,6 +72,8 @@ class NEB:
             images = [images]
         for image in images:
             image.calc = calculator_factory()
+        if recovery_strategy is None:
+            recovery_strategy = getattr(calculator_factory, "recovery_strategy", None)
         return cls(
             images,
             k=k,
@@ -75,6 +81,7 @@ class NEB:
             climb=climb,
             climb_delay=climb_delay,
             n_workers=n_workers,
+            recovery_strategy=recovery_strategy,
         )
 
     def optimize(
@@ -84,6 +91,7 @@ class NEB:
         verbose: bool = True,
     ) -> bool:
         """Optimize the NEB path using FIRE."""
+        self.recovery_log = []
         converged, _steps, history = fire_optimize(
             self.images,
             self.k,
@@ -94,6 +102,8 @@ class NEB:
             k_min=self.k_min,
             n_workers=self.n_workers,
             verbose=verbose,
+            recovery_strategy=self.recovery_strategy,
+            recovery_log=self.recovery_log,
         )
         self.history = history
         return converged

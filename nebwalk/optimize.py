@@ -13,9 +13,11 @@ from ase.constraints import FixAtoms
 from numpy.typing import NDArray
 
 from .forces import compute_neb_forces, validate_calculators, variable_spring_constants
+from .recovery import NoOpRecoveryStrategy, run_with_recovery
 
 logger = logging.getLogger(__name__)
 FloatArray = NDArray[np.float64]
+_NOOP_RECOVERY = NoOpRecoveryStrategy()
 
 
 def max_force_magnitude(forces: FloatArray) -> float:
@@ -106,11 +108,85 @@ def _get_free_mask(img: Atoms) -> NDArray[np.bool_]:
     return mask
 
 
-def _eval_image(img: Atoms) -> tuple[float, FloatArray]:
+def _image_recovery_strategy(img: Atoms, recovery_strategy: Any | None) -> Any:
+    if recovery_strategy is not None:
+        return recovery_strategy
+    return getattr(img.calc, "recovery_strategy", _NOOP_RECOVERY)
+
+
+def _extract_calc_params(calc: Any) -> dict:
+    params: dict[str, Any] = {}
+    calc_params = getattr(calc, "parameters", None)
+    if isinstance(calc_params, dict):
+        input_data = calc_params.get("input_data")
+    else:
+        input_data = getattr(calc_params, "input_data", None)
+    if not isinstance(input_data, dict):
+        return params
+
+    for section_name in ("electrons", "system"):
+        section = input_data.get(section_name)
+        if isinstance(section, dict):
+            params.update(section)
+    return params
+
+
+def _apply_calc_params(calc: Any, calc_params: dict) -> None:
+    parameters = getattr(calc, "parameters", None)
+    if not isinstance(parameters, dict):
+        return
+    input_data = parameters.get("input_data")
+    if not isinstance(input_data, dict):
+        return
+
+    sections = {
+        "electrons": {"conv_thr", "mixing_beta"},
+        "system": {"degauss"},
+    }
+    changed = False
+    for section_name, names in sections.items():
+        section = input_data.setdefault(section_name, {})
+        if not isinstance(section, dict):
+            continue
+        for name in names:
+            if name in calc_params and section.get(name) != calc_params[name]:
+                section[name] = calc_params[name]
+                changed = True
+    if changed and hasattr(calc, "reset"):
+        calc.reset()
+    elif changed and hasattr(calc, "results"):
+        calc.results.clear()
+
+
+def _eval_image(
+    img: Atoms,
+    image_index: int,
+    recovery_strategy: Any | None = None,
+    recovery_log: list | None = None,
+) -> tuple[float, FloatArray]:
     """Evaluate energy and forces for one image."""
-    energy = float(img.get_potential_energy())
-    forces = np.asarray(img.get_forces(), dtype=float)
-    return energy, forces
+    strategy = _image_recovery_strategy(img, recovery_strategy)
+    log = recovery_log if recovery_log is not None else []
+    calc = img.calc
+    calc_params = _extract_calc_params(calc)
+
+    def compute_fn(eval_atoms: Atoms, params: dict) -> tuple[float, FloatArray]:
+        if eval_atoms.calc is None:
+            eval_atoms.calc = calc
+        if eval_atoms.calc is not None:
+            _apply_calc_params(eval_atoms.calc, params)
+        energy = float(eval_atoms.get_potential_energy())
+        forces = np.asarray(eval_atoms.get_forces(), dtype=float)
+        return energy, forces
+
+    return run_with_recovery(
+        compute_fn,
+        strategy,
+        img,
+        calc_params,
+        image_index,
+        log,
+    )
 
 
 def _warn_if_gpu_calculator(images: Sequence[Atoms], n_workers: int) -> None:
@@ -132,6 +208,8 @@ def _warn_if_gpu_calculator(images: Sequence[Atoms], n_workers: int) -> None:
 def _eval_all(
     images: Sequence[Atoms],
     n_workers: int,
+    recovery_strategy: Any | None = None,
+    recovery_log: list | None = None,
 ) -> tuple[list[float], list[FloatArray | None]]:
     """Evaluate energy and forces for all images."""
     e_start = float(images[0].get_potential_energy())
@@ -139,11 +217,29 @@ def _eval_all(
     movable = images[1:-1]
 
     if n_workers == 1 or len(movable) <= 1:
-        results = [_eval_image(img) for img in movable]
+        results = [
+            _eval_image(
+                img,
+                image_index=j + 1,
+                recovery_strategy=recovery_strategy,
+                recovery_log=recovery_log,
+            )
+            for j, img in enumerate(movable)
+        ]
     else:
         workers = min(int(n_workers), len(movable))
         with ThreadPoolExecutor(max_workers=workers) as executor:
-            results = list(executor.map(_eval_image, movable))
+            results = list(
+                executor.map(
+                    lambda item: _eval_image(
+                        item[1],
+                        image_index=item[0] + 1,
+                        recovery_strategy=recovery_strategy,
+                        recovery_log=recovery_log,
+                    ),
+                    enumerate(movable),
+                )
+            )
 
     energies_mid = [result[0] for result in results]
     forces_mid = [result[1] for result in results]
@@ -176,6 +272,8 @@ def fire_optimize(
     f_inc: float = 1.10,
     f_dec: float = 0.50,
     f_alpha: float = 0.99,
+    recovery_strategy: Any | None = None,
+    recovery_log: list | None = None,
 ) -> tuple[bool, int, list[dict[str, Any]]]:
     """Run FIRE optimization on the NEB path.
 
@@ -214,7 +312,12 @@ def fire_optimize(
         )
 
     for step in range(max_steps):
-        energies, forces_cache = _eval_all(images, n_workers)
+        energies, forces_cache = _eval_all(
+            images,
+            n_workers,
+            recovery_strategy=recovery_strategy,
+            recovery_log=recovery_log,
+        )
 
         if use_variable_k:
             k_curr = variable_spring_constants(energies, k_max=k, k_min=k_min)

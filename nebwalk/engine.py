@@ -113,6 +113,7 @@ def run_neb_calculation(
             cfg,
             output_dir=reproduce_dir,
             calc_params=calc_params,
+            recovery_log=getattr(result.neb, "recovery_log", None),
         )
         print(f"Reproducibility bundle saved to {reproduce_dir}")
     return result

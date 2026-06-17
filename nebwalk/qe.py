@@ -7,6 +7,7 @@ callers opt in by creating a QE calculator factory.
 
 from __future__ import annotations
 
+import random
 import shlex
 import shutil
 from collections.abc import Callable, Mapping
@@ -14,6 +15,11 @@ from dataclasses import dataclass, field
 from os import X_OK, access
 from pathlib import Path
 from typing import Any
+
+import numpy as np
+from ase.geometry import find_mic
+
+from .recovery import MAX_RETRIES, FailureType
 
 
 def _espresso_placeholder(*args: Any, **kwargs: Any) -> Any:
@@ -43,6 +49,99 @@ class QEParams:
     extra_control: Mapping[str, Any] = field(default_factory=dict)
     extra_system: Mapping[str, Any] = field(default_factory=dict)
     extra_electrons: Mapping[str, Any] = field(default_factory=dict)
+
+
+class QERecoveryStrategy:
+    def __init__(
+        self,
+        seed: int = 0,
+        max_displacement_A: float = 0.05,
+        mic_tolerance_A: float = 0.3,
+    ) -> None:
+        self._rng = random.Random(seed)
+        self.max_displacement_A = max_displacement_A
+        self.mic_tolerance_A = mic_tolerance_A
+
+    def classify(self, error, raw_output=None):
+        text = raw_output or str(error)
+        if "JOB DONE." in text:
+            return FailureType.UNKNOWN
+        if "convergence NOT achieved" in text:
+            return FailureType.CONVERGENCE_FAILURE
+        geometry_markers = (
+            "S matrix not positive definite",
+            "negative bond length",
+            "atoms too close",
+            "NaN",
+        )
+        if any(marker in text for marker in geometry_markers):
+            return FailureType.GEOMETRY_INSTABILITY
+        return FailureType.PROCESS_FAILURE
+
+    def propose_retry(self, failure_type, attempt, atoms, calc_params):
+        new_params = dict(calc_params)
+
+        if failure_type == FailureType.CONVERGENCE_FAILURE:
+            base_beta = calc_params.get("mixing_beta", 0.7)
+            new_params["mixing_beta"] = base_beta * (0.5**attempt)
+            if attempt >= MAX_RETRIES:
+                new_params["degauss"] = calc_params.get("degauss", 0.01) + 0.01
+            return new_params, atoms
+
+        if failure_type == FailureType.GEOMETRY_INSTABILITY:
+            new_atoms = atoms.copy()
+            new_atoms.calc = atoms.calc
+            disp = self._rng.uniform
+            displacement = np.array(
+                [
+                    [
+                        disp(-self.max_displacement_A, self.max_displacement_A)
+                        for _ in range(3)
+                    ]
+                    for _ in range(len(new_atoms))
+                ]
+            )
+            new_atoms.positions = new_atoms.positions + displacement
+            return new_params, new_atoms
+
+        return None
+
+    def validate_recovered_geometry(self, recovered_atoms, target_atoms) -> bool:
+        _, dist = find_mic(
+            recovered_atoms.positions - target_atoms.positions,
+            recovered_atoms.cell,
+            recovered_atoms.pbc,
+        )
+        return float(np.max(dist)) <= self.mic_tolerance_A
+
+
+def _read_qe_output(image_dir: Path) -> str:
+    chunks: list[str] = []
+    for pattern in ("*.pwo", "*.out", "*.err"):
+        for path in sorted(image_dir.glob(pattern)):
+            try:
+                chunks.append(path.read_text(encoding="utf-8", errors="replace"))
+            except OSError:
+                continue
+    return "\n".join(chunks)
+
+
+def _attach_qe_output_capture(calc: Any, image_dir: Path) -> Any:
+    for method_name in ("get_potential_energy", "get_forces"):
+        method = getattr(calc, method_name, None)
+        if method is None:
+            continue
+
+        def wrapped(*args, _method=method, **kwargs):
+            try:
+                return _method(*args, **kwargs)
+            except Exception as exc:
+                if not hasattr(exc, "qe_output"):
+                    exc.qe_output = _read_qe_output(image_dir)
+                raise
+
+        setattr(calc, method_name, wrapped)
+    return calc
 
 
 def _command_binaries(command: str) -> list[str]:
@@ -200,6 +299,7 @@ def make_qe_factory(
     pseudopotentials: Mapping[str, str],
     base_dir: str | Path = "neb_qe_workdir",
     command: str = "pw.x",
+    recovery_strategy: Any | None = None,
 ) -> Callable[[], Any]:
     """Create a zero-argument factory returning independent QE calculators.
 
@@ -223,6 +323,9 @@ def make_qe_factory(
     pseudo_path = Path(pseudo_dir).expanduser().resolve()
     base_path = Path(base_dir).expanduser().resolve()
     counter = {"image": 0}
+    strategy = (
+        recovery_strategy if recovery_strategy is not None else QERecoveryStrategy()
+    )
 
     def factory() -> Any:
         image_idx = counter["image"]
@@ -234,7 +337,7 @@ def make_qe_factory(
 
         if EspressoProfile is not None:
             _profile = EspressoProfile(command, str(pseudo_path))
-            return Espresso(
+            calc = Espresso(
                 profile=_profile,
                 input_data=_input_data(params, pseudo_path, outdir, pseudopotentials),
                 pseudopotentials=dict(pseudopotentials),
@@ -242,17 +345,21 @@ def make_qe_factory(
                 koffset=params.koffset,
                 directory=str(image_dir),
             )
-        return Espresso(
-            input_data=_input_data(params, pseudo_path, outdir, pseudopotentials),
-            pseudopotentials=dict(pseudopotentials),
-            kpts=params.kpts,
-            koffset=params.koffset,
-            directory=str(image_dir),
-            label="espresso",
-            command=f"{command} -in PREFIX.pwi > PREFIX.pwo",
-        )
+        else:
+            calc = Espresso(
+                input_data=_input_data(params, pseudo_path, outdir, pseudopotentials),
+                pseudopotentials=dict(pseudopotentials),
+                kpts=params.kpts,
+                koffset=params.koffset,
+                directory=str(image_dir),
+                label="espresso",
+                command=f"{command} -in PREFIX.pwi > PREFIX.pwo",
+            )
+        calc.recovery_strategy = strategy
+        return _attach_qe_output_capture(calc, image_dir)
 
+    factory.recovery_strategy = strategy  # type: ignore[attr-defined]
     return factory
 
 
-__all__ = ["QEParams", "make_qe_factory", "validate_qe_setup"]
+__all__ = ["QEParams", "QERecoveryStrategy", "make_qe_factory", "validate_qe_setup"]

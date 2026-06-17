@@ -14,11 +14,18 @@ from .forces import compute_neb_forces, variable_spring_constants
 from .interpolate import geodesic_interpolate, idpp_interpolate, linear_interpolate
 from .neb import NEB
 from .output import plot_energy_profile, save_csv, save_trajectory
-from .qe import QEParams, make_qe_factory, validate_qe_setup
+from .qe import QEParams, QERecoveryStrategy, make_qe_factory, validate_qe_setup
+from .recovery import (
+    FailureType,
+    NoOpRecoveryStrategy,
+    RecoveryAttempt,
+    RecoveryExhausted,
+    run_with_recovery,
+)
 from .reproduce import ReproBundle, save_bundle
 from .selection import select_images, select_peak_plus_neighbors
 
-__version__ = "0.8.0"
+__version__ = "0.9.0"
 
 __all__ = [
     "NEB",
@@ -41,8 +48,14 @@ __all__ = [
     "save_csv",
     "save_trajectory",
     "QEParams",
+    "QERecoveryStrategy",
     "make_qe_factory",
     "validate_qe_setup",
     "ReproBundle",
     "save_bundle",
+    "FailureType",
+    "NoOpRecoveryStrategy",
+    "RecoveryAttempt",
+    "RecoveryExhausted",
+    "run_with_recovery",
 ]
