@@ -16,7 +16,7 @@ calculators, while remaining compatible with DFT backends through ASE.
 pip install nebwalk
 ```
 
-Current source version: **v0.9.0**.
+Current source version: **v0.10.0**.
 
 ---
 
@@ -66,8 +66,11 @@ around ASE calculators and atomic structures.
 In addition to the v0.6.x NEB/CI-NEB engine, v0.7.0 adds:
 
 - MLIP-assisted NEB workflow through `run_mlip_assisted_neb()`.
-- Active-learning-ready image selection.
+- Selection step of an active-learning workflow.
 - `peak_plus_neighbors` selection of the barrier-sensitive image and neighboring images.
+- `uncertainty_disagreement` selection by cross-model disagreement
+  (uncertainty proxy) between Egret-1t and MACE-OFF23 for exercised organic
+  systems.
 - Selected-image export as `.xyz`, `.traj`, and `.json`.
 - Clean handoff from MLIP/MACE NEB to DFT/QE refinement.
 
@@ -158,8 +161,8 @@ ASE calculator object across all images.
 barrier-sensitive images, and export those images for higher-level DFT/QE
 refinement.
 
-This is an active-learning-ready workflow layer. It does not yet retrain the
-MLIP or perform uncertainty-guided selection automatically.
+This is the selection step of an active-learning workflow. It does not retrain
+the MLIP, automatically label data, or adaptively insert/remove images.
 
 ```python
 from ase.calculators.emt import EMT
@@ -183,7 +186,48 @@ print(result.selected_indices)
 ```
 
 The selected images are intended for DFT/QE refinement, single-point validation,
-or later active-learning labeling.
+or later labeling in an active-learning workflow.
+
+### Cross-model disagreement selection (v0.10.0)
+
+`uncertainty_disagreement` ranks images by cross-model disagreement
+(uncertainty proxy) between Egret-1t as the primary production calculator and
+MACE-OFF23 as the secondary disagreement calculator. This v0.10.0 path is
+organic-domain-only and is currently exercised in nebwalk on ethane torsion.
+Do not use this Egret-1t disagreement workflow with MACE-MP-0 or with
+inorganic/vacancy systems.
+
+```python
+from mace.calculators import MACECalculator
+from mace.calculators.mace_off import mace_off
+from nebwalk import NEBRunConfig
+from nebwalk.active import MLIPActiveNEBConfig, run_mlip_assisted_neb
+
+def make_egret():
+    return MACECalculator(model_paths="EGRET_1T.model", device="cpu")
+
+def make_mace_off23():
+    return mace_off(model="medium", device="cpu", default_dtype="float32")
+
+result = run_mlip_assisted_neb(
+    initial=ethane(60.0),
+    final=ethane(180.0),
+    mlip_calculator_factory=make_egret,
+    neb_config=NEBRunConfig(n_images=7, interpolation="idpp", climb=True),
+    active_config=MLIPActiveNEBConfig(
+        selection_strategy="uncertainty_disagreement",
+        secondary_calculator_factory=make_mace_off23,
+        n_select=3,
+        output_dir="ethane_disagreement_selected",
+    ),
+)
+```
+
+Selection used cross-model disagreement between two independently-trained MLIPs
+as an uncertainty proxy, not a calibrated uncertainty quantification method (no
+committee/ensemble was trained). This proxy is only meaningful where both
+calculators are within their validated chemical domain; consult nebwalk's
+documented domain-failure list before trusting results outside that domain.
 
 ---
 
@@ -535,10 +579,8 @@ Short-term priorities:
 
 Future active-learning roadmap:
 
-- uncertainty-guided image selection
 - DFT/MLIP hybrid barrier correction
 - adaptive image insertion/removal
-- automatic QE failed-image recovery
 - benchmark-grade reproducibility archives
 
 Long-term priorities:
@@ -561,7 +603,7 @@ rm -rf dist/ build/ *.egg-info
 python -m build
 python -m twine check dist/*
 python -m twine upload dist/*
-VERSION=v0.9.0
+VERSION=v0.10.0
 git tag -a "$VERSION" -m "nebwalk $VERSION"
 git push origin main "$VERSION"
 ```
@@ -596,6 +638,20 @@ The scientific direction, algorithmic design, implementation decisions, validati
 ## License
 
 MIT License. See [LICENSE](LICENSE).
+
+## Features in v0.10.0
+
+In addition to the v0.9.0 QE recovery workflow, v0.10.0 adds:
+
+- `uncertainty_disagreement` image selection by cross-model disagreement
+  (uncertainty proxy).
+- `nebwalk.uncertainty` with `DisagreementResult` and
+  `compute_cross_model_disagreement()`.
+- Optional secondary calculator factory in `MLIPActiveNEBConfig`.
+- Exported `energy_disagreement` and `force_disagreement` metadata for selected
+  images.
+- Ethane Egret-1t/MACE-OFF23 disagreement example and MACE-OFF23 sanity-check
+  script.
 
 ## Features in v0.9.0
 

@@ -23,9 +23,14 @@ from .recovery import (
     run_with_recovery,
 )
 from .reproduce import ReproBundle, save_bundle
-from .selection import select_images, select_peak_plus_neighbors
+from .selection import (
+    select_images,
+    select_peak_plus_neighbors,
+    select_uncertainty_disagreement,
+)
+from .uncertainty import DisagreementResult, compute_cross_model_disagreement
 
-__version__ = "0.9.0"
+__version__ = "0.10.0"
 
 __all__ = [
     "NEB",
@@ -39,6 +44,9 @@ __all__ = [
     "export_selected_images",
     "select_images",
     "select_peak_plus_neighbors",
+    "select_uncertainty_disagreement",
+    "DisagreementResult",
+    "compute_cross_model_disagreement",
     "linear_interpolate",
     "idpp_interpolate",
     "geodesic_interpolate",

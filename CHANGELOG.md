@@ -6,13 +6,50 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [0.10.0] — 2026-06-18
+
+### Added
+- Cross-model disagreement (uncertainty proxy) image selection strategy:
+  `uncertainty_disagreement`.
+- `nebwalk.uncertainty` module with `DisagreementResult` and
+  `compute_cross_model_disagreement()`.
+- Secondary-calculator support in `MLIPActiveNEBConfig` for comparing
+  converged primary MLIP images against a second organic-domain MLIP.
+- Optional `energy_disagreement` and `force_disagreement` fields on exported
+  `SelectedImage` metadata.
+- MACE-OFF23 sanity-check script and ethane Egret-1t/MACE-OFF23 end-to-end
+  disagreement-selection example.
+- Tests covering relative-energy disagreement, calculator isolation,
+  per-image failures, reference-image failure, fallback behavior, and JSON
+  export metadata.
+
+### Changed
+- `select_images()` dispatch now supports `uncertainty_disagreement` while
+  preserving existing `peak_plus_neighbors` behavior.
+- `run_mlip_assisted_neb()` now distinguishes missing secondary-calculator
+  configuration errors from per-run fallback when too few valid disagreement
+  results are available.
+- Exported selected-image README files disclose when cross-model disagreement
+  was used as an uncertainty proxy.
+- Test suite expanded: 144 -> 156 tests.
+
+### Notes
+- This release closes the previously documented uncertainty-guided selection
+  gap only through cross-model disagreement between Egret-1t and MACE-OFF23.
+  It is not calibrated uncertainty quantification and no committee/ensemble
+  was trained.
+- The disagreement proxy is only meaningful where both calculators are within
+  their validated chemical domain. In v0.10.0 this is documented for organic
+  systems, with ethane torsion as the exercised example.
+- Does not implement automatic MLIP retraining, automatic QE/DFT refinement,
+  adaptive image insertion/removal, or inorganic/vacancy disagreement pairing.
+
 ## [0.9.0] - 2026-06-17
 
 ### Added
 - Automatic failed-image recovery for Quantum ESPRESSO image calculations.
 - Generic recovery layer: FailureType, RecoveryAttempt,
-  NoOpRecoveryStrategy, RecoveryExhausted, and 
-un_with_recovery.
+  NoOpRecoveryStrategy, RecoveryExhausted, and run_with_recovery.
 - QE-specific recovery strategy: classify convergence failures, geometry
   instabilities, process failures, and unknown failures from QE output.
 - Retry policy for QE convergence failures: reduce mixing_beta on retries
@@ -26,8 +63,7 @@ un_with_recovery.
 ### Changed
 - QE calculator factories now attach QERecoveryStrategy by default while
   preserving default no-op recovery behavior for non-QE calculators.
-- NEB optimization threads recovery strategy and 
-ecovery_log through
+- NEB optimization threads recovery strategy and recovery_log through
   per-image evaluation.
 - Public API exports recovery primitives and QERecoveryStrategy.
 

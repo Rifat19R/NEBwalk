@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import json
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from dataclasses import asdict, dataclass, field
 from importlib import metadata as importlib_metadata
 from pathlib import Path
@@ -12,7 +12,16 @@ from typing import Any
 from ase.io import write
 
 from .engine import NEBRunConfig, run_neb_calculation
-from .selection import select_images
+from .selection import select_images, select_peak_plus_neighbors
+from .uncertainty import DisagreementResult, compute_cross_model_disagreement
+
+DISAGREEMENT_DISCLOSURE = (
+    "Selection used cross-model disagreement between two independently-trained MLIPs\n"
+    "as an uncertainty proxy, not a calibrated uncertainty quantification method (no\n"
+    "committee/ensemble was trained). This proxy is only meaningful where both\n"
+    "calculators are within their validated chemical domain; consult nebwalk's\n"
+    "documented domain-failure list before trusting results outside that domain."
+)
 
 
 @dataclass(frozen=True)
@@ -26,6 +35,8 @@ class MLIPActiveNEBConfig:
     output_dir: str | Path = "nebwalk_mlip_round0"
     export_formats: tuple[str, ...] = ("xyz", "traj", "json")
     metadata: dict[str, Any] = field(default_factory=dict)
+    secondary_calculator_factory: Callable[[], Any] | None = None
+    disagreement_metric: str = "force_disagreement"
 
 
 @dataclass(frozen=True)
@@ -36,6 +47,8 @@ class SelectedImage:
     energy: float
     relative_energy: float
     reason: str = "peak_plus_neighbors"
+    energy_disagreement: float | None = None
+    force_disagreement: float | None = None
 
 
 @dataclass(frozen=True)
@@ -112,16 +125,37 @@ def export_selected_images(
 
     readme = out / "README.md"
     strategy = selected[0].reason if selected else "unknown"
-    readme.write_text(
+    readme_text = (
         "# nebwalk selected images\n\n"
         "These images were selected from an MLIP-assisted NEB path using the "
         f"`{strategy}` strategy.\n\n"
         "They are intended for DFT/QE refinement, single-point validation, or "
-        "later active-learning labeling.\n\n"
-        "This folder does not contain a complete DFT workflow by itself.\n",
-        encoding="utf-8",
+        "later labeling in an active-learning workflow.\n\n"
+        "This folder does not contain a complete DFT workflow by itself.\n"
     )
+    if selected and selected[0].reason == "uncertainty_disagreement":
+        readme_text += f"\n{DISAGREEMENT_DISCLOSURE}\n"
+    readme.write_text(readme_text, encoding="utf-8")
     return out
+
+
+def _eligible_valid_count(
+    disagreements: Sequence[DisagreementResult],
+    include_endpoints: bool,
+) -> int:
+    start = 0 if include_endpoints else 1
+    stop = len(disagreements) if include_endpoints else len(disagreements) - 1
+    return sum(
+        1
+        for result in disagreements
+        if start <= result.index < stop and result.valid
+    )
+
+
+def _disagreement_by_index(
+    disagreements: Sequence[DisagreementResult],
+) -> dict[int, DisagreementResult]:
+    return {result.index: result for result in disagreements}
 
 
 def run_mlip_assisted_neb(
@@ -144,28 +178,77 @@ def run_mlip_assisted_neb(
 
     images = neb_result.neb.images
     energies = [float(energy) for energy in neb_result.neb.get_energies()]
-    selected_indices = select_images(
-        energies=energies,
-        strategy=active_cfg.selection_strategy,
-        n_select=active_cfg.n_select,
-        include_endpoints=active_cfg.include_endpoints,
-    )
-    reference_energy = energies[0]
-    selected = tuple(
-        SelectedImage(
-            index=idx,
-            energy=energies[idx],
-            relative_energy=energies[idx] - reference_energy,
-            reason=active_cfg.selection_strategy,
-        )
-        for idx in selected_indices
-    )
-
     result_metadata = {
         "nebwalk_version": _nebwalk_version(),
         "stage": "mlip_assisted_neb",
         **active_cfg.metadata,
     }
+    disagreements: list[DisagreementResult] | None = None
+    selection_reason = active_cfg.selection_strategy
+
+    if active_cfg.selection_strategy == "uncertainty_disagreement":
+        if active_cfg.secondary_calculator_factory is None:
+            raise ValueError(
+                "uncertainty_disagreement strategy requires "
+                "secondary_calculator_factory"
+            )
+        disagreements = compute_cross_model_disagreement(
+            images,
+            active_cfg.secondary_calculator_factory,
+        )
+        valid_count = _eligible_valid_count(
+            disagreements,
+            active_cfg.include_endpoints,
+        )
+        if valid_count < active_cfg.n_select:
+            selected_indices = select_peak_plus_neighbors(
+                energies=energies,
+                n_select=active_cfg.n_select,
+                include_endpoints=active_cfg.include_endpoints,
+            )
+            selection_reason = "peak_plus_neighbors"
+            result_metadata["selection_fallback"] = (
+                "insufficient_valid_disagreement_results"
+            )
+        else:
+            selected_indices = select_images(
+                energies=energies,
+                strategy=active_cfg.selection_strategy,
+                n_select=active_cfg.n_select,
+                include_endpoints=active_cfg.include_endpoints,
+                disagreements=disagreements,
+                disagreement_metric=active_cfg.disagreement_metric,
+            )
+    else:
+        selected_indices = select_images(
+            energies=energies,
+            strategy=active_cfg.selection_strategy,
+            n_select=active_cfg.n_select,
+            include_endpoints=active_cfg.include_endpoints,
+        )
+
+    reference_energy = energies[0]
+    disagreement_map = _disagreement_by_index(disagreements or [])
+    use_disagreement_metadata = selection_reason == "uncertainty_disagreement"
+    selected = tuple(
+        SelectedImage(
+            index=idx,
+            energy=energies[idx],
+            relative_energy=energies[idx] - reference_energy,
+            reason=selection_reason,
+            energy_disagreement=(
+                disagreement_map[idx].energy_disagreement
+                if idx in disagreement_map and use_disagreement_metadata
+                else None
+            ),
+            force_disagreement=(
+                disagreement_map[idx].force_disagreement
+                if idx in disagreement_map and use_disagreement_metadata
+                else None
+            ),
+        )
+        for idx in selected_indices
+    )
     output_dir = None
     if active_cfg.export_selected:
         output_dir = export_selected_images(
