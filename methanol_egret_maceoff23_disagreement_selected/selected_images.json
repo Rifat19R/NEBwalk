@@ -1,0 +1,40 @@
+{
+  "schema": "nebwalk.selected_images.v1",
+  "selection_strategy": "uncertainty_disagreement",
+  "selected_indices": [
+    1,
+    3,
+    7
+  ],
+  "selected_images": [
+    {
+      "index": 1,
+      "energy": -3150.999755859375,
+      "relative_energy": -0.00537109375,
+      "reason": "uncertainty_disagreement",
+      "energy_disagreement": 0.00030446513983406476,
+      "force_disagreement": 0.014118961354234336
+    },
+    {
+      "index": 3,
+      "energy": -3150.97314453125,
+      "relative_energy": 0.021240234375,
+      "reason": "uncertainty_disagreement",
+      "energy_disagreement": 0.0002632067744343658,
+      "force_disagreement": 0.01469294321658702
+    },
+    {
+      "index": 7,
+      "energy": -3151.000732421875,
+      "relative_energy": -0.00634765625,
+      "reason": "uncertainty_disagreement",
+      "energy_disagreement": 0.0003051282310480019,
+      "force_disagreement": 0.014343210583543731
+    }
+  ],
+  "notes": "Selected images are intended for higher-level DFT/QE refinement.",
+  "metadata": {
+    "nebwalk_version": "0.10.0",
+    "stage": "mlip_assisted_neb"
+  }
+}

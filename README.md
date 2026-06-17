@@ -409,6 +409,11 @@ python examples/morse_h3.py
 python examples/mlip_assisted_neb_emt.py
 python examples/al_diffusion_emt.py
 python examples/ethane_egret.py
+python examples/ethane_egret_maceoff23_disagreement.py
+python examples/propane_egret_maceoff23_disagreement.py
+python examples/methanol_egret_maceoff23_disagreement.py
+python examples/ethanol_egret_maceoff23_disagreement.py
+python examples/dimethyl_ether_egret_maceoff23_disagreement.py
 python examples/al_vacancy_macemp.py
 python examples/mg_vacancy_macemp.py
 python examples/li2o_vacancy_macemp.py
@@ -420,6 +425,15 @@ python examples/al_vacancy_qe.py
 ```
 
 A larger benchmark suite (38 systems, EMT/MACE/Egret) is available in `examples/v8/`.
+
+Organic Egret-1t/MACE-OFF23 disagreement-selection runs are summarized in
+`examples/organic_disagreement_results_v0.10.0.md` and compared against
+literature-scale torsional barriers in
+`examples/organic_disagreement_literature_comparison_v0.10.0.md`. These are
+exploratory organic-domain checks, not DFT validation or calibrated uncertainty
+quantification. Acetaldehyde was tested but excluded from the pushed example set
+because its barrier was a clear outlier and default force-disagreement selection
+was endpoint-adjacent.
 
 For a clean Al vacancy QE rerun, remove stale partial QE outputs through the
 script's explicit clean flag:

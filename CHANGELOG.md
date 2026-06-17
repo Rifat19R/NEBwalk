@@ -6,6 +6,20 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [Unreleased]
+
+### Added
+- Five organic Egret-1t/MACE-OFF23 disagreement-selection example scripts:
+  ethane, propane, methanol, ethanol, and dimethyl ether.
+- Organic disagreement result summaries with literature-scale comparison notes
+  and explicit caveats that these runs are exploratory checks, not DFT
+  validation or calibrated uncertainty quantification.
+
+### Notes
+- Acetaldehyde was tested but intentionally excluded from the pushed example
+  set because its barrier was a clear outlier and default force-disagreement
+  selection was endpoint-adjacent.
+
 ## [0.10.0] — 2026-06-18
 
 ### Added

@@ -20,6 +20,7 @@ from mace.calculators import MACECalculator, mace_off
 
 from nebwalk import NEBRunConfig
 from nebwalk.active import MLIPActiveNEBConfig, run_mlip_assisted_neb
+from nebwalk.uncertainty import compute_cross_model_disagreement
 
 EGRET_MODEL = Path("EGRET_1T.model")
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
@@ -60,7 +61,29 @@ def make_egret():
 
 def make_mace_off23():
     """Fresh MACE-OFF23 secondary calculator."""
-    return mace_off(model="medium", device=DEVICE, default_dtype="float32")
+    return mace_off(model="medium", device=DEVICE, default_dtype="float64")
+
+
+def print_disagreement_table(result) -> None:
+    """Print per-image disagreement diagnostics for the converged NEB path."""
+    disagreements = compute_cross_model_disagreement(
+        result.neb_result.neb.images,
+        make_mace_off23,
+    )
+    print("\nPer-image cross-model disagreement")
+    print("image  valid  dE_rel(eV)    dF_max(eV/A)")
+    for item in disagreements:
+        energy = (
+            f"{item.energy_disagreement:+.8f}"
+            if item.energy_disagreement is not None
+            else "None"
+        )
+        force = (
+            f"{item.force_disagreement:.8f}"
+            if item.force_disagreement is not None
+            else "None"
+        )
+        print(f"{item.index:02d}     {str(item.valid):5s}  {energy:>11s}  {force:>12s}")
 
 
 def main() -> None:
@@ -91,6 +114,7 @@ def main() -> None:
     print(f"MLIP barrier     : {result.mlip_barrier:.6f} eV")
     print(f"Selected indices : {result.selected_indices}")
     print(f"Output directory : {result.output_dir}")
+    print_disagreement_table(result)
 
 
 if __name__ == "__main__":
