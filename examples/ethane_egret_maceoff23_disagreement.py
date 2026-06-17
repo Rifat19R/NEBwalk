@@ -16,8 +16,7 @@ from pathlib import Path
 import numpy as np
 import torch
 from ase import Atoms
-from mace.calculators import MACECalculator
-from mace.calculators.mace_off import mace_off
+from mace.calculators import MACECalculator, mace_off
 
 from nebwalk import NEBRunConfig
 from nebwalk.active import MLIPActiveNEBConfig, run_mlip_assisted_neb

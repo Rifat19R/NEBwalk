@@ -198,8 +198,7 @@ Do not use this Egret-1t disagreement workflow with MACE-MP-0 or with
 inorganic/vacancy systems.
 
 ```python
-from mace.calculators import MACECalculator
-from mace.calculators.mace_off import mace_off
+from mace.calculators import MACECalculator, mace_off
 from nebwalk import NEBRunConfig
 from nebwalk.active import MLIPActiveNEBConfig, run_mlip_assisted_neb
 
