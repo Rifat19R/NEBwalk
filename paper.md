@@ -82,6 +82,34 @@ The library is small on purpose. The force routine maps line for line onto the
 equations in @henkelman2000a, so it is also useful for teaching the method or
 for testing changes to it.
 
+# State of the field
+
+The NEB method is widely available, but most implementations are tied either to
+a particular electronic-structure engine or to a particular transition-state
+workflow. Plane-wave DFT packages such as Quantum ESPRESSO [@giannozzi2009]
+provide production NEB drivers, but these drivers are naturally coupled to that
+engine's input format, parallel model, and restart files. They are the right
+choice for a fully DFT calculation, but they are less convenient when the first
+path search should be done with a machine-learned potential and only selected
+images should later be checked with DFT.
+
+ASE [@larsen2017] provides a general Python NEB interface and is the closest
+software foundation to nebwalk. nebwalk builds on the same calculator-agnostic
+idea, but narrows the workflow around reproducible barrier screening: FIRE is
+the default optimizer, IDPP and minimum-image interpolation are part of the
+standard path setup, every QE image gets an isolated working directory, and the
+active-learning helper exports the highest-value images for DFT refinement.
+This makes the common MLIP-to-DFT screening pattern a first-class workflow
+rather than a set of scripts around ASE.
+
+Other transition-state tools focus on different parts of the problem. Sella is
+designed for direct saddle-point optimization once a reasonable transition-state
+guess is available. Engine-specific NEB drivers focus on robust DFT
+execution. nebwalk occupies the space between them: it is a lightweight Python
+library for building and optimizing full paths with any ASE-compatible
+calculator, then preserving the path, metadata, and selected images needed for
+DFT validation or active learning.
+
 # Implementation
 
 nebwalk is pure Python and depends on ASE [@larsen2017], NumPy, SciPy, and
@@ -117,10 +145,27 @@ a clearly marked spot for the user to put the factory back. This is more honest
 than trying to capture arbitrary source code and more likely to actually work
 on another machine.
 
-The test suite has 132 tests. They cover interpolation, the force projection,
+The test suite has 156 tests. They cover interpolation, the force projection,
 the tangent construction, minimum-image handling, variable springs, the
 two-stage workflow, the reproducibility bundles, and the QE interface. The
 package is on PyPI and is tested on every push through GitHub Actions.
+
+# Software design
+
+nebwalk is organized around small modules with one responsibility each. The core
+NEB force projection and optimizer live separately from interpolation, image
+selection, QE calculator setup, and reproducibility output. This keeps the
+scientific algorithm easy to inspect while allowing optional workflows, such as
+QE-backed calculations or active-learning image export, to sit at the edge of
+the package.
+
+The main user-facing object is an ASE `Atoms` path with an attached calculator
+factory. Users can provide any calculator that returns energies and forces, and
+nebwalk does not need to know whether that calculator is EMT, a machine-learned
+potential, or a DFT wrapper. File-writing code is similarly separated from the
+optimization loop, so validation examples can write plots, CSV files,
+trajectories, and reproducibility bundles without changing the NEB force
+routine.
 
 # Validation
 
@@ -147,6 +192,34 @@ The three QE results cover two crystal structures, FCC aluminium and BCC
 tungsten and molybdenum, and stay within about 8% of the DFT references. The
 remaining error is mostly finite-size: the supercells are small, and a larger
 cell would bring the barriers closer to the reference values.
+
+# Research impact statement
+
+nebwalk is intended for researchers who need activation barriers but cannot run
+every candidate path directly in DFT. It supports a practical screening pattern:
+run many paths cheaply with a machine-learned potential, identify the important
+images, and reserve DFT for the small number of structures that control the
+barrier. This is useful for vacancy migration, surface diffusion, catalytic
+elementary steps, and other materials problems where the same transition search
+must be repeated across many sites, compositions, or adsorbates.
+An ongoing study of hydrogen migration on Ti₃C₂O₂, Ti₃C₂(OH)₂, and Ti₃C₂F₂
+MXene surfaces uses nebwalk to manage the QE/PBE NEB workflow and extract
+termination-dependent activation barriers, which demonstrates the library's
+applicability to realistic periodic slab systems.
+
+The package also has educational value. The implementation keeps the tangent
+construction, force projection, climbing-image modification, and FIRE update in
+plain Python. This makes the method easier to audit than a monolithic engine
+driver and gives students or method developers a compact reference
+implementation that still works with real calculators.
+
+# AI usage disclosure
+
+Claude and OpenAI Codex were used during development for code review, debugging,
+documentation editing, and assistance with example scripts. They were not used
+as scientific authorities. All equations, validation choices, benchmark
+interpretation, and final claims were checked by the author against the code,
+the generated outputs, and the cited literature.
 
 # Acknowledgements
 
