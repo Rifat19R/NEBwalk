@@ -8,6 +8,7 @@ callers opt in by creating a QE calculator factory.
 from __future__ import annotations
 
 import random
+import re
 import shlex
 import shutil
 from collections.abc import Callable, Mapping
@@ -17,6 +18,7 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
+from ase import units
 from ase.geometry import find_mic
 
 from .recovery import MAX_RETRIES, FailureType
@@ -126,19 +128,72 @@ def _read_qe_output(image_dir: Path) -> str:
     return "\n".join(chunks)
 
 
+def _parse_qe_energy_forces(raw_output: str) -> tuple[float, np.ndarray]:
+    """Parse final QE energy and forces when ASE output parsing fails."""
+    energy_ry: float | None = None
+    forces_ry_bohr: list[list[float]] = []
+    in_forces = False
+
+    for line in raw_output.splitlines():
+        if "total energy" in line and "=" in line and "Ry" in line:
+            match = re.search(r"=\s*([-+]?\d+(?:\.\d*)?(?:[Ee][-+]?\d+)?)\s*Ry", line)
+            if match:
+                energy_ry = float(match.group(1))
+
+        if "Forces acting on atoms" in line:
+            forces_ry_bohr = []
+            in_forces = True
+            continue
+
+        if in_forces and line.lstrip().startswith("atom") and "force =" in line:
+            values = line.split("force =", 1)[1].split()
+            if len(values) >= 3:
+                forces_ry_bohr.append(
+                    [float(values[0]), float(values[1]), float(values[2])]
+                )
+            continue
+
+        if in_forces and forces_ry_bohr and line.strip().startswith("Total force"):
+            in_forces = False
+
+    if energy_ry is None or not forces_ry_bohr:
+        raise ValueError("could not parse QE energy/forces from completed output")
+
+    energy_ev = energy_ry * units.Ry
+    forces_ev_ang = np.array(forces_ry_bohr, dtype=float) * units.Ry / units.Bohr
+    return float(energy_ev), forces_ev_ang
+
+
 def _attach_qe_output_capture(calc: Any, image_dir: Path) -> Any:
+    fallback_results: dict[str, Any] = {}
+
+    def completed_qe_fallback(exc: Exception) -> tuple[float, np.ndarray]:
+        raw_output = _read_qe_output(image_dir)
+        if not hasattr(exc, "qe_output"):
+            exc.qe_output = raw_output
+        if "JOB DONE" not in raw_output:
+            raise exc
+        if "energy" not in fallback_results or "forces" not in fallback_results:
+            energy, forces = _parse_qe_energy_forces(raw_output)
+            fallback_results["energy"] = energy
+            fallback_results["forces"] = forces
+            if hasattr(calc, "results"):
+                calc.results.update(fallback_results)
+        return fallback_results["energy"], fallback_results["forces"]
+
     for method_name in ("get_potential_energy", "get_forces"):
         method = getattr(calc, method_name, None)
         if method is None:
             continue
 
-        def wrapped(*args, _method=method, **kwargs):
+        def wrapped(*args, _method=method, _name=method_name, **kwargs):
             try:
                 return _method(*args, **kwargs)
             except Exception as exc:
-                if not hasattr(exc, "qe_output"):
-                    exc.qe_output = _read_qe_output(image_dir)
-                raise
+                energy, forces = completed_qe_fallback(exc)
+                if _name == "get_potential_energy":
+                    return energy
+                return forces
 
         setattr(calc, method_name, wrapped)
     return calc

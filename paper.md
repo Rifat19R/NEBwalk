@@ -145,7 +145,7 @@ a clearly marked spot for the user to put the factory back. This is more honest
 than trying to capture arbitrary source code and more likely to actually work
 on another machine.
 
-The test suite has 156 tests. They cover interpolation, the force projection,
+The test suite has 157 tests. They cover interpolation, the force projection,
 the tangent construction, minimum-image handling, variable springs, the
 two-stage workflow, the reproducibility bundles, and the QE interface. The
 package is on PyPI and is tested on every push through GitHub Actions.

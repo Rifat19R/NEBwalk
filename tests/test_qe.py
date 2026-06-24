@@ -5,7 +5,12 @@ from unittest.mock import patch
 
 import pytest
 
-from nebwalk.qe import QEParams, make_qe_factory, validate_qe_setup
+from nebwalk.qe import (
+    QEParams,
+    _parse_qe_energy_forces,
+    make_qe_factory,
+    validate_qe_setup,
+)
 
 
 def write_pseudos(tmp_path: Path, *names: str) -> Path:
@@ -316,3 +321,28 @@ def test_factory_uses_espresso_profile_when_available(
     assert "command" not in kwargs
     assert kwargs["profile"].command == "mpirun -np 4 pw.x"
     assert kwargs["profile"].pseudo_dir == str(pseudo_dir.resolve())
+
+
+def test_parse_completed_qe_output_with_repeated_band_blocks() -> None:
+    raw_output = """
+     total energy              =      -10.00000000 Ry
+     End of self-consistent calculation
+          k = 0.0000 0.0000 0.0000 ( 10 PWs)   bands (ev):
+   -1.0 -0.5
+     End of self-consistent calculation
+          k = 0.0000 0.0000 0.0000 ( 10 PWs)   bands (ev):
+   -1.0 -0.5
+     Forces acting on atoms (cartesian axes, Ry/au):
+     atom    1 type  1   force =     0.10000000    0.00000000   -0.20000000
+     atom    2 type  1   force =     0.00000000    0.30000000    0.00000000
+     Total force =     0.374166     Total SCF correction =     0.000001
+   JOB DONE.
+"""
+
+    energy, forces = _parse_qe_energy_forces(raw_output)
+
+    assert energy == pytest.approx(-136.05693122)
+    assert forces.shape == (2, 3)
+    assert forces[0, 0] == pytest.approx(2.57110311)
+    assert forces[0, 2] == pytest.approx(-5.14220622)
+    assert forces[1, 1] == pytest.approx(7.71330933)
