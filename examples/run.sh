@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-cd /mnt/d/Rifat_kh/nebwalk_universal
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+cd "${REPO_ROOT}"
 
 if [[ -d venv ]]; then
   # shellcheck disable=SC1091
@@ -57,8 +59,8 @@ run_dry() {
 
 run_qe() {
   export NEBWALK_RUN_QE=1
-  export ESPRESSO_PSEUDO=/mnt/d/Rifat_kh/SSSP_1.3.0_PBE_efficiency
-  : "${ESPRESSO_COMMAND:=mpirun --oversubscribe -np 4 /home/duets/q-e-qe-7.4.1/bin/pw.x}"
+  : "${ESPRESSO_PSEUDO:?Set ESPRESSO_PSEUDO to your Quantum ESPRESSO pseudopotential directory.}"
+  : "${ESPRESSO_COMMAND:=pw.x}"
   export ESPRESSO_COMMAND
   export NEBWALK_QE_CLEAN=1
 
@@ -87,8 +89,8 @@ run_qe() {
 
 run_qe_targets() {
   export NEBWALK_RUN_QE=1
-  export ESPRESSO_PSEUDO=/mnt/d/Rifat_kh/SSSP_1.3.0_PBE_efficiency
-  : "${ESPRESSO_COMMAND:=mpirun --oversubscribe -np 4 /home/duets/q-e-qe-7.4.1/bin/pw.x}"
+  : "${ESPRESSO_PSEUDO:?Set ESPRESSO_PSEUDO to your Quantum ESPRESSO pseudopotential directory.}"
+  : "${ESPRESSO_COMMAND:=pw.x}"
   export ESPRESSO_COMMAND
   export NEBWALK_QE_CLEAN=1
 
@@ -103,8 +105,8 @@ run_qe_targets() {
 
 run_qe_extended() {
   export NEBWALK_RUN_QE=1
-  export ESPRESSO_PSEUDO=/mnt/d/Rifat_kh/SSSP_1.3.0_PBE_efficiency
-  : "${ESPRESSO_COMMAND:=mpirun --oversubscribe -np 4 /home/duets/q-e-qe-7.4.1/bin/pw.x}"
+  : "${ESPRESSO_PSEUDO:?Set ESPRESSO_PSEUDO to your Quantum ESPRESSO pseudopotential directory.}"
+  : "${ESPRESSO_COMMAND:=pw.x}"
   export ESPRESSO_COMMAND
   export NEBWALK_QE_CLEAN=1
 

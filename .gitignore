@@ -34,6 +34,7 @@ EGRET_1T.model
 *.pth
 
 # QE working directories
+CRASH
 neb_qe_workdir/
 smoke_test/
 */tmp/
