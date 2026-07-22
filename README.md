@@ -203,10 +203,12 @@ from nebwalk import NEBRunConfig
 from nebwalk.active import MLIPActiveNEBConfig, run_mlip_assisted_neb
 
 def make_egret():
-    return MACECalculator(model_paths="EGRET_1T.model", device="cpu")
+    return MACECalculator(
+        model_paths="EGRET_1T.model", device="cpu", default_dtype="float32"
+    )
 
 def make_mace_off23():
-    return mace_off(model="medium", device="cpu", default_dtype="float32")
+    return mace_off(model="medium", device="cpu", default_dtype="float64")
 
 result = run_mlip_assisted_neb(
     initial=ethane(60.0),
@@ -426,9 +428,8 @@ python examples/al_vacancy_qe.py
 
 A larger benchmark suite (38 systems, EMT/MACE/Egret) is available in `examples/v8/`.
 
-Organic Egret-1t/MACE-OFF23 disagreement-selection runs are summarized in
-`examples/organic_disagreement_results_v0.10.0.md` and compared against
-literature-scale torsional barriers in
+Organic Egret-1t/MACE-OFF23 disagreement-selection runs, per-image diagnostics,
+and literature-scale torsional-barrier comparisons are in
 `examples/organic_disagreement_literature_comparison_v0.10.0.md`. These are
 exploratory organic-domain checks, not DFT validation or calibrated uncertainty
 quantification. Acetaldehyde was tested but excluded from the pushed example set

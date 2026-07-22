@@ -39,14 +39,16 @@ LOG_FILE = Path("al_vacancy_qe.log")
 CLEAN_RUN = os.environ.get("NEBWALK_QE_CLEAN", "0") == "1"
 
 PARAMS = QEParams(
-    ecutwfc=30.0,
-    ecutrho=240.0,
+    # Matches vacancy_benchmark_suite.qe_params_for() for metals — keep the two
+    # Al/QE entry points numerically consistent since they share output files.
+    ecutwfc=50.0,
+    ecutrho=400.0,
     kpts=(2, 2, 2),
     koffset=(0, 0, 0),
     occupations="smearing",
     smearing="marzari-vanderbilt",
     degauss=0.02,
-    conv_thr=1.0e-6,
+    conv_thr=1.0e-7,
     mixing_beta=0.3,
     extra_system={"input_dft": "PBE"},
 )

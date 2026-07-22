@@ -7,54 +7,13 @@ validated Egret-1t organic example: ethane torsion.
 
 from __future__ import annotations
 
-from pathlib import Path
-
 import numpy as np
-import torch
 from ase import Atoms
-from mace.calculators import MACECalculator, mace_off
 
 from nebwalk import idpp_interpolate
+from organic_disagreement_common import EGRET_MODEL, ethane, make_egret, make_mace_off23
 
-EGRET_MODEL = Path("EGRET_1T.model")
-DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 N_IMAGES = 7
-CC = 0.770
-R_CH = 1.090
-DZ = abs(R_CH * np.cos(np.radians(111.2)))
-RL = R_CH * np.sin(np.radians(111.2))
-CELL = np.diag([20.0, 20.0, 20.0])
-
-
-def ethane(phi_c2_deg: float) -> Atoms:
-    phi = np.radians(phi_c2_deg)
-    positions = [
-        [0.0, 0.0, -CC],
-        [0.0, 0.0, +CC],
-    ]
-    for k in range(3):
-        angle = k * (2 * np.pi / 3)
-        positions.append([RL * np.cos(angle), RL * np.sin(angle), -CC - DZ])
-    for k in range(3):
-        angle = phi + k * (2 * np.pi / 3)
-        positions.append([RL * np.cos(angle), RL * np.sin(angle), +CC + DZ])
-    atoms = Atoms("C2H6", positions=positions)
-    atoms.set_cell(CELL)
-    atoms.pbc = False
-    atoms.center()
-    return atoms
-
-
-def make_egret():
-    kwargs = {"device": DEVICE, "default_dtype": "float32"}
-    try:
-        return MACECalculator(model_paths=str(EGRET_MODEL), **kwargs)
-    except TypeError:
-        return MACECalculator(model_path=str(EGRET_MODEL), **kwargs)
-
-
-def make_mace_off23():
-    return mace_off(model="medium", device=DEVICE, default_dtype="float32")
 
 
 def assert_finite_nonzero(label: str, atoms: Atoms) -> tuple[float, np.ndarray]:

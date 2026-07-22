@@ -4,7 +4,8 @@ Mg vacancy migration (basal plane) in HCP Mg — MACE-MP-0 calculator.
 The vacancy hops between nearest-neighbour sites within the basal (0001)
 plane. NN distance = a = 3.209 Å.
 
-Reference barrier (basal hop, DFT-PBE): ~0.60 eV.
+Reference barrier (basal hop, DFT-PBE): ~0.52 eV.
+See vacancy_benchmark_suite.SYSTEMS["mg"] for the same reference value.
 
 Usage
 -----
@@ -89,7 +90,7 @@ converged = neb.optimize(fmax=0.05, max_steps=300)
 # ---------------------------------------------------------------------------
 
 barrier = neb.get_barrier()
-ref = 0.60
+ref = 0.52
 print(f"\nConverged      : {converged}")
 print(f"Forward barrier: {barrier:.4f} eV")
 print(f"Reference (DFT): ~{ref} eV  (basal plane, DFT-PBE)")

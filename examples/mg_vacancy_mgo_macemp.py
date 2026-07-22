@@ -173,11 +173,11 @@ for i, e in enumerate(energies):
     marker = " <- TS" if e == max(energies) else ""
     print(f"  [{i}] {(e - e0)*1000:+8.1f} meV{marker}")
 
-result.neb.plot("mg_vacancy_mgo_profile.png")
-result.neb.save_csv("mg_vacancy_mgo_profile.csv")
-result.neb.save_trajectory("mg_vacancy_mgo_path.traj")
-print("\nSaved: mg_vacancy_mgo_profile.png, mg_vacancy_mgo_profile.csv, "
-      "mg_vacancy_mgo_path.traj")
+result.neb.plot("mg_vacancy_mgo_macemp_profile.png")
+result.neb.save_csv("mg_vacancy_mgo_macemp_profile.csv")
+result.neb.save_trajectory("mg_vacancy_mgo_macemp_path.traj")
+print("\nSaved: mg_vacancy_mgo_macemp_profile.png, mg_vacancy_mgo_macemp_profile.csv, "
+      "mg_vacancy_mgo_macemp_path.traj")
 
 print("\nNote: Steep rise near TS is physical — Mg²⁺ passing through O²⁻ gate.")
 print("MACE-MP-0 is well-trained on simple ionic oxides in Materials Project.")

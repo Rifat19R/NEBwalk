@@ -2,14 +2,6 @@
 
 from __future__ import annotations
 
-if __name__ == "__main__":
-    print(
-        "organic_disagreement_common.py is a shared helper module. "
-        "Run one of the molecule scripts, for example:\n"
-        "  python examples/propane_egret_maceoff23_disagreement.py"
-    )
-    raise SystemExit(0)
-
 from pathlib import Path
 from typing import Any
 
@@ -26,6 +18,36 @@ from nebwalk.uncertainty import compute_cross_model_disagreement
 EGRET_MODEL = Path("EGRET_1T.model")
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 CELL = np.diag([20.0, 20.0, 20.0])
+
+# Ethane geometry, staggered <-> eclipsed methyl rotation. Built by hand rather
+# than via isolated_molecule()/rotate_group() because we need the rotation
+# angle as a free parameter, not just a start/end pair for a fixed conformer.
+_ETHANE_CC = 0.770
+_ETHANE_R_CH = 1.090
+_ETHANE_DZ = abs(_ETHANE_R_CH * np.cos(np.radians(111.2)))
+_ETHANE_RL = _ETHANE_R_CH * np.sin(np.radians(111.2))
+
+
+def ethane(phi_c2_deg: float) -> Atoms:
+    """Return isolated ethane with one methyl rotated by phi_c2_deg."""
+    phi = np.radians(phi_c2_deg)
+    positions = [[0.0, 0.0, -_ETHANE_CC], [0.0, 0.0, _ETHANE_CC]]
+    for idx in range(3):
+        angle = idx * (2 * np.pi / 3)
+        positions.append(
+            [_ETHANE_RL * np.cos(angle), _ETHANE_RL * np.sin(angle), -_ETHANE_CC - _ETHANE_DZ]
+        )
+    for idx in range(3):
+        angle = phi + idx * (2 * np.pi / 3)
+        positions.append(
+            [_ETHANE_RL * np.cos(angle), _ETHANE_RL * np.sin(angle), _ETHANE_CC + _ETHANE_DZ]
+        )
+
+    atoms = Atoms("C2H6", positions=positions)
+    atoms.set_cell(CELL)
+    atoms.pbc = False
+    atoms.center()
+    return atoms
 
 
 def make_egret():
@@ -172,3 +194,12 @@ def run_organic_disagreement_example(
     print(f"Output directory : {result.output_dir}")
     print_disagreement_table(result)
     return result
+
+
+if __name__ == "__main__":
+    print(
+        "organic_disagreement_common.py is a shared helper module. "
+        "Run one of the molecule scripts, for example:\n"
+        "  python examples/propane_egret_maceoff23_disagreement.py"
+    )
+    raise SystemExit(0)

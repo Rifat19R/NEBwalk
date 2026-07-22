@@ -14,6 +14,40 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Organic disagreement result summaries with literature-scale comparison notes
   and explicit caveats that these runs are exploratory checks, not DFT
   validation or calibrated uncertainty quantification.
+- Pt vacancy migration added to `vacancy_benchmark_suite.py` (EMT), kept as a
+  documented calculator-limitation case rather than a nebwalk bug.
+
+### Changed
+- `ag/au/cu/ni/pd/pt_vacancy_emt.py` collapsed into thin wrappers around
+  `vacancy_benchmark_suite.main()`; removes ~600 lines of duplicated
+  build/relax/NEB/report boilerplate across the six scripts.
+- `ethane_egret_maceoff23_disagreement.py` and `maceoff23_sanity_check.py` now
+  share their `ethane()` geometry builder and calculator factories from
+  `organic_disagreement_common.py` instead of each carrying its own copy.
+  This also aligns `maceoff23_sanity_check.py`'s MACE-OFF23 precision from
+  `float32` to `float64`, matching the project-wide convention used by
+  `vacancy_benchmark_suite.py` and the other MACE-MP-0 examples.
+- `al_vacancy_qe.py` QE params (`ecutwfc`, `ecutrho`, `conv_thr`) brought in
+  line with `vacancy_benchmark_suite.qe_params_for()` — the two Al/QE entry
+  points share output files and were silently drifting apart.
+- Mg (HCP, basal-plane) vacancy reference barrier corrected from 0.60 eV to
+  0.52 eV in `mg_vacancy_macemp.py`, matching the canonical value in
+  `vacancy_benchmark_suite.SYSTEMS["mg"]`.
+- `mg_vacancy_mgo_macemp.py` output filenames now consistently prefixed
+  `mg_vacancy_mgo_macemp_*` instead of `mg_vacancy_mgo_*`.
+- README's MACE-OFF23 code sample corrected to `default_dtype="float64"`
+  (was stale `float32`, contradicting the actual `organic_disagreement_common.py`
+  implementation and the MACE-MP-0 example immediately below it); added the
+  missing `default_dtype="float32"` to the sample's Egret-1t factory to match
+  actual code.
+- README's `examples/organic_disagreement_results_v0.10.0.md` reference
+  replaced by `examples/organic_disagreement_literature_comparison_v0.10.0.md`,
+  which now carries both the disagreement diagnostics and the literature
+  comparison in one file.
+
+### Removed
+- `examples/organic_disagreement_results_v0.10.0.md`, superseded by
+  `examples/organic_disagreement_literature_comparison_v0.10.0.md`.
 
 ### Notes
 - Acetaldehyde was tested but intentionally excluded from the pushed example

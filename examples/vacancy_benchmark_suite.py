@@ -100,6 +100,15 @@ SYSTEMS: dict[str, VacancySystem] = {
         reference_label="~0.68 eV DFT-PBE",
         description="FCC Au vacancy migration",
     ),
+    "pt": VacancySystem(
+        symbol="Pt",
+        crystal="fcc",
+        lattice_a=3.924,
+        repeat=(2, 2, 2),
+        reference_barrier=1.49,
+        reference_label="~1.49 eV DFT-PBE",
+        description="FCC Pt vacancy migration",
+    ),
     "w": VacancySystem(
         symbol="W",
         crystal="bcc",
@@ -159,7 +168,7 @@ SYSTEMS: dict[str, VacancySystem] = {
 }
 
 QE_MATERIALS = {"al", "cu", "ag", "w", "mo", "si", "mg", "li", "fe", "ni"}
-EMT_MATERIALS = {"al", "cu", "ag", "ni", "pd", "au"}
+EMT_MATERIALS = {"al", "cu", "ag", "ni", "pd", "au", "pt"}
 MACE_MATERIALS = {"al", "cu", "ag", "ni", "pd", "au", "w", "mo", "si"}
 MACE_MODEL_BY_MATERIAL = {
     "al": "medium",
