@@ -7,10 +7,13 @@ __pycache__/
 *.egg
 *.egg-info/
 .pytest_cache/
+.coverage
+coverage.xml
 .mypy_cache/
 .ruff_cache/
 dist/
 build/
+site/
 .eggs/
 *.whl
 .venv/
@@ -44,6 +47,13 @@ espresso.pwo
 *.pwo
 
 # Local calculation working directories
+campaign-output/
+nebwalk_campaigns/
+validation/**/generated/
+dataset_v*.extxyz
+labels.extxyz
+selected_candidates.extxyz
+committee_uncertainty.csv
 MXenes/
 Li2O/
 MgO/
