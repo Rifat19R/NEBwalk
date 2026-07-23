@@ -1,0 +1,48 @@
+{
+  "schema": "nebwalk.flagship_qe_protocol.v1",
+  "protocol_id": "phase1-qe-pbe-ci-neb-v1",
+  "qe_version": "7.4.1",
+  "functional": "PBE",
+  "pseudopotentials": {
+    "Ti": {"filename": "ti_pbe_v1.4.uspp.F.UPF", "sha256": "747afa52fa17dc061e9eff72bcea534e81ffa5a4a5d33af3eb8fc9f1b3aee580"},
+    "C": {"filename": "C.pbe-n-kjpaw_psl.1.0.0.UPF", "sha256": "9900d1efd50b9848e31849f39094b33348486b400ee51e0f3922f716137cf3d7"},
+    "O": {"filename": "O.pbe-n-kjpaw_psl.0.1.UPF", "sha256": "7c4b6ed541f83d0afdf5c1d3a8c611340f073f3e2b11e95b7963bb2ee26929aa"},
+    "H": {"filename": "H.pbe-rrkjus_psl.1.0.0.UPF", "sha256": "27f8a7e87851d59a2698237d6ab4578d62950640f4f175781b015a0ce731f962"}
+  },
+  "baseline": {
+    "ecutwfc_ry": 60.0,
+    "ecutrho_ry": 600.0,
+    "kpoints": [3, 3, 1],
+    "occupations": "smearing",
+    "smearing": "marzari-vanderbilt",
+    "degauss_ry": 0.02,
+    "nspin": 1,
+    "scf_threshold_ry": 1e-6,
+    "electron_maxstep": 200,
+    "mixing_mode": "local-TF",
+    "mixing_beta": 0.3,
+    "intermediate_images": 7,
+    "total_images": 9,
+    "interpolation": "idpp",
+    "spring_ev_per_angstrom_squared": 0.1,
+    "climbing_image": true,
+    "climb_delay_steps": 20,
+    "neb_force_threshold_ev_per_angstrom": 0.05,
+    "maximum_optimizer_steps": 500,
+    "constraints": "none",
+    "cell_treatment": "fixed cell"
+  },
+  "convergence_variants": {
+    "higher_cutoff": {"ecutwfc_ry": 80.0, "ecutrho_ry": 800.0},
+    "denser_kpoints": {"kpoints": [4, 4, 1]},
+    "higher_image_count": {"intermediate_images": 9, "total_images": 11},
+    "tighter_neb_threshold": {"neb_force_threshold_ev_per_angstrom": 0.03}
+  },
+  "acceptance": {
+    "all_runs_must_converge": true,
+    "maximum_barrier_change_ev": 0.05,
+    "endpoint_energy_tolerance_ev": 0.01,
+    "must_preserve_endpoint_connectivity": true,
+    "must_have_no_unphysical_pathway_reconstruction": true
+  }
+}
