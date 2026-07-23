@@ -114,8 +114,6 @@ def test_geodesic_interpolate_separates_exact_midpoint_overlap():
     )[1]
 
     linear_distance = np.linalg.norm(linear.positions[0] - linear.positions[1])
-    geodesic_distance = np.linalg.norm(
-        geodesic.positions[0] - geodesic.positions[1]
-    )
+    geodesic_distance = np.linalg.norm(geodesic.positions[0] - geodesic.positions[1])
     assert linear_distance == pytest.approx(0.0)
     assert geodesic_distance > 0.6

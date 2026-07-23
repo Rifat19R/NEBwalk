@@ -24,12 +24,15 @@ def test_noop_recovery_strategy_classifies_unknown_and_never_retries() -> None:
     strategy = NoOpRecoveryStrategy()
 
     assert strategy.classify(RuntimeError("boom")) == FailureType.UNKNOWN
-    assert strategy.propose_retry(
-        FailureType.UNKNOWN,
-        1,
-        atoms=object(),
-        calc_params={},
-    ) is None
+    assert (
+        strategy.propose_retry(
+            FailureType.UNKNOWN,
+            1,
+            atoms=object(),
+            calc_params={},
+        )
+        is None
+    )
 
 
 def test_run_with_recovery_first_try_success_calls_once_and_logs_nothing() -> None:

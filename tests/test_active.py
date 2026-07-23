@@ -18,10 +18,7 @@ from nebwalk.active import (
 
 
 def _images(n_images: int = 5) -> list[Atoms]:
-    return [
-        Atoms("Al", positions=[[0.1 * idx, 0.0, 0.0]])
-        for idx in range(n_images)
-    ]
+    return [Atoms("Al", positions=[[0.1 * idx, 0.0, 0.0]]) for idx in range(n_images)]
 
 
 def test_active_config_defaults():

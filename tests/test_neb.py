@@ -69,3 +69,20 @@ def test_run_neb_calculation_engine_smoke():
     )
     assert result.converged
     assert result.neb.get_barrier() == result.barrier
+
+
+@pytest.mark.parametrize(
+    ("kwargs", "message"),
+    [
+        ({"n_images": 0}, "n_images"),
+        ({"k": 0.0}, "k"),
+        ({"k": 0.1, "k_min": 0.1}, "k_min"),
+        ({"climb_delay": -1}, "climb_delay"),
+        ({"n_workers": 0}, "n_workers"),
+        ({"fmax": 0.0}, "fmax"),
+        ({"max_steps": 0}, "max_steps"),
+    ],
+)
+def test_run_config_rejects_invalid_values(kwargs, message):
+    with pytest.raises(ValueError, match=message):
+        NEBRunConfig(**kwargs)

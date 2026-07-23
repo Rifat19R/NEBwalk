@@ -20,6 +20,7 @@ from nebwalk.forces import (
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 class MockCalculator:
     """Minimal ASE-compatible calculator for testing."""
 
@@ -57,6 +58,7 @@ def _make_images(n=5, spacing=1.0, e_profile=None, f_components=(0.1, 0.05, 0.0)
 # ---------------------------------------------------------------------------
 # Basic shape / endpoint tests
 # ---------------------------------------------------------------------------
+
 
 def test_endpoint_forces_are_zero():
     images = _make_images(5)
@@ -106,6 +108,7 @@ def test_neb_band_properties():
 # Spring force
 # ---------------------------------------------------------------------------
 
+
 def test_spring_force_zero_for_equal_spacing():
     """Equally spaced images → zero spring force."""
     images = _make_images(5, spacing=1.0)
@@ -145,6 +148,7 @@ def test_spring_force_nonzero_for_unequal_spacing():
 # ---------------------------------------------------------------------------
 # Perpendicular force projection
 # ---------------------------------------------------------------------------
+
 
 def test_perpendicular_force_is_perpendicular_to_tangent():
     """
@@ -186,14 +190,14 @@ def test_neb_force_tangent_component_equals_spring():
     actual_proj = float((forces[i] * tau).sum())
     # actual_proj should equal expected_spring_proj + 0 (f_pot has no x-component)
     assert abs(actual_proj - expected_spring_proj) < 1e-10, (
-        f"Expected spring projection {expected_spring_proj:.4f}, "
-        f"got {actual_proj:.4f}"
+        f"Expected spring projection {expected_spring_proj:.4f}, got {actual_proj:.4f}"
     )
 
 
 # ---------------------------------------------------------------------------
 # Climbing image
 # ---------------------------------------------------------------------------
+
 
 def test_climbing_image_has_inverted_tangent_component():
     """
@@ -228,6 +232,7 @@ def test_non_climbing_images_unchanged_when_climb_active():
 # ---------------------------------------------------------------------------
 # _improved_tangent
 # ---------------------------------------------------------------------------
+
 
 def test_improved_tangent_ascending():
     """Monotonically ascending: forward tangent."""
@@ -311,14 +316,16 @@ def test_variable_springs_monotonic_path_matches_hand_computed_values():
 # MIC displacement tests
 # ---------------------------------------------------------------------------
 
+
 def test_mic_disp_nopbc_unchanged():
     """With pbc=False, _mic_disp must return dr unchanged."""
     from ase.cell import Cell
 
     from nebwalk.forces import _mic_disp
-    dr   = np.array([[3.0, -1.5, 0.2]])
+
+    dr = np.array([[3.0, -1.5, 0.2]])
     cell = Cell([[5, 0, 0], [0, 5, 0], [0, 0, 5]])
-    pbc  = [False, False, False]
+    pbc = [False, False, False]
     result = _mic_disp(dr, cell, pbc)
     assert np.allclose(result, dr)
 
@@ -328,11 +335,12 @@ def test_mic_disp_wraps_correctly():
     from ase.cell import Cell
 
     from nebwalk.forces import _mic_disp
-    a    = 5.0
+
+    a = 5.0
     cell = Cell([[a, 0, 0], [0, a, 0], [0, 0, a]])
-    pbc  = [True, True, True]
+    pbc = [True, True, True]
     # Displacement of 4.5 Å in x in a 5 Å box: MIC gives -0.5 Å
-    dr  = np.array([[4.5, 0.0, 0.0]])
+    dr = np.array([[4.5, 0.0, 0.0]])
     mic = _mic_disp(dr, cell, pbc)
     assert np.allclose(mic, [[-0.5, 0.0, 0.0]], atol=1e-10), (
         f"Expected [[-0.5, 0, 0]], got {mic}"
@@ -344,11 +352,12 @@ def test_mic_disp_partial_pbc():
     from ase.cell import Cell
 
     from nebwalk.forces import _mic_disp
-    a    = 4.0
+
+    a = 4.0
     cell = Cell([[a, 0, 0], [0, a, 0], [0, 0, 20.0]])
-    pbc  = [True, True, False]
+    pbc = [True, True, False]
     # x: 3.5 > a/2 → wraps to -0.5; z: 8.0 not wrapped (pbc=False in z)
-    dr  = np.array([[3.5, 0.0, 8.0]])
+    dr = np.array([[3.5, 0.0, 8.0]])
     mic = _mic_disp(dr, cell, pbc)
-    assert abs(mic[0, 0] - (-0.5)) < 1e-10, f"x MIC wrong: {mic[0,0]}"
-    assert abs(mic[0, 2] - 8.0)   < 1e-10, f"z should not be wrapped: {mic[0,2]}"
+    assert abs(mic[0, 0] - (-0.5)) < 1e-10, f"x MIC wrong: {mic[0, 0]}"
+    assert abs(mic[0, 2] - 8.0) < 1e-10, f"z should not be wrapped: {mic[0, 2]}"

@@ -13,6 +13,7 @@ from nebwalk.forces import compute_neb_forces, variable_spring_constants
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _mock_images(energies, n_atoms=1):
     """
     Create mock Atoms-like objects with known energies and positions.
@@ -21,6 +22,7 @@ def _mock_images(energies, n_atoms=1):
     from unittest.mock import MagicMock
 
     import numpy as np
+
     images = []
     for i, E in enumerate(energies):
         img = MagicMock()
@@ -37,8 +39,8 @@ def _mock_images(energies, n_atoms=1):
 # variable_spring_constants
 # ---------------------------------------------------------------------------
 
-class TestVariableSpringConstants:
 
+class TestVariableSpringConstants:
     def test_output_shape(self):
         """Returns array of length N-1."""
         E = [0.0, 0.5, 1.0, 0.5, 0.0]
@@ -110,8 +112,8 @@ class TestVariableSpringConstants:
 # compute_neb_forces with array k
 # ---------------------------------------------------------------------------
 
-class TestComputeNEBForcesArrayK:
 
+class TestComputeNEBForcesArrayK:
     def test_scalar_k_and_uniform_array_give_same_forces(self):
         """
         Passing scalar k and a uniform array of the same value must give
@@ -123,25 +125,26 @@ class TestComputeNEBForcesArrayK:
 
         # Give each image real positions spread along x
         for i, img in enumerate(images):
-            img.positions = np.array([[float(i), 0.0, 0.0],
-                                      [float(i), 1.0, 0.0]])
+            img.positions = np.array([[float(i), 0.0, 0.0], [float(i), 1.0, 0.0]])
 
         k_scalar = 0.2
-        k_array  = np.full(n - 1, k_scalar)
+        k_array = np.full(n - 1, k_scalar)
 
         f_scalar = compute_neb_forces(images, k_scalar, energies=energies)
-        f_array  = compute_neb_forces(images, k_array,  energies=energies)
+        f_array = compute_neb_forces(images, k_array, energies=energies)
 
         for i in range(n):
             np.testing.assert_allclose(
-                f_scalar[i], f_array[i], atol=1e-12,
-                err_msg=f"Force mismatch at image {i}"
+                f_scalar[i],
+                f_array[i],
+                atol=1e-12,
+                err_msg=f"Force mismatch at image {i}",
             )
 
     def test_array_k_wrong_length_raises(self):
         """Array k of wrong length must raise ValueError."""
         energies = [0.0, 0.5, 1.0, 0.5, 0.0]
-        images   = _mock_images(energies, n_atoms=1)
+        images = _mock_images(energies, n_atoms=1)
         with pytest.raises(ValueError, match="length"):
             compute_neb_forces(images, np.array([0.1, 0.2]), energies=energies)
 
@@ -151,7 +154,7 @@ class TestComputeNEBForcesArrayK:
         inside compute_neb_forces.
         """
         energies = [0.0, 0.5, 1.0, 0.5, 0.0]
-        images   = _mock_images(energies, n_atoms=1)
+        images = _mock_images(energies, n_atoms=1)
         for i, img in enumerate(images):
             img.positions = np.array([[float(i), 0.0, 0.0]])
 
@@ -167,34 +170,36 @@ class TestComputeNEBForcesArrayK:
         on the adjacent image (all else equal on a simple 3-image path).
         """
         energies = [0.0, 1.0, 0.0]
-        images   = _mock_images(energies, n_atoms=1)
+        images = _mock_images(energies, n_atoms=1)
         images[0].positions = np.array([[0.0, 0.0, 0.0]])
         images[1].positions = np.array([[1.0, 0.0, 0.0]])
         images[2].positions = np.array([[2.0, 0.0, 0.0]])
 
-        k_uniform  = 0.1
+        k_uniform = 0.1
         k_variable = np.array([0.1, 0.2])
 
-        f_uniform  = compute_neb_forces(images, k_uniform,  energies=energies)
+        f_uniform = compute_neb_forces(images, k_uniform, energies=energies)
         f_variable = compute_neb_forces(images, k_variable, energies=energies)
 
         # Stronger forward spring adds +0.1 along the tangent.
         spring_diff = f_variable[1][0, 0] - f_uniform[1][0, 0]
-        assert abs(spring_diff - 0.1) < 1e-10, \
+        assert abs(spring_diff - 0.1) < 1e-10, (
             f"Expected spring difference +0.1, got {spring_diff:.6f}"
+        )
 
 
 # ---------------------------------------------------------------------------
 # NEB class integration
 # ---------------------------------------------------------------------------
 
-class TestNEBVariableK:
 
+class TestNEBVariableK:
     def test_k_min_validation(self):
         """k_min >= k must raise ValueError."""
         from unittest.mock import MagicMock
 
         from nebwalk import NEB
+
         imgs = []
         for i in range(5):
             img = MagicMock()

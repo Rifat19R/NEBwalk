@@ -24,6 +24,7 @@ from nebwalk.optimize import _eval_all, _warn_if_gpu_calculator, fire_optimize
 # Fixtures
 # ---------------------------------------------------------------------------
 
+
 def _al_images(n_images=5):
     """
     Simple Al FCC vacancy migration path with EMT calculator.
@@ -33,7 +34,7 @@ def _al_images(n_images=5):
     del al[0]
 
     start = al.copy()
-    end   = al.copy()
+    end = al.copy()
     end.positions[0] += [2.025, 0.0, 0.0]
 
     images = idpp_interpolate(start, end, n_images=n_images)
@@ -47,6 +48,7 @@ def _al_images(n_images=5):
 # ---------------------------------------------------------------------------
 # _eval_all correctness
 # ---------------------------------------------------------------------------
+
 
 def test_warn_if_gpu_calculator(caplog):
     """CUDA calculators with n_workers > 1 must emit a safety warning."""
@@ -79,26 +81,25 @@ def test_warn_if_gpu_calculator(caplog):
 
 
 class TestEvalAll:
-
     def test_sequential_output_shape(self):
         """_eval_all returns energies (N,) and forces (N,) lists."""
         images = _al_images(n_images=3)
         energies, forces = _eval_all(images, n_workers=1)
         assert len(energies) == 5
-        assert len(forces)   == 5
+        assert len(forces) == 5
 
     def test_endpoints_in_energies(self):
         """Endpoint energies must match direct calculator calls."""
         images = _al_images(n_images=3)
         energies, _ = _eval_all(images, n_workers=1)
-        assert abs(energies[0]  - images[0].get_potential_energy())  < 1e-10
+        assert abs(energies[0] - images[0].get_potential_energy()) < 1e-10
         assert abs(energies[-1] - images[-1].get_potential_energy()) < 1e-10
 
     def test_endpoint_forces_are_none(self):
         """Forces at endpoints are None — they are not needed for NEB."""
         images = _al_images(n_images=3)
         _, forces = _eval_all(images, n_workers=1)
-        assert forces[0]  is None
+        assert forces[0] is None
         assert forces[-1] is None
 
     def test_intermediate_forces_are_arrays(self):
@@ -117,8 +118,9 @@ class TestEvalAll:
         images = _al_images(n_images=5)
         E_seq, _ = _eval_all(images, n_workers=1)
         E_par, _ = _eval_all(images, n_workers=3)
-        np.testing.assert_allclose(E_seq, E_par, atol=1e-10,
-                                   err_msg="Parallel energies differ from sequential")
+        np.testing.assert_allclose(
+            E_seq, E_par, atol=1e-10, err_msg="Parallel energies differ from sequential"
+        )
 
     def test_parallel_forces_match_sequential(self):
         """
@@ -130,8 +132,7 @@ class TestEvalAll:
         _, F_par = _eval_all(images, n_workers=3)
         for i, (fs, fp) in enumerate(zip(F_seq[1:-1], F_par[1:-1])):
             np.testing.assert_allclose(
-                fs, fp, atol=1e-10,
-                err_msg=f"Force mismatch at image {i+1}"
+                fs, fp, atol=1e-10, err_msg=f"Force mismatch at image {i + 1}"
             )
 
     def test_n_workers_larger_than_images_is_safe(self):
@@ -148,8 +149,8 @@ class TestEvalAll:
 # NEB class with n_workers
 # ---------------------------------------------------------------------------
 
-class TestNEBParallel:
 
+class TestNEBParallel:
     def test_n_workers_validation(self):
         """n_workers < 1 must raise ValueError."""
         images = _al_images(n_images=3)
@@ -200,15 +201,15 @@ class TestNEBParallel:
         for img_s, img_p in zip(images_seq, images_par):
             img_p.set_positions(img_s.positions.copy())
 
-        fire_optimize(images_seq, k=0.1, max_steps=10,
-                      n_workers=1, verbose=False)
-        fire_optimize(images_par, k=0.1, max_steps=10,
-                      n_workers=3, verbose=False)
+        fire_optimize(images_seq, k=0.1, max_steps=10, n_workers=1, verbose=False)
+        fire_optimize(images_par, k=0.1, max_steps=10, n_workers=3, verbose=False)
 
         for i, (img_s, img_p) in enumerate(zip(images_seq, images_par)):
             np.testing.assert_allclose(
-                img_s.positions, img_p.positions, atol=1e-10,
-                err_msg=f"Position mismatch at image {i}"
+                img_s.positions,
+                img_p.positions,
+                atol=1e-10,
+                err_msg=f"Position mismatch at image {i}",
             )
 
     def test_history_recorded_correctly_parallel(self):
@@ -222,7 +223,7 @@ class TestNEBParallel:
 
         assert len(neb.history) > 0
         for entry in neb.history:
-            assert 'step'     in entry
-            assert 'fmax'     in entry
-            assert 'energies' in entry
-            assert 'k_springs' in entry
+            assert "step" in entry
+            assert "fmax" in entry
+            assert "energies" in entry
+            assert "k_springs" in entry
