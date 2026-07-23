@@ -1,0 +1,51 @@
+{
+  "schema": "nebwalk.phase1_test_inventory.v1",
+  "package_version": "0.10.0",
+  "environment": {
+    "platform": "WSL Ubuntu",
+    "python": "3.12.3",
+    "pytest": "9.1.1",
+    "installation": "built wheel only; tests copied outside the source checkout",
+    "installed_package_path": "/mnt/d/Rifat_kh/nebwalk_phase1_wheel_gate/venv/lib/python3.12/site-packages"
+  },
+  "distributions": {
+    "wheel": {
+      "filename": "nebwalk-0.10.0-py3-none-any.whl",
+      "sha256": "dc9c20ce2befc87bec732a2dbda3580b70e571dba3a23aad00cd96be7299ca6c",
+      "twine_check": "passed"
+    },
+    "sdist": {
+      "filename": "nebwalk-0.10.0.tar.gz",
+      "sha256": "688766f1be19862567daf697871dc0f4f79d7c9f738bd82632b980bba5f1702e",
+      "twine_check": "passed"
+    }
+  },
+  "collection": {
+    "command": "pytest --collect-only -q",
+    "collected": 261,
+    "exit_code": 0,
+    "log": "/mnt/d/Rifat_kh/nebwalk_phase1_wheel_gate/collect-only.txt",
+    "log_sha256": "d5680a1ca2e2ec145d467b1586edaad335a4857e3d84ee3ed4ed9005385cf280"
+  },
+  "execution": {
+    "command": "pytest -q",
+    "passed": 261,
+    "failed": 0,
+    "skipped": 0,
+    "exit_code": 0,
+    "duration_seconds": 27.87,
+    "log": "/mnt/d/Rifat_kh/nebwalk_phase1_wheel_gate/pytest-q.txt",
+    "log_sha256": "e9948a9efce9e8e7e5d4868605cf0edd6588b42577c0122e588c9aa8e6bb6e26"
+  },
+  "batching": {
+    "used": false,
+    "reason": null,
+    "disjointness_proof_required": false,
+    "omitted_tests": 0,
+    "union_count": 261
+  },
+  "dependency_freeze": {
+    "log": "/mnt/d/Rifat_kh/nebwalk_phase1_wheel_gate/dependency-freeze.txt",
+    "sha256": "9f34521136a902bf8c3d306b1e5a2cde33ccf1db3830da1ba46bb73fa0432e24"
+  }
+}
