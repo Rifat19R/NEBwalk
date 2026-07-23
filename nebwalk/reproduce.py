@@ -285,6 +285,7 @@ def _make_tarball(output_dir: Path) -> Path:
         check=True,
         capture_output=True,
         text=True,
+        timeout=120,
     )
     return tarball
 

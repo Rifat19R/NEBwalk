@@ -170,7 +170,7 @@ def _attach_qe_output_capture(calc: Any, image_dir: Path) -> Any:
     def completed_qe_fallback(exc: Exception) -> tuple[float, np.ndarray]:
         raw_output = _read_qe_output(image_dir)
         if not hasattr(exc, "qe_output"):
-            exc.qe_output = raw_output
+            setattr(exc, "qe_output", raw_output)
         if "JOB DONE" not in raw_output:
             raise exc
         if "energy" not in fallback_results or "forces" not in fallback_results:
@@ -371,6 +371,7 @@ def make_qe_factory(
         Espresso = ASEEspresso
         try:
             from ase.calculators.espresso import EspressoProfile as _EP
+
             EspressoProfile = _EP
         except ImportError:
             pass

@@ -80,6 +80,7 @@ def _idpp_obj_and_grad(
 
     use_mic = cell is not None and pbc is not None and np.any(pbc)
     if use_mic:
+        assert cell is not None and pbc is not None
         diff, dist = _pairwise_mic(positions, cell, pbc)
     else:
         diff, dist = _pairwise(positions)
@@ -125,8 +126,8 @@ def idpp_interpolate(
     n_total = n_images + 2
     n_atoms = len(start)
     use_mic = bool(np.any(start.pbc))
-    cell = start.cell if use_mic else None
-    pbc = start.pbc if use_mic else None
+    cell = np.asarray(start.cell, dtype=float) if use_mic else None
+    pbc = np.asarray(start.pbc, dtype=bool) if use_mic else None
     images = linear_interpolate(start, end, n_images)
     d_start, d_end = _endpoint_distances(start, end)
 
@@ -155,6 +156,7 @@ def _repulsion_obj_and_grad(
 ) -> tuple[float, FloatArray]:
     use_mic = cell is not None and pbc is not None and np.any(pbc)
     if use_mic:
+        assert cell is not None and pbc is not None
         diff, dist = _pairwise_mic(positions, cell, pbc)
     else:
         diff, dist = _pairwise(positions)
@@ -205,6 +207,7 @@ def _separate_overlaps(
     for _ in range(n_passes):
         use_mic = cell is not None and pbc is not None and np.any(pbc)
         if use_mic:
+            assert cell is not None and pbc is not None
             diff, dist = _pairwise_mic(pos, cell, pbc)
         else:
             diff, dist = _pairwise(pos)

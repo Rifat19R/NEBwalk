@@ -53,8 +53,7 @@ def compute_cross_model_disagreement(
         return []
     if reference_index < 0 or reference_index >= len(images):
         raise ValueError(
-            f"reference_index must be in [0, {len(images) - 1}], "
-            f"got {reference_index}"
+            f"reference_index must be in [0, {len(images) - 1}], got {reference_index}"
         )
 
     results: list[DisagreementResult] = []
@@ -105,15 +104,26 @@ def compute_cross_model_disagreement(
             for result in results
         ]
 
-    primary_reference = float(reference.primary_energy)
-    secondary_reference = float(reference.secondary_energy)
+    if reference.primary_energy is None or reference.secondary_energy is None:
+        raise RuntimeError("valid reference result is missing calculator energies")
+    primary_reference = reference.primary_energy
+    secondary_reference = reference.secondary_energy
     relative_results: list[DisagreementResult] = []
     for result in results:
         if not result.valid:
             relative_results.append(result)
             continue
-        primary_relative = float(result.primary_energy) - primary_reference
-        secondary_relative = float(result.secondary_energy) - secondary_reference
+        if result.primary_energy is None or result.secondary_energy is None:
+            relative_results.append(
+                DisagreementResult(
+                    index=result.index,
+                    valid=False,
+                    failure_reason="valid_result_missing_energy",
+                )
+            )
+            continue
+        primary_relative = result.primary_energy - primary_reference
+        secondary_relative = result.secondary_energy - secondary_reference
         relative_results.append(
             DisagreementResult(
                 index=result.index,

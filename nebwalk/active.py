@@ -146,9 +146,7 @@ def _eligible_valid_count(
     start = 0 if include_endpoints else 1
     stop = len(disagreements) if include_endpoints else len(disagreements) - 1
     return sum(
-        1
-        for result in disagreements
-        if start <= result.index < stop and result.valid
+        1 for result in disagreements if start <= result.index < stop and result.valid
     )
 
 

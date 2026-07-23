@@ -12,6 +12,7 @@ from .active import (
 from .engine import NEBRunConfig, NEBRunResult, run_neb_calculation
 from .forces import compute_neb_forces, variable_spring_constants
 from .interpolate import geodesic_interpolate, idpp_interpolate, linear_interpolate
+from .label import DFTLabel, LabelingResult, label_selected_images
 from .neb import NEB
 from .output import plot_energy_profile, save_csv, save_trajectory
 from .qe import QEParams, QERecoveryStrategy, make_qe_factory, validate_qe_setup
@@ -42,6 +43,9 @@ __all__ = [
     "run_neb_calculation",
     "run_mlip_assisted_neb",
     "export_selected_images",
+    "DFTLabel",
+    "LabelingResult",
+    "label_selected_images",
     "select_images",
     "select_peak_plus_neighbors",
     "select_uncertainty_disagreement",

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
+from typing import cast
 
 import numpy as np
 from ase import Atoms
@@ -110,7 +111,7 @@ def compute_neb_forces(
         energies = [img.get_potential_energy() for img in images]
 
     if np.isscalar(k):
-        k_arr = np.full(n - 1, float(k))
+        k_arr = np.full(n - 1, float(cast(float, k)))
     else:
         k_arr = np.asarray(k, dtype=float)
         if len(k_arr) != n - 1:

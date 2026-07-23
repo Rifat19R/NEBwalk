@@ -30,6 +30,23 @@ class NEBRunConfig:
     max_steps: int = 500
     verbose: bool = True
 
+    def __post_init__(self) -> None:
+        """Reject invalid runs before calculators or output paths are touched."""
+        if self.n_images < 1:
+            raise ValueError("n_images must be >= 1")
+        if self.k <= 0:
+            raise ValueError("k must be > 0")
+        if self.k_min is not None and not 0 < self.k_min < self.k:
+            raise ValueError("k_min must satisfy 0 < k_min < k")
+        if self.climb_delay < 0:
+            raise ValueError("climb_delay must be >= 0")
+        if self.n_workers < 1:
+            raise ValueError("n_workers must be >= 1")
+        if self.fmax <= 0:
+            raise ValueError("fmax must be > 0")
+        if self.max_steps < 1:
+            raise ValueError("max_steps must be >= 1")
+
 
 @dataclass(frozen=True)
 class NEBRunResult:

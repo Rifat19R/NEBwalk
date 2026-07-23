@@ -74,10 +74,9 @@ class FIREOptimizer:
         force_norm = float(np.linalg.norm(forces))
         velocity_norm = float(np.linalg.norm(velocity))
         if force_norm > 1e-10:
-            velocity[:] = (
-                (1.0 - self.alpha) * velocity
-                + self.alpha * (velocity_norm / force_norm) * forces
-            )
+            velocity[:] = (1.0 - self.alpha) * velocity + self.alpha * (
+                velocity_norm / force_norm
+            ) * forces
 
         if power > 0.0:
             self.n_pos += 1
@@ -300,6 +299,7 @@ def fire_optimize(
     climb_active = False
     climb_index: int | None = None
     use_variable_k = k_min is not None
+    k_curr: float | FloatArray
     fmax_curr = float("inf")
 
     _warn_if_gpu_calculator(images, n_workers)
@@ -320,6 +320,8 @@ def fire_optimize(
         )
 
         if use_variable_k:
+            if k_min is None:  # Defensive narrowing for static type checkers.
+                raise RuntimeError("variable springs require k_min")
             k_curr = variable_spring_constants(energies, k_max=k, k_min=k_min)
         else:
             k_curr = k
@@ -356,9 +358,7 @@ def fire_optimize(
                 "fmax": fmax_curr,
                 "energies": energies,
                 "k_springs": (
-                    k_springs.tolist()
-                    if hasattr(k_springs, "tolist")
-                    else k_springs
+                    k_springs.tolist() if hasattr(k_springs, "tolist") else k_springs
                 ),
             }
         )
