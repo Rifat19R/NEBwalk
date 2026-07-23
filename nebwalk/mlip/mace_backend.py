@@ -442,6 +442,12 @@ class MACEFineTuningBackend:
             "split_manifest_sha256": _sha256(dataset.manifest_path),
             "protocol": config.protocol.value,
             "seed": config.seed,
+            "e0s": config.e0s,
+            "atomic_reference_strategy": (
+                "frozen_foundation_atomic_references"
+                if config.e0s.lower() == "foundation"
+                else "configured_by_training_run"
+            ),
             "energy_key": config.energy_key,
             "forces_key": config.forces_key,
             "command": command,

@@ -190,6 +190,8 @@ def test_environment_and_training_never_use_shell(tmp_path):
     assert manifest["sha256"] == artifact.checksum
     assert manifest["seed"] == 7
     assert manifest["model_id"] == "safe"
+    assert manifest["e0s"] == "estimated"
+    assert manifest["atomic_reference_strategy"] == "configured_by_training_run"
     assert manifest["split_manifest_sha256"]
     assert manifest["validation_metrics"] is None
     assert manifest["creation_time"].endswith("+00:00")
