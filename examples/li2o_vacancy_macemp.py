@@ -27,23 +27,28 @@ from mace.calculators import mace_mp
 from nebwalk import NEBRunConfig, run_neb_calculation
 
 # ── Reference ─────────────────────────────────────────────────────────────────
-REF_BARRIER = 0.28   # eV, DFT-GGA central estimate
-REF_RANGE   = (0.20, 0.35)
+REF_BARRIER = 0.28  # eV, DFT-GGA central estimate
+REF_RANGE = (0.20, 0.35)
 
 # ── Step 1: Build and relax Li₂O primitive cell ───────────────────────────────
 
 a = 4.619  # Å, experimental lattice parameter
 
 prim = Atoms(
-    symbols=["O", "O", "O", "O",
-             "Li", "Li", "Li", "Li", "Li", "Li", "Li", "Li"],
+    symbols=["O", "O", "O", "O", "Li", "Li", "Li", "Li", "Li", "Li", "Li", "Li"],
     scaled_positions=[
-        [0.00, 0.00, 0.00], [0.50, 0.50, 0.00],
-        [0.50, 0.00, 0.50], [0.00, 0.50, 0.50],
-        [0.25, 0.25, 0.25], [0.75, 0.75, 0.25],
-        [0.75, 0.25, 0.75], [0.25, 0.75, 0.75],
-        [0.75, 0.75, 0.75], [0.25, 0.25, 0.75],
-        [0.25, 0.75, 0.25], [0.75, 0.25, 0.25],
+        [0.00, 0.00, 0.00],
+        [0.50, 0.50, 0.00],
+        [0.50, 0.00, 0.50],
+        [0.00, 0.50, 0.50],
+        [0.25, 0.25, 0.25],
+        [0.75, 0.75, 0.25],
+        [0.75, 0.25, 0.75],
+        [0.25, 0.75, 0.75],
+        [0.75, 0.75, 0.75],
+        [0.25, 0.25, 0.75],
+        [0.25, 0.75, 0.25],
+        [0.75, 0.25, 0.25],
     ],
     cell=[[a, 0, 0], [0, a, 0], [0, 0, a]],
     pbc=True,
@@ -62,21 +67,22 @@ print("\nStep 2: Building supercell and vacancy endpoints...")
 sc = make_supercell(prim, [[2, 0, 0], [0, 2, 0], [0, 0, 2]])
 print(f"  Supercell: {len(sc)} atoms")
 
-syms   = sc.get_chemical_symbols()
-pos    = sc.get_positions()
+syms = sc.get_chemical_symbols()
+pos = sc.get_positions()
 li_idx = [i for i, s in enumerate(syms) if s == "Li"]
 
 # Vacancy: Li nearest to supercell centre
-centre    = sc.cell[:].sum(axis=0) / 2
-li_pos    = np.array([pos[i] for i in li_idx])
+centre = sc.cell[:].sum(axis=0) / 2
+li_pos = np.array([pos[i] for i in li_idx])
 vac_local = np.argmin(np.linalg.norm(li_pos - centre, axis=1))
-vac_idx   = li_idx[vac_local]
+vac_idx = li_idx[vac_local]
 
 # Nearest-neighbour Li (hop destination)
-nn      = sorted([(sc.get_distance(vac_idx, j, mic=True), j)
-                  for j in li_idx if j != vac_idx])
+nn = sorted(
+    [(sc.get_distance(vac_idx, j, mic=True), j) for j in li_idx if j != vac_idx]
+)
 hop_idx = nn[0][1]
-print(f"  Hop distance: {nn[0][0]:.4f} Å  (target: ~{a_rel/2:.4f})")
+print(f"  Hop distance: {nn[0][0]:.4f} Å  (target: ~{a_rel / 2:.4f})")
 
 # Save vacancy position before deletion
 vac_pos = sc.positions[vac_idx].copy()
@@ -118,50 +124,54 @@ if dE > 10:
 print("\nStep 3: Running CI-NEB (7 images, IDPP, MACE-MP-0)...")
 
 config = NEBRunConfig(
-    n_images      = 7,
-    interpolation = "idpp",
-    k             = 0.5,
-    climb         = True,
-    climb_delay   = 100,
-    n_workers     = 1,
-    fmax          = 0.05,
-    max_steps     = 500,
-    verbose       = True,
+    n_images=7,
+    interpolation="idpp",
+    k=0.5,
+    climb=True,
+    climb_delay=100,
+    n_workers=1,
+    fmax=0.05,
+    max_steps=500,
+    verbose=True,
 )
 
 result = run_neb_calculation(
-    initial            = init,
-    final              = final,
-    calculator_factory = lambda: mace_mp(
+    initial=init,
+    final=final,
+    calculator_factory=lambda: mace_mp(
         model="small", dispersion=False, default_dtype="float64"
     ),
-    config             = config,
+    config=config,
 )
 
 # ── Results ───────────────────────────────────────────────────────────────────
 
 energies = [img.get_potential_energy() for img in result.neb.images]
-e0       = energies[0]
+e0 = energies[0]
 
 print("\n=== RESULTS ===")
 print(f"Converged      : {result.converged}")
-print(f"Forward barrier: {result.barrier*1000:.1f} meV  ({result.barrier:.4f} eV)")
-print(f"Reverse barrier: {result.reverse_barrier*1000:.1f} meV")
-print(f"Reaction energy: {result.reaction_energy*1000:.2f} meV  (target: ~0)")
-print(f"Reference DFT  : {REF_BARRIER*1000:.0f} meV  "
-      f"(range: {REF_RANGE[0]*1000:.0f}–{REF_RANGE[1]*1000:.0f} meV)")
-print(f"Error          : {abs(result.barrier - REF_BARRIER)/REF_BARRIER*100:.1f}%")
+print(f"Forward barrier: {result.barrier * 1000:.1f} meV  ({result.barrier:.4f} eV)")
+print(f"Reverse barrier: {result.reverse_barrier * 1000:.1f} meV")
+print(f"Reaction energy: {result.reaction_energy * 1000:.2f} meV  (target: ~0)")
+print(
+    f"Reference DFT  : {REF_BARRIER * 1000:.0f} meV  "
+    f"(range: {REF_RANGE[0] * 1000:.0f}–{REF_RANGE[1] * 1000:.0f} meV)"
+)
+print(f"Error          : {abs(result.barrier - REF_BARRIER) / REF_BARRIER * 100:.1f}%")
 
 print("\nImage energies (relative to initial):")
 for i, e in enumerate(energies):
     marker = " <- TS" if e == max(energies) else ""
-    print(f"  [{i}] {(e - e0)*1000:+8.1f} meV{marker}")
+    print(f"  [{i}] {(e - e0) * 1000:+8.1f} meV{marker}")
 
 result.neb.plot("li2o_vacancy_profile.png")
 result.neb.save_csv("li2o_vacancy_profile.csv")
 result.neb.save_trajectory("li2o_vacancy_path.traj")
-print("\nSaved: li2o_vacancy_profile.png, li2o_vacancy_profile.csv, "
-      "li2o_vacancy_path.traj")
+print(
+    "\nSaved: li2o_vacancy_profile.png, li2o_vacancy_profile.csv, "
+    "li2o_vacancy_path.traj"
+)
 
 # ── Attribution note ──────────────────────────────────────────────────────────
 print("\nNote: MACE-MP-0 is well-trained on simple ionic oxides in Materials")

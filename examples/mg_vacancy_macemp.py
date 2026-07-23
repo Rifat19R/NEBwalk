@@ -21,8 +21,9 @@ from nebwalk import NEB, linear_interpolate
 
 
 def make_calc():
-    return mace_mp(model="small", dispersion=False,
-                   default_dtype="float32", device="cpu")
+    return mace_mp(
+        model="small", dispersion=False, default_dtype="float32", device="cpu"
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -30,12 +31,12 @@ def make_calc():
 # ---------------------------------------------------------------------------
 
 mg_bulk = bulk("Mg", "hcp", a=3.209, c=5.211)
-supercell = mg_bulk.repeat([3, 3, 2])              # 3x3x2 → 36 atoms
+supercell = mg_bulk.repeat([3, 3, 2])  # 3x3x2 → 36 atoms
 
 vacancy_index = 0
 vacancy_pos = supercell.positions[vacancy_index].copy()
-atom0_z = vacancy_pos[2]                           # z-coordinate of vacancy layer
-del supercell[vacancy_index]                       # 35 atoms remain
+atom0_z = vacancy_pos[2]  # z-coordinate of vacancy layer
+del supercell[vacancy_index]  # 35 atoms remain
 
 # ---------------------------------------------------------------------------
 # 2. Find nearest basal-plane neighbour
@@ -63,12 +64,14 @@ final.positions[nn_index] = vacancy_pos
 final.calc = make_calc()
 
 BFGS(initial, logfile=None).run(fmax=0.02)
-BFGS(final,   logfile=None).run(fmax=0.02)
+BFGS(final, logfile=None).run(fmax=0.02)
 
 print(f"\nInitial energy : {initial.get_potential_energy():.4f} eV")
 print(f"Final energy   : {final.get_potential_energy():.4f} eV")
-print(f"ΔE             : "
-      f"{final.get_potential_energy() - initial.get_potential_energy():.5f} eV")
+print(
+    f"ΔE             : "
+    f"{final.get_potential_energy() - initial.get_potential_energy():.5f} eV"
+)
 
 # ---------------------------------------------------------------------------
 # 4. Build NEB path
@@ -96,7 +99,9 @@ print(f"Forward barrier: {barrier:.4f} eV")
 print(f"Reference (DFT): ~{ref} eV  (basal plane, DFT-PBE)")
 print(f"Error          : {abs(barrier - ref) / ref * 100:.1f}%")
 
-neb.plot("mg_vacancy_macemp_profile.png",
-         title="Mg vacancy migration in HCP Mg [MACE-MP-0, CI-NEB]")
+neb.plot(
+    "mg_vacancy_macemp_profile.png",
+    title="Mg vacancy migration in HCP Mg [MACE-MP-0, CI-NEB]",
+)
 neb.save_csv("mg_vacancy_macemp_profile.csv")
 neb.save_trajectory("mg_vacancy_macemp.traj")

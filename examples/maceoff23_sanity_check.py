@@ -9,9 +9,14 @@ from __future__ import annotations
 
 import numpy as np
 from ase import Atoms
+from organic_disagreement_common import (
+    EGRET_MODEL,
+    ethane,
+    make_egret,
+    make_mace_off23,
+)
 
 from nebwalk import idpp_interpolate
-from organic_disagreement_common import EGRET_MODEL, ethane, make_egret, make_mace_off23
 
 N_IMAGES = 7
 

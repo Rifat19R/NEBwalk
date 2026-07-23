@@ -42,14 +42,14 @@ warnings.filterwarnings("ignore")
 # ---------------------------------------------------------------------------
 # Configuration
 # ---------------------------------------------------------------------------
-MODEL  = "small"    # "medium" for higher accuracy (~20 MB extra download)
+MODEL = "small"  # "medium" for higher accuracy (~20 MB extra download)
 DEVICE = "cpu"
-DTYPE  = "float64"  # mandatory for geometry optimisation with MACE-MP-0
+DTYPE = "float64"  # mandatory for geometry optimisation with MACE-MP-0
 
-N_IMAGES   = 5
-K_SPRING   = 0.10   # eV/Å²
-FMAX_RELAX = 0.01   # eV/Å
-FMAX_NEB   = 0.05   # eV/Å
+N_IMAGES = 5
+K_SPRING = 0.10  # eV/Å²
+FMAX_RELAX = 0.01  # eV/Å
+FMAX_NEB = 0.05  # eV/Å
 
 print("System          : Al vacancy diffusion in bulk FCC Al")
 print(f"MACE-MP-0 model : {MODEL}")
@@ -75,15 +75,17 @@ def make_calc():
 # After del[0]: the 31-atom system has atom 0 (formerly atom 1) as the
 # jumping atom and an implicit vacancy at [0, 0, 0].
 # ---------------------------------------------------------------------------
-al_super = bulk('Al', 'fcc', a=4.05, cubic=True).repeat([2, 2, 2])  # 32 atoms
-vac_pos  = al_super.positions[0].copy()   # [0.000, 0.000, 0.000]
-jump_pos = al_super.positions[1].copy()   # [2.025, 2.025, 0.000]
+al_super = bulk("Al", "fcc", a=4.05, cubic=True).repeat([2, 2, 2])  # 32 atoms
+vac_pos = al_super.positions[0].copy()  # [0.000, 0.000, 0.000]
+jump_pos = al_super.positions[1].copy()  # [2.025, 2.025, 0.000]
 
 print(f"Cell            : {al_super.cell[0, 0]:.3f} Å (cubic)")
 print(f"Vacancy site    : {vac_pos}")
 print(f"Jumping atom    : {jump_pos}")
-print(f"Jump distance   : {np.linalg.norm(jump_pos - vac_pos):.3f} Å  "
-      f"(= a/√2, FCC nearest-neighbour)\n")
+print(
+    f"Jump distance   : {np.linalg.norm(jump_pos - vac_pos):.3f} Å  "
+    f"(= a/√2, FCC nearest-neighbour)\n"
+)
 
 # Create 31-atom base system (vacancy at former site 0)
 al_31 = al_super.copy()
@@ -101,7 +103,7 @@ print(f"  E_initial = {E0:.4f} eV")
 
 print("Relaxing final state    (jumping atom at [0,0,0], vacancy at NN site) ...")
 final = al_31.copy()
-final.positions[0] = vac_pos   # move jumping atom into the vacancy
+final.positions[0] = vac_pos  # move jumping atom into the vacancy
 final.calc = make_calc()
 BFGS(final, logfile=None).run(fmax=FMAX_RELAX)
 E1 = final.get_potential_energy()
@@ -129,8 +131,10 @@ print("Experimental       : ~0.60–0.68 eV")
 # ---------------------------------------------------------------------------
 # Output
 # ---------------------------------------------------------------------------
-neb.plot("al_vacancy_macemp_profile.png",
-         title="Al vacancy diffusion in FCC Al [MACE-MP-0, CI-NEB]")
+neb.plot(
+    "al_vacancy_macemp_profile.png",
+    title="Al vacancy diffusion in FCC Al [MACE-MP-0, CI-NEB]",
+)
 neb.save_csv("al_vacancy_macemp_profile.csv")
 neb.save_trajectory("al_vacancy_macemp.traj")
 print("\nDone.  View trajectory:  ase gui al_vacancy_macemp.traj")

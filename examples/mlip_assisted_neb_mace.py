@@ -19,7 +19,7 @@ def make_mace_calc():
         from mace.calculators import mace_mp
     except ImportError as exc:
         raise ImportError(
-            'MACE is not installed. Install optional support with: '
+            "MACE is not installed. Install optional support with: "
             'pip install "nebwalk[mace]"'
         ) from exc
 

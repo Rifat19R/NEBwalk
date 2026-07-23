@@ -1,0 +1,11 @@
+{
+  "template": "Copy mace_qe_campaign.json and replace this object after converging the physical model.",
+  "system": "MXene surface diffusion",
+  "required_review": [
+    "surface termination and adsorption site",
+    "slab thickness, vacuum, fixed layers, and dipole treatment",
+    "spin state, k-points, cutoffs, pseudopotentials, and smearing",
+    "MLIP chemical-domain suitability",
+    "full final QE NEB for reported DFT barriers"
+  ]
+}

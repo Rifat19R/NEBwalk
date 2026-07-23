@@ -24,13 +24,13 @@ from nebwalk import NEB, idpp_interpolate
 MODEL = "EGRET_1T.model"
 N_IMAGES = 7
 N_REPEATS = 10
-N_WARMUP  = 3
+N_WARMUP = 3
 
 
 def make_images():
     """Build fresh images with independent calculator instances."""
     start = molecule("C2H6")
-    end   = molecule("C2H6")
+    end = molecule("C2H6")
     end.rotate(60, "z", center=end.positions[0])
     images = idpp_interpolate(start, end, N_IMAGES)
     # Each image gets its own calculator — required for correctness
@@ -67,9 +67,9 @@ print(f"  Mean: {seq_ms:.1f} ± {seq_std:.1f} ms")
 print("\n=== Parallel (n_workers=7, default threads) ===")
 par_ms, par_std = bench(n_workers=N_IMAGES)
 print(f"  Mean: {par_ms:.1f} ± {par_std:.1f} ms")
-print(f"  Speedup: {seq_ms/par_ms:.2f}×")
+print(f"  Speedup: {seq_ms / par_ms:.2f}×")
 
 print("\n=== Parallel (n_workers=7, 1 thread/worker) ===")
 par1_ms, par1_std = bench(n_workers=N_IMAGES, n_threads=1)
 print(f"  Mean: {par1_ms:.1f} ± {par1_std:.1f} ms")
-print(f"  Speedup: {seq_ms/par1_ms:.2f}×")
+print(f"  Speedup: {seq_ms / par1_ms:.2f}×")

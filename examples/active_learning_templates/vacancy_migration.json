@@ -1,0 +1,11 @@
+{
+  "template": "Copy mace_qe_campaign.json and replace this object after converging the physical model.",
+  "system": "bulk vacancy migration",
+  "required_review": [
+    "supercell finite-size convergence",
+    "charge and spin state",
+    "k-points, cutoffs, pseudopotentials, and smearing",
+    "symmetry-equivalent endpoints",
+    "full final QE NEB for reported DFT barriers"
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "active_learning": {
+    "campaign_id": "replace-me",
+    "campaign_dir": "campaign-output",
+    "fine_tuning": {
+      "name": "nebwalk-mace",
+      "foundation_model": "/absolute/path/to/foundation.model",
+      "protocol": "naive",
+      "device": "cpu",
+      "default_dtype": "float64"
+    },
+    "candidate_selection": {
+      "n_select": 5,
+      "include_peak": true,
+      "peak_neighbors": 1,
+      "diversity": true
+    },
+    "stopping": {
+      "maximum_iterations": 5,
+      "maximum_force_uncertainty": 0.1,
+      "maximum_committee_barrier_std": 0.03,
+      "consecutive_successful_iterations": 2
+    }
+  },
+  "path_runner": {
+    "foundation_model": "/absolute/path/to/foundation.model",
+    "device": "cpu",
+    "default_dtype": "float64",
+    "neb_config": {
+      "n_images": 7,
+      "interpolation": "idpp",
+      "climb": true,
+      "fmax": 0.05
+    }
+  },
+  "mace_backend": {
+    "executable": "mace_run_train",
+    "evaluation_executable": "mace_eval_configs"
+  },
+  "qe": {
+    "pseudo_dir": "/absolute/path/to/pseudos",
+    "pseudopotentials": {"REPLACE_ELEMENT": "REPLACE.UPF"},
+    "command": "/absolute/path/to/pw.x",
+    "params": {"ecutwfc": 60.0, "ecutrho": 480.0, "kpts": [1, 1, 1]}
+  },
+  "paths": [
+    {"path_id": "path-001", "initial": "initial.xyz", "final": "final.xyz"}
+  ]
+}

@@ -64,16 +64,16 @@ class MorsePairH3:
         _, dEdr_AB = _morse_pair(r_AB)
         _, dEdr_BC = _morse_pair(r_BC)
 
-        r_hat_AB = r_vec_AB / r_AB   # unit vector HA→HB
-        r_hat_BC = r_vec_BC / r_BC   # unit vector HB→HC
+        r_hat_AB = r_vec_AB / r_AB  # unit vector HA→HB
+        r_hat_BC = r_vec_BC / r_BC  # unit vector HB→HC
 
         f = np.zeros((3, 3))
         # F_A = -dV/dr_A = -dV_AB/dr * (dr/dr_A) = +dEdr * r_hat_AB
         # (positive dEdr at r > r0 → force on HA toward HB = attractive)
         f[0] += dEdr_AB * r_hat_AB
-        f[1] -= dEdr_AB * r_hat_AB   # reaction on HB from AB
-        f[1] += dEdr_BC * r_hat_BC   # HB pulled toward HC
-        f[2] -= dEdr_BC * r_hat_BC   # reaction on HC from BC
+        f[1] -= dEdr_AB * r_hat_AB  # reaction on HB from AB
+        f[1] += dEdr_BC * r_hat_BC  # HB pulled toward HC
+        f[2] -= dEdr_BC * r_hat_BC  # reaction on HC from BC
         return f
 
 
@@ -82,15 +82,18 @@ class MorsePairH3:
 # ---------------------------------------------------------------------------
 
 # Start: HA-HB bonded at r0 = 0.74 Å; HC separated at 2.50 Å from HA
-start = Atoms("H3", positions=[[0.00, 0, 0],
-                                [0.74, 0, 0],
-                                [2.50, 0, 0]])
+start = Atoms("H3", positions=[[0.00, 0, 0], [0.74, 0, 0], [2.50, 0, 0]])
 start.calc = MorsePairH3()
 
 # End: HB-HC bonded; HA now separated
-end = Atoms("H3", positions=[[0.00, 0, 0],
-                              [1.76, 0, 0],   # 2.50 - 0.74
-                              [2.50, 0, 0]])
+end = Atoms(
+    "H3",
+    positions=[
+        [0.00, 0, 0],
+        [1.76, 0, 0],  # 2.50 - 0.74
+        [2.50, 0, 0],
+    ],
+)
 end.calc = MorsePairH3()
 
 print(f"Start energy : {start.get_potential_energy():.4f} eV")

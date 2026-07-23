@@ -28,18 +28,18 @@ from nebwalk import NEB, idpp_interpolate
 # Configuration
 # ---------------------------------------------------------------------------
 MODEL_PATH = "EGRET_1T.model"
-DEVICE     = "cuda" if torch.cuda.is_available() else "cpu"
-N_IMAGES   = 7        # intermediate images
-K_MAX      = 0.10     # eV/Å² — spring constant at saddle point
-K_MIN      = 0.033    # eV/Å² — spring constant far from saddle (k/3)
+DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+N_IMAGES = 7  # intermediate images
+K_MAX = 0.10  # eV/Å² — spring constant at saddle point
+K_MIN = 0.033  # eV/Å² — spring constant far from saddle (k/3)
 
 # ---------------------------------------------------------------------------
 # Geometry parameters (D3d ethane)
 # ---------------------------------------------------------------------------
-CC   = 0.770
+CC = 0.770
 r_CH = 1.090
-_dz  = abs(r_CH * np.cos(np.radians(111.2)))
-_rl  = r_CH * np.sin(np.radians(111.2))
+_dz = abs(r_CH * np.cos(np.radians(111.2)))
+_rl = r_CH * np.sin(np.radians(111.2))
 CELL = np.diag([20.0, 20.0, 20.0])
 
 
@@ -113,10 +113,10 @@ for img in images:
 neb = NEB(
     images,
     k=K_MAX,
-    k_min=K_MIN,           # variable springs: concentrate images near TS
+    k_min=K_MIN,  # variable springs: concentrate images near TS
     climb=True,
     climb_delay=60,
-    n_workers=N_IMAGES,    # one thread per image — Egret-1t releases the GIL
+    n_workers=N_IMAGES,  # one thread per image — Egret-1t releases the GIL
 )
 converged = neb.optimize(fmax=0.05, max_steps=400)
 
@@ -128,8 +128,9 @@ print(f"k_springs       : {neb.get_spring_constants().round(4)}")
 # ---------------------------------------------------------------------------
 # Output
 # ---------------------------------------------------------------------------
-neb.plot("ethane_egret_profile.png",
-         title="Ethane C–C torsion [Egret-1t, CI-NEB, IDPP]")
+neb.plot(
+    "ethane_egret_profile.png", title="Ethane C–C torsion [Egret-1t, CI-NEB, IDPP]"
+)
 neb.save_csv("ethane_egret_profile.csv")
 neb.save_trajectory("ethane_egret.traj")
 

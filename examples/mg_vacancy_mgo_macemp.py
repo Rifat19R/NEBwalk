@@ -34,8 +34,8 @@ from mace.calculators import mace_mp
 from nebwalk import NEBRunConfig, run_neb_calculation
 
 # ── Reference ─────────────────────────────────────────────────────────────────
-REF_BARRIER = 2.20   # eV, DFT-PBE central estimate
-REF_RANGE   = (1.90, 2.50)
+REF_BARRIER = 2.20  # eV, DFT-PBE central estimate
+REF_RANGE = (1.90, 2.50)
 
 # ── Step 1: Build and relax MgO primitive cell ────────────────────────────────
 
@@ -46,10 +46,14 @@ a = 4.211  # Å, experimental
 prim = Atoms(
     symbols=["Mg", "Mg", "Mg", "Mg", "O", "O", "O", "O"],
     scaled_positions=[
-        [0.0, 0.0, 0.0], [0.5, 0.5, 0.0],
-        [0.5, 0.0, 0.5], [0.0, 0.5, 0.5],
-        [0.5, 0.5, 0.5], [0.0, 0.0, 0.5],
-        [0.0, 0.5, 0.0], [0.5, 0.0, 0.0],
+        [0.0, 0.0, 0.0],
+        [0.5, 0.5, 0.0],
+        [0.5, 0.0, 0.5],
+        [0.0, 0.5, 0.5],
+        [0.5, 0.5, 0.5],
+        [0.0, 0.0, 0.5],
+        [0.0, 0.5, 0.0],
+        [0.5, 0.0, 0.0],
     ],
     cell=[[a, 0, 0], [0, a, 0], [0, 0, a]],
     pbc=True,
@@ -59,11 +63,10 @@ calc = mace_mp(model="small", dispersion=False, default_dtype="float64")
 prim.calc = calc
 FIRE(prim, logfile=None).run(fmax=0.01)
 
-a_rel  = prim.cell.lengths()[0]
+a_rel = prim.cell.lengths()[0]
 mg_idx = [i for i, s in enumerate(prim.get_chemical_symbols()) if s == "Mg"]
-o_idx  = [i for i, s in enumerate(prim.get_chemical_symbols()) if s == "O"]
-mg_o   = sorted([prim.get_distance(i, j, mic=True)
-                 for i in mg_idx for j in o_idx])
+o_idx = [i for i, s in enumerate(prim.get_chemical_symbols()) if s == "O"]
+mg_o = sorted([prim.get_distance(i, j, mic=True) for i in mg_idx for j in o_idx])
 
 print(f"  Relaxed a  = {a_rel:.4f} Å  (target: 4.18–4.25)")
 print(f"  Mg-O dist  = {mg_o[0]:.4f} Å  (target: ~2.11)")
@@ -74,19 +77,20 @@ print("\nStep 2: Building supercell and Mg vacancy endpoints...")
 sc = make_supercell(prim, [[2, 0, 0], [0, 2, 0], [0, 0, 2]])
 print(f"  Supercell: {len(sc)} atoms  (32 Mg + 32 O)")
 
-syms   = sc.get_chemical_symbols()
-pos    = sc.get_positions()
+syms = sc.get_chemical_symbols()
+pos = sc.get_positions()
 mg_idx = [i for i, s in enumerate(syms) if s == "Mg"]
 
 # Vacancy: Mg nearest to supercell centre
-centre    = sc.cell[:].sum(axis=0) / 2
-mg_pos    = np.array([pos[i] for i in mg_idx])
+centre = sc.cell[:].sum(axis=0) / 2
+mg_pos = np.array([pos[i] for i in mg_idx])
 vac_local = np.argmin(np.linalg.norm(mg_pos - centre, axis=1))
-vac_idx   = mg_idx[vac_local]
+vac_idx = mg_idx[vac_local]
 
 # Nearest-neighbour Mg (hop destination; = a/√2 ≈ 2.98 Å in rock salt)
-nn      = sorted([(sc.get_distance(vac_idx, j, mic=True), j)
-                  for j in mg_idx if j != vac_idx])
+nn = sorted(
+    [(sc.get_distance(vac_idx, j, mic=True), j) for j in mg_idx if j != vac_idx]
+)
 hop_idx = nn[0][1]
 print(f"  Hop distance: {nn[0][0]:.4f} Å  (target: ~2.98 = a/√2)")
 
@@ -118,9 +122,7 @@ e_final = final.get_potential_energy()
 print(f"    E = {e_final:.6f} eV   atoms = {len(final)}")
 
 dE = abs(e_final - e_init) * 1000
-d_hop = np.linalg.norm(
-    final.positions[hop_in_init] - init.positions[hop_in_init]
-)
+d_hop = np.linalg.norm(final.positions[hop_in_init] - init.positions[hop_in_init])
 print(f"\n  Endpoint ΔE    = {dE:.2f} meV  (target: < 5 meV — symmetry check)")
 print(f"  Mg displacement = {d_hop:.4f} Å   (target: ~2.98)")
 if dE > 10:
@@ -134,50 +136,54 @@ if dE > 10:
 print("\nStep 3: Running CI-NEB (7 images, IDPP, MACE-MP-0)...")
 
 config = NEBRunConfig(
-    n_images      = 7,
-    interpolation = "idpp",
-    k             = 0.5,
-    climb         = True,
-    climb_delay   = 100,
-    n_workers     = 1,
-    fmax          = 0.05,
-    max_steps     = 500,
-    verbose       = True,
+    n_images=7,
+    interpolation="idpp",
+    k=0.5,
+    climb=True,
+    climb_delay=100,
+    n_workers=1,
+    fmax=0.05,
+    max_steps=500,
+    verbose=True,
 )
 
 result = run_neb_calculation(
-    initial            = init,
-    final              = final,
-    calculator_factory = lambda: mace_mp(
+    initial=init,
+    final=final,
+    calculator_factory=lambda: mace_mp(
         model="small", dispersion=False, default_dtype="float64"
     ),
-    config             = config,
+    config=config,
 )
 
 # ── Results ───────────────────────────────────────────────────────────────────
 
 energies = [img.get_potential_energy() for img in result.neb.images]
-e0       = energies[0]
+e0 = energies[0]
 
 print("\n=== RESULTS ===")
 print(f"Converged      : {result.converged}")
-print(f"Forward barrier: {result.barrier*1000:.1f} meV  ({result.barrier:.4f} eV)")
-print(f"Reverse barrier: {result.reverse_barrier*1000:.1f} meV")
-print(f"Reaction energy: {result.reaction_energy*1000:.2f} meV  (target: ~0)")
-print(f"Reference DFT  : {REF_BARRIER*1000:.0f} meV  "
-      f"(range: {REF_RANGE[0]*1000:.0f}–{REF_RANGE[1]*1000:.0f} meV)")
-print(f"Error          : {abs(result.barrier - REF_BARRIER)/REF_BARRIER*100:.1f}%")
+print(f"Forward barrier: {result.barrier * 1000:.1f} meV  ({result.barrier:.4f} eV)")
+print(f"Reverse barrier: {result.reverse_barrier * 1000:.1f} meV")
+print(f"Reaction energy: {result.reaction_energy * 1000:.2f} meV  (target: ~0)")
+print(
+    f"Reference DFT  : {REF_BARRIER * 1000:.0f} meV  "
+    f"(range: {REF_RANGE[0] * 1000:.0f}–{REF_RANGE[1] * 1000:.0f} meV)"
+)
+print(f"Error          : {abs(result.barrier - REF_BARRIER) / REF_BARRIER * 100:.1f}%")
 
 print("\nImage energies (relative to initial):")
 for i, e in enumerate(energies):
     marker = " <- TS" if e == max(energies) else ""
-    print(f"  [{i}] {(e - e0)*1000:+8.1f} meV{marker}")
+    print(f"  [{i}] {(e - e0) * 1000:+8.1f} meV{marker}")
 
 result.neb.plot("mg_vacancy_mgo_macemp_profile.png")
 result.neb.save_csv("mg_vacancy_mgo_macemp_profile.csv")
 result.neb.save_trajectory("mg_vacancy_mgo_macemp_path.traj")
-print("\nSaved: mg_vacancy_mgo_macemp_profile.png, mg_vacancy_mgo_macemp_profile.csv, "
-      "mg_vacancy_mgo_macemp_path.traj")
+print(
+    "\nSaved: mg_vacancy_mgo_macemp_profile.png, mg_vacancy_mgo_macemp_profile.csv, "
+    "mg_vacancy_mgo_macemp_path.traj"
+)
 
 print("\nNote: Steep rise near TS is physical — Mg²⁺ passing through O²⁻ gate.")
 print("MACE-MP-0 is well-trained on simple ionic oxides in Materials Project.")

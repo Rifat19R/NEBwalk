@@ -26,14 +26,15 @@ from nebwalk import NEB, linear_interpolate
 # ---------------------------------------------------------------------------
 # Configuration
 # ---------------------------------------------------------------------------
-N_IMAGES = 5       # intermediate images
-K_MAX    = 0.10    # eV/Å² — spring constant at saddle point
-K_MIN    = 0.033   # eV/Å² — spring constant far from saddle (k/3)
+N_IMAGES = 5  # intermediate images
+K_MAX = 0.10  # eV/Å² — spring constant at saddle point
+K_MIN = 0.033  # eV/Å² — spring constant far from saddle (k/3)
 
 
 # ---------------------------------------------------------------------------
 # Build slab and relax endpoints
 # ---------------------------------------------------------------------------
+
 
 def make_slab():
     """Al(100) slab, 2×2×3, with Al adatom at hollow site."""
@@ -73,7 +74,7 @@ for img in images:
 neb = NEB(
     images,
     k=K_MAX,
-    k_min=K_MIN,      # variable springs: concentrate images near TS
+    k_min=K_MIN,  # variable springs: concentrate images near TS
     climb=True,
     climb_delay=50,
 )
@@ -86,8 +87,9 @@ print(f"k_springs       : {neb.get_spring_constants().round(4)}")
 # ---------------------------------------------------------------------------
 # Output
 # ---------------------------------------------------------------------------
-neb.plot("al_diffusion_profile.png",
-         title="Al adatom diffusion on Al(100) [EMT, CI-NEB]")
+neb.plot(
+    "al_diffusion_profile.png", title="Al adatom diffusion on Al(100) [EMT, CI-NEB]"
+)
 neb.save_csv("al_diffusion_profile.csv")
 neb.save_trajectory("al_diffusion.traj")
 

@@ -29,14 +29,14 @@ print("Model loaded OK\n")
 atoms = Atoms(
     "C2H6",
     positions=[
-        [ 0.000,  0.000, -0.770],  # C1
-        [ 0.000,  0.000,  0.770],  # C2
-        [ 1.016,  0.000, -1.164],  # H1 (C1 methyl)
-        [-0.508,  0.880, -1.164],  # H2
+        [0.000, 0.000, -0.770],  # C1
+        [0.000, 0.000, 0.770],  # C2
+        [1.016, 0.000, -1.164],  # H1 (C1 methyl)
+        [-0.508, 0.880, -1.164],  # H2
         [-0.508, -0.880, -1.164],  # H3
-        [ 0.508,  0.880,  1.164],  # H4 (C2 methyl, staggered)
-        [-1.016,  0.000,  1.164],  # H5
-        [ 0.508, -0.880,  1.164],  # H6
+        [0.508, 0.880, 1.164],  # H4 (C2 methyl, staggered)
+        [-1.016, 0.000, 1.164],  # H5
+        [0.508, -0.880, 1.164],  # H6
     ],
 )
 atoms.calc = calc
@@ -47,8 +47,7 @@ F = atoms.get_forces()
 print(f"Energy       : {E:.4f} eV  (absolute; only differences matter for NEB)")
 print(f"Forces shape : {F.shape}  (should be (8, 3))")
 print(
-    f"Max |F|      : {np.max(np.abs(F)):.4f} eV/Å "
-    "(nonzero expected; approx geometry)"
+    f"Max |F|      : {np.max(np.abs(F)):.4f} eV/Å (nonzero expected; approx geometry)"
 )
 
 if F.shape == (8, 3):
