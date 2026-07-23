@@ -1,0 +1,35 @@
+name: Bug report
+description: Report reproducible incorrect behavior in nebwalk
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Please remove proprietary structures, credentials, and large outputs.
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What happened, and what did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: Include the smallest script and structures needed to reproduce it.
+      render: python
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: nebwalk, Python, ASE, NumPy, calculator, OS, CPU/GPU, and QE versions.
+    validations:
+      required: true
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Diagnostics
+      description: Traceback, convergence history, and relevant calculator output.

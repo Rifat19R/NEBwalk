@@ -9,6 +9,41 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [Unreleased]
 
 ### Added
+- Canonical extended-XYZ reference datasets with strict energy/force and
+  provenance validation, deterministic structure and dataset checksums,
+  conflicting-label detection, atomic manifests, conflict-aware merge and
+  deduplication, and leakage-free path-grouped train/validation/test splits.
+- Backend-neutral fine-tuning contracts, typed naive/LoRA/multihead-replay
+  configuration, safe official MACE CLI command generation and execution,
+  environment/capability checks, complete training provenance, explicit
+  evaluation failures, energy/force/pathway metrics, and a checksummed local
+  model registry that selects active models using validation metrics.
+- Generic ASE committee calculator/evaluator with independent member
+  calculators, partial-failure handling, mean predictions, energy/force and
+  relative-energy disagreement proxies, per-image diagnostics, and barrier
+  spread; plus mandatory-and-ranked candidate selection with peak awareness,
+  failure/high-force inclusion, path diversity, and explicit fallback records.
+- Resumable `QEReferenceLabeler` built on the existing QE factory and recovery
+  machinery, with isolated raw work directories, canonical dataset keys,
+  settings hashes, recovery/geometry-change provenance, atomic manifests,
+  partial-failure retention, and checksum-verified reuse of completed labels.
+- Atomic, lock-protected `ActiveLearningCampaign` state machine covering
+  bootstrap labeling, leakage-free dataset versioning, committee retraining,
+  validation-based model activation, iterative NEB selection, explicit
+  stopping decisions, failure tracebacks and stage resume, immutable iteration
+  artifacts, and separate sparse/full-QE final validation semantics.
+- `nebwalk` CLI commands for dataset validation/splitting, MACE environment
+  checks/fine-tuning/evaluation, and campaign initialization, execution,
+  status, resume, and final validation; deterministic JSON, Markdown, and CSV
+  reports; a dependency-free campaign dry run; and editable campaign templates.
+- Production quality gates for Ruff, mypy, branch coverage, package validation,
+  and strict documentation builds across Python 3.9-3.12.
+- MkDocs user guide and generated API reference, contribution and conduct
+  policies, correct security policy, citation metadata, issue forms, PR
+  checklist, CODEOWNERS, and Dependabot configuration.
+- Early validation for invalid `NEBRunConfig` values.
+- Independent force-regression tests against ASE's improved-tangent NEB for
+  standard and climbing-image paths.
 - Five organic Egret-1t/MACE-OFF23 disagreement-selection example scripts:
   ethane, propane, methanol, ethanol, and dimethyl ether.
 - Organic disagreement result summaries with literature-scale comparison notes
@@ -184,8 +219,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [0.6.0] — 2026-06-10
 
 ### Added
-- **Geodesic interpolation** (`geodesic_interpolate`) — mass-weighted Cartesian
-  geodesic path; superior to IDPP for large conformational changes.
+- **Approximate geodesic-style interpolation** (`geodesic_interpolate`) — IDPP
+  interpolation with overlap repulsion, not the mass-weighted internal-coordinate
+  geodesic method; a heuristic alternative to plain IDPP for large conformational
+  changes.
 - **Quantum ESPRESSO interface** (`nebwalk.qe`): `QEParams`, `make_qe_factory`,
   `validate_qe_setup` — generate and validate QE PWSCF input files for
   DFT-level NEB workflows.

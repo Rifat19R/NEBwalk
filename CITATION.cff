@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+message: "If you use nebwalk, please cite this software and the NEB methods it implements."
+title: "nebwalk: transparent ASE-compatible nudged elastic band workflows"
+type: software
+authors:
+  - family-names: Khandaker
+    given-names: Md. Rifat
+repository-code: "https://github.com/Rifat19R/nebwalk"
+url: "https://github.com/Rifat19R/nebwalk"
+license: MIT
+version: 0.10.0
+date-released: 2026-06-18

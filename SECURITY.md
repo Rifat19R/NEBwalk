@@ -1,21 +1,24 @@
-# Security Policy
+# Security policy
 
-## Supported Versions
+## Supported versions
 
-Use this section to tell people about which versions of your project are
-currently being supported with security updates.
+Security fixes are applied to the latest release and the `main` branch. Older
+minor releases are not maintained unless a backport is announced explicitly.
 
-| Version | Supported          |
-| ------- | ------------------ |
-| 5.1.x   | :white_check_mark: |
-| 5.0.x   | :x:                |
-| 4.0.x   | :white_check_mark: |
-| < 4.0   | :x:                |
+| Version | Supported |
+| --- | --- |
+| 0.10.x | Yes |
+| < 0.10 | No |
 
-## Reporting a Vulnerability
+## Reporting a vulnerability
 
-Use this section to tell people how to report a vulnerability.
+Do not open a public issue for a suspected vulnerability. Use GitHub's private
+security-advisory reporting for `Rifat19R/nebwalk`. Include affected versions,
+a minimal reproduction, impact, and any proposed mitigation. Expect an initial
+response within seven days. Confirmed reports will receive a remediation plan;
+coordinated disclosure and reporter credit are offered when appropriate.
 
-Tell them where to go, how often they can expect to get an update on a
-reported vulnerability, what to expect if the vulnerability is accepted or
-declined, etc.
+Scientific disagreement, convergence failure, and inaccurate calculator output
+are normally correctness issues rather than security vulnerabilities and should
+use the bug-report template. Never attach proprietary structures, credentials,
+cluster configuration, or unrestricted pseudopotentials to reports.

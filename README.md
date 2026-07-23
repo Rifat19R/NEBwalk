@@ -4,6 +4,7 @@
 [![PyPI](https://img.shields.io/pypi/v/nebwalk.svg)](https://pypi.org/project/nebwalk/)
 [![Python](https://img.shields.io/badge/python-3.9%20%7C%203.10%20%7C%203.11%20%7C%203.12-blue)](https://pypi.org/project/nebwalk/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Docs](https://img.shields.io/badge/docs-MkDocs-blue.svg)](https://rifat19r.github.io/nebwalk/)
 
 **nebwalk** is a lightweight, transparent, ASE-compatible Nudged Elastic Band
 (NEB/CI-NEB) library for minimum-energy paths, transition-state barriers, and
@@ -17,6 +18,10 @@ pip install nebwalk
 ```
 
 Current source version: **v0.10.0**.
+
+Documentation: **[user guide and API reference](https://rifat19r.github.io/nebwalk/)**.
+For development and scientific-evidence requirements, see
+**[CONTRIBUTING.md](CONTRIBUTING.md)**.
 
 ---
 
@@ -73,6 +78,29 @@ In addition to the v0.6.x NEB/CI-NEB engine, v0.7.0 adds:
   systems.
 - Selected-image export as `.xyz`, `.traj`, and `.json`.
 - Clean handoff from MLIP/MACE NEB to DFT/QE refinement.
+
+### Closed-loop MACE + QE campaigns (source / Unreleased)
+
+The source tree also includes an auditable, resumable active-learning loop:
+canonical reference datasets, grouped splits, optional MACE fine-tuning,
+committee disagreement diagnostics, diverse candidate selection, resumable QE
+labeling, checksummed model registration, objective stopping, and final
+validation reports.
+
+```bash
+pip install -e ".[dev,docs,training]"
+nebwalk mlip check
+python examples/active_learning_dry_run.py
+nebwalk campaign init campaign.json
+nebwalk campaign run campaign.json
+```
+
+Start from
+[`examples/active_learning_templates/mace_qe_campaign.json`](examples/active_learning_templates/mace_qe_campaign.json)
+and read the [active-learning guide](docs/active_learning.md). MACE and QE are
+optional external tools; importing `nebwalk` does not import PyTorch or MACE.
+Committee disagreement is an uncertainty proxy, not calibrated uncertainty,
+and sparse QE checks are not a full DFT NEB.
 
 ---
 
@@ -585,11 +613,11 @@ reproducibility bundles, active-workflow helpers, and QE failed-image recovery.
 
 Short-term priorities:
 
-1. Keep PyPI, GitHub tags, and source metadata synchronized for v0.9.x releases.
-2. Add H/Cu(111) benchmark scripts, static output CSVs, and profile plots.
-3. Expand DFT-backed Quantum ESPRESSO benchmarks with small inputs and clear cost warnings.
-4. Add post-NEB transition-state refinement using a dimer method.
-5. Build a documentation site with theory, API usage, calculator setup, and benchmarks.
+1. Add independent regression comparisons against ASE NEB.
+2. Expand DFT-backed benchmarks with machine-readable provenance and convergence studies.
+3. Add post-NEB transition-state refinement and imaginary-mode validation.
+4. Add process-isolated multi-GPU image evaluation.
+5. Add adaptive image insertion and removal.
 
 Future active-learning roadmap:
 
