@@ -96,3 +96,27 @@ tests.yml
 # BCC Li — MACE-MP-0 domain failure, excluded from validated examples
 examples/li_vacancy_macemp.py
 examples/v8/
+
+# Active-learning vacancy pilot: raw/intermediate QE + NEB working data.
+# The curated, checksummed, schema-validated output lives in datasets/ --
+# these are local scratch inputs to examples/_finalize_datasets.py, not
+# meant to be committed (mirrors the QE-working-directory policy above).
+_pilot_*_vacancy_selected/
+_pilot_*_vacancy_dft_labels/
+_pilot_*_vacancy_dft_labels_qe_workdir/
+_fix_*_isolated_atom_qe_workdir/
+_pilot_*_isolated_atom_qe_workdir/
+_vacancy_training_set/
+
+# Ethane/Egret-1t pilot scratch -- abandoned as a fine-tuning target once
+# the DFT-reference-level mismatch was found (Egret-1t trained on
+# B97M-D3BJ/def2-TZVPPD, not QE/PBE); see _pilot_ethane_dft_labeling.py.
+_pilot_ethane_selected/
+_pilot_ethane_dft_labels/
+
+# Smoke-training validation (Al/Cu/Ag 1-epoch mace_run_train pipeline
+# check) -- explicitly a throwaway pipeline smoke test, not published
+# validation data. Kept local only.
+examples/_smoke_validate_al_cu_ag.py
+_smoke_al_cu_ag/
+mp_finetuning-smoke_*

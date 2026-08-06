@@ -1,0 +1,26 @@
+{
+  "metadata": {
+    "path_id": "fe_vacancy",
+    "stage": "mace_training_export"
+  },
+  "path": "fe_train.extxyz",
+  "schema": "nebwalk.dataset.v1",
+  "sha256": "890cb1ffe5706a417995a4a2c8d48c2da622344f58576654bcf6475a1fb59619",
+  "summary": {
+    "config_types": {
+      "Default": 4
+    },
+    "dft_settings_hashes": [
+      "7cd7be4368a1602dec7ae4ec5aef6f391a9ec12171066ee24a753b53ae43a078"
+    ],
+    "duplicate_count": 0,
+    "elements": [
+      "Fe"
+    ],
+    "n_atoms": 60,
+    "n_configurations": 4,
+    "path_ids": [
+      "fe_vacancy"
+    ]
+  }
+}

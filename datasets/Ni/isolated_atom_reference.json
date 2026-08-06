@@ -1,0 +1,42 @@
+{
+  "schema": "nebwalk.isolated_atom_reference.v1",
+  "symbol": "Ni",
+  "energy_eV": -4665.70187869546,
+  "forces_eV_A": [
+    [
+      0.0,
+      0.0,
+      0.0
+    ]
+  ],
+  "positions_A": [
+    [
+      0.0,
+      0.0,
+      0.0
+    ]
+  ],
+  "cell_A": [
+    [
+      10.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      10.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      10.0
+    ]
+  ],
+  "pbc": [
+    true,
+    true,
+    true
+  ],
+  "dft_settings_hash": "ec20338aa9594316f21a2d6654198dbbac24c6ab30b5ecf51f514e027947a13c"
+}

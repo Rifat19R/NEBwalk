@@ -1,0 +1,37 @@
+{
+  "material": "li",
+  "symbol": "Li",
+  "n_labeled": 4,
+  "n_failed": 0,
+  "qe_settings": {
+    "pseudopotential_file": "li_pbe_v1.4.uspp.F.UPF",
+    "pseudopotential_sha256": "02cc4b3810e28a43b570277840d9631ca24f634d922928200c047b72c0a86bf5",
+    "ecutwfc": 50.0,
+    "ecutrho": 400.0,
+    "kpts": [
+      2,
+      2,
+      2
+    ],
+    "occupations": "smearing",
+    "smearing": "marzari-vanderbilt",
+    "degauss": 0.02,
+    "nspin": 1,
+    "starting_magnetization": null,
+    "conv_thr": 1e-07,
+    "mixing_beta": 0.3
+  },
+  "finite_check_problems": [],
+  "cohesive_energy_eV_per_atom": -1.4500941201091848,
+  "cohesive_energy_flags": [],
+  "mace_loader_ok": true,
+  "mace_loader_n_configs": 4,
+  "mace_loader_config_types": [
+    "Default"
+  ],
+  "scf_converged_cleanly": true,
+  "scf_problems": [],
+  "nebwalk_dataset_ok": true,
+  "nebwalk_dataset_error": null,
+  "passed": true
+}

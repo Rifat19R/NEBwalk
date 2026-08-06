@@ -1,0 +1,26 @@
+{
+  "metadata": {
+    "path_id": "mo_vacancy",
+    "stage": "mace_training_export"
+  },
+  "path": "mo_train.extxyz",
+  "schema": "nebwalk.dataset.v1",
+  "sha256": "c32001e4d5c005f39e52d4222a12671e1141a3b285cd5e3b9a9f6d6b3214a6c5",
+  "summary": {
+    "config_types": {
+      "Default": 4
+    },
+    "dft_settings_hashes": [
+      "0e7b70ae6ed15e202d151597c20f95b897fd7ee9a570018990ec9fd2d3c51426"
+    ],
+    "duplicate_count": 0,
+    "elements": [
+      "Mo"
+    ],
+    "n_atoms": 60,
+    "n_configurations": 4,
+    "path_ids": [
+      "mo_vacancy"
+    ]
+  }
+}

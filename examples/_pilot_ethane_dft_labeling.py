@@ -14,10 +14,18 @@ from __future__ import annotations
 
 import os
 
-from organic_disagreement_common import ethane, run_organic_disagreement_example
+from ase import Atoms
+from ase.optimize import BFGS
+from organic_disagreement_common import (
+    ethane,
+    make_egret,
+    run_organic_disagreement_example,
+)
 
 from nebwalk.label import label_selected_images
 from nebwalk.qe import QEParams, make_qe_factory
+
+ENDPOINT_RELAX_FMAX = 0.05
 
 PSEUDO_DIR = "/mnt/d/Rifat_kh/SSSP_1.3.0_PBE_efficiency"
 PSEUDOPOTENTIALS = {
@@ -40,12 +48,32 @@ QE_PARAMS = QEParams(
 )
 
 
+def relax_endpoint(atoms: Atoms, fmax: float = ENDPOINT_RELAX_FMAX) -> Atoms:
+    """Relax a hand-built endpoint under Egret-1t before it enters the NEB.
+
+    ethane() builds idealized, non-equilibrium geometries from fixed bond
+    lengths/angles, and NEB never moves endpoint images (forces are zeroed
+    there by design). Without this step, DFT-vs-MLIP force comparisons at
+    the endpoints would measure "how wrong is this idealized geometry" for
+    both methods, not "how wrong is the MLIP" -- a confound, not a labeling
+    signal.
+    """
+    relaxed = atoms.copy()
+    relaxed.calc = make_egret()
+    BFGS(relaxed, logfile=None).run(fmax=fmax, steps=200)
+    return relaxed
+
+
 def main() -> None:
+    print("[0] Relaxing endpoints under Egret-1t before NEB")
+    initial = relax_endpoint(ethane(60.0))
+    final = relax_endpoint(ethane(180.0))
+
     print("[1] Running Stage 1: Egret-1t NEB + uncertainty-disagreement selection")
     result = run_organic_disagreement_example(
         title="Ethane methyl torsion (DFT labeling pilot)",
-        initial=ethane(60.0),
-        final=ethane(180.0),
+        initial=initial,
+        final=final,
         output_dir="_pilot_ethane_selected",
     )
 

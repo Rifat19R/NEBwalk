@@ -1,0 +1,42 @@
+{
+  "schema": "nebwalk.isolated_atom_reference.v1",
+  "symbol": "Pd",
+  "energy_eV": -3441.1341660403023,
+  "forces_eV_A": [
+    [
+      0.0,
+      0.0,
+      0.0
+    ]
+  ],
+  "positions_A": [
+    [
+      0.0,
+      0.0,
+      0.0
+    ]
+  ],
+  "cell_A": [
+    [
+      20.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      20.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      20.0
+    ]
+  ],
+  "pbc": [
+    true,
+    true,
+    true
+  ],
+  "dft_settings_hash": "d13f22cb34bc6c4285be182da9266c9e6267ee52837c128a1e2146d7600f9e27"
+}

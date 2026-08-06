@@ -1,0 +1,42 @@
+{
+  "schema": "nebwalk.isolated_atom_reference.v1",
+  "symbol": "Fe",
+  "energy_eV": -4474.735136981495,
+  "forces_eV_A": [
+    [
+      0.0,
+      0.0,
+      0.0
+    ]
+  ],
+  "positions_A": [
+    [
+      0.0,
+      0.0,
+      0.0
+    ]
+  ],
+  "cell_A": [
+    [
+      10.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      10.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      10.0
+    ]
+  ],
+  "pbc": [
+    true,
+    true,
+    true
+  ],
+  "dft_settings_hash": "8e5bf17de57e066a4c42c9ebc8fefd1d9a5a416c8dc8b61cb611c5ed54f59c2e"
+}

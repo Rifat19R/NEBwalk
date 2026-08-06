@@ -1,0 +1,26 @@
+{
+  "metadata": {
+    "path_id": "cu_vacancy",
+    "stage": "mace_training_export"
+  },
+  "path": "cu_train.extxyz",
+  "schema": "nebwalk.dataset.v1",
+  "sha256": "ddad2402c80ea952359792505b806ffcf0fec70139148d0321cff48fb63f2655",
+  "summary": {
+    "config_types": {
+      "Default": 4
+    },
+    "dft_settings_hashes": [
+      "7c0d77db432c17b9c5324ca0506b9da76aa434fac29ae5cf67eecfed6f7f27e6"
+    ],
+    "duplicate_count": 0,
+    "elements": [
+      "Cu"
+    ],
+    "n_atoms": 124,
+    "n_configurations": 4,
+    "path_ids": [
+      "cu_vacancy"
+    ]
+  }
+}

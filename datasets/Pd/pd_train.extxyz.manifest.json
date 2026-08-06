@@ -1,0 +1,26 @@
+{
+  "metadata": {
+    "path_id": "pd_vacancy",
+    "stage": "mace_training_export"
+  },
+  "path": "pd_train.extxyz",
+  "schema": "nebwalk.dataset.v1",
+  "sha256": "a03d4c026e5198f0ccec1de7b91fb870b0e0d0d7a7174a385d23cff21faece92",
+  "summary": {
+    "config_types": {
+      "Default": 4
+    },
+    "dft_settings_hashes": [
+      "9116a3b74767f8c12a6eb53cd6bef74c1507c7744006b79e3ac863d4a25477af"
+    ],
+    "duplicate_count": 0,
+    "elements": [
+      "Pd"
+    ],
+    "n_atoms": 124,
+    "n_configurations": 4,
+    "path_ids": [
+      "pd_vacancy"
+    ]
+  }
+}

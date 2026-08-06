@@ -1,0 +1,37 @@
+{
+  "material": "si",
+  "symbol": "Si",
+  "n_labeled": 4,
+  "n_failed": 0,
+  "qe_settings": {
+    "pseudopotential_file": "Si.pbe-n-rrkjus_psl.1.0.0.UPF",
+    "pseudopotential_sha256": "ae3aefd0811f9499dbc4a72f1f9ae02ef4fc7f3568bf6f559b68668719c69e2b",
+    "ecutwfc": 50.0,
+    "ecutrho": 400.0,
+    "kpts": [
+      2,
+      2,
+      2
+    ],
+    "occupations": "fixed",
+    "smearing": null,
+    "degauss": null,
+    "nspin": 1,
+    "starting_magnetization": null,
+    "conv_thr": 1e-08,
+    "mixing_beta": 0.4
+  },
+  "finite_check_problems": [],
+  "cohesive_energy_eV_per_atom": -4.55548681352775,
+  "cohesive_energy_flags": [],
+  "mace_loader_ok": true,
+  "mace_loader_n_configs": 4,
+  "mace_loader_config_types": [
+    "Default"
+  ],
+  "scf_converged_cleanly": true,
+  "scf_problems": [],
+  "nebwalk_dataset_ok": true,
+  "nebwalk_dataset_error": null,
+  "passed": true
+}

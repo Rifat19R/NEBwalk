@@ -1,0 +1,111 @@
+{
+  "schema": "nebwalk.dataset_manifest.v1",
+  "materials": [
+    {
+      "material": "al",
+      "symbol": "Al",
+      "dataset_path": "datasets/Al/al_train.extxyz",
+      "n_labeled": 4,
+      "n_failed": 0,
+      "passed": true
+    },
+    {
+      "material": "cu",
+      "symbol": "Cu",
+      "dataset_path": "datasets/Cu/cu_train.extxyz",
+      "n_labeled": 4,
+      "n_failed": 0,
+      "passed": true
+    },
+    {
+      "material": "ag",
+      "symbol": "Ag",
+      "dataset_path": "datasets/Ag/ag_train.extxyz",
+      "n_labeled": 4,
+      "n_failed": 0,
+      "passed": true
+    },
+    {
+      "material": "ni",
+      "symbol": "Ni",
+      "dataset_path": "datasets/Ni/ni_train.extxyz",
+      "n_labeled": 4,
+      "n_failed": 0,
+      "passed": true
+    },
+    {
+      "material": "pd",
+      "symbol": "Pd",
+      "dataset_path": "datasets/Pd/pd_train.extxyz",
+      "n_labeled": 4,
+      "n_failed": 0,
+      "passed": true
+    },
+    {
+      "material": "au",
+      "symbol": "Au",
+      "dataset_path": "datasets/Au/au_train.extxyz",
+      "n_labeled": 4,
+      "n_failed": 0,
+      "passed": true
+    },
+    {
+      "material": "pt",
+      "symbol": "Pt",
+      "dataset_path": "datasets/Pt/pt_train.extxyz",
+      "n_labeled": 4,
+      "n_failed": 0,
+      "passed": true
+    },
+    {
+      "material": "w",
+      "symbol": "W",
+      "dataset_path": "datasets/W/w_train.extxyz",
+      "n_labeled": 4,
+      "n_failed": 0,
+      "passed": true
+    },
+    {
+      "material": "mo",
+      "symbol": "Mo",
+      "dataset_path": "datasets/Mo/mo_train.extxyz",
+      "n_labeled": 4,
+      "n_failed": 0,
+      "passed": true
+    },
+    {
+      "material": "si",
+      "symbol": "Si",
+      "dataset_path": "datasets/Si/si_train.extxyz",
+      "n_labeled": 4,
+      "n_failed": 0,
+      "passed": true
+    },
+    {
+      "material": "mg",
+      "symbol": "Mg",
+      "dataset_path": "datasets/Mg/mg_train.extxyz",
+      "n_labeled": 4,
+      "n_failed": 0,
+      "passed": true
+    },
+    {
+      "material": "li",
+      "symbol": "Li",
+      "dataset_path": "datasets/Li/li_train.extxyz",
+      "n_labeled": 4,
+      "n_failed": 0,
+      "passed": true
+    },
+    {
+      "material": "fe",
+      "symbol": "Fe",
+      "dataset_path": "datasets/Fe/fe_train.extxyz",
+      "n_labeled": 4,
+      "n_failed": 0,
+      "passed": true
+    }
+  ],
+  "n_materials": 13,
+  "n_passed": 13
+}

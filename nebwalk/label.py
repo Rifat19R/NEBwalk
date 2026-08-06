@@ -74,8 +74,14 @@ class DFTLabel:
 
 
 @dataclass(frozen=True)
-class LabelingResult:
-    """Result bundle for a DFT labeling pass over selected images."""
+class NEBLabelingResult:
+    """Result bundle for a DFT labeling pass over selected images.
+
+    Named ``NEBLabelingResult`` (not ``LabelingResult``) to stay distinct from
+    :class:`nebwalk.labeling.LabelingResult`, the campaign-level labeling
+    result used by :mod:`nebwalk.campaign` -- the two are unrelated types
+    that happened to want the same short name.
+    """
 
     labels: tuple[DFTLabel, ...]
     failed_indices: tuple[int, ...]
@@ -120,7 +126,7 @@ def label_selected_images(
     output_dir: str | Path | None = None,
     recovery_strategy: Any | None = None,
     reference_index: int = 0,
-) -> LabelingResult:
+) -> NEBLabelingResult:
     """Run DFT single-point labeling on an MLIP-assisted NEB's selected images.
 
     Labels are computed at the exact MLIP-relaxed geometry of each selected
@@ -138,7 +144,7 @@ def label_selected_images(
 
     QE images that fail are retried through the same recovery machinery used
     during NEB optimization (see :mod:`nebwalk.recovery`); images that are
-    still unrecoverable are reported in ``LabelingResult.failed_indices``
+    still unrecoverable are reported in ``NEBLabelingResult.failed_indices``
     rather than aborting the whole batch.
     """
     images = result.neb_result.neb.images
@@ -209,7 +215,7 @@ def label_selected_images(
     if output_dir is not None:
         out_dir = _export_labels(images, labels, output_dir, metadata)
 
-    return LabelingResult(
+    return NEBLabelingResult(
         labels=tuple(labels),
         failed_indices=tuple(failed),
         reference_index=reference_index,
@@ -255,6 +261,6 @@ def _export_labels(
 
 __all__ = [
     "DFTLabel",
-    "LabelingResult",
+    "NEBLabelingResult",
     "label_selected_images",
 ]

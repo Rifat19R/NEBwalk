@@ -1,0 +1,37 @@
+{
+  "material": "al",
+  "symbol": "Al",
+  "n_labeled": 4,
+  "n_failed": 0,
+  "qe_settings": {
+    "pseudopotential_file": "Al.pbe-n-kjpaw_psl.1.0.0.UPF",
+    "pseudopotential_sha256": "fd7b78921e6d0939095b681c328732668eaefd1dee6882fdbc03be463550cc97",
+    "ecutwfc": 50.0,
+    "ecutrho": 400.0,
+    "kpts": [
+      2,
+      2,
+      2
+    ],
+    "occupations": "smearing",
+    "smearing": "marzari-vanderbilt",
+    "degauss": 0.02,
+    "nspin": 1,
+    "starting_magnetization": null,
+    "conv_thr": 1e-07,
+    "mixing_beta": 0.3
+  },
+  "finite_check_problems": [],
+  "cohesive_energy_eV_per_atom": -3.3764291515577725,
+  "cohesive_energy_flags": [],
+  "mace_loader_ok": true,
+  "mace_loader_n_configs": 4,
+  "mace_loader_config_types": [
+    "Default"
+  ],
+  "scf_converged_cleanly": true,
+  "scf_problems": [],
+  "nebwalk_dataset_ok": true,
+  "nebwalk_dataset_error": null,
+  "passed": true
+}

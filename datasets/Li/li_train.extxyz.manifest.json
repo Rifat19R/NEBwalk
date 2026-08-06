@@ -1,0 +1,26 @@
+{
+  "metadata": {
+    "path_id": "li_vacancy",
+    "stage": "mace_training_export"
+  },
+  "path": "li_train.extxyz",
+  "schema": "nebwalk.dataset.v1",
+  "sha256": "4f543b865a0d50fe50b60e44113e7740b2d3d82e6e7160a27f0eb06c2065852d",
+  "summary": {
+    "config_types": {
+      "Default": 4
+    },
+    "dft_settings_hashes": [
+      "a5458097d168d5de4db049ec656a1bf2e121ad16e3b597abcf11dbeb8de758aa"
+    ],
+    "duplicate_count": 0,
+    "elements": [
+      "Li"
+    ],
+    "n_atoms": 60,
+    "n_configurations": 4,
+    "path_ids": [
+      "li_vacancy"
+    ]
+  }
+}

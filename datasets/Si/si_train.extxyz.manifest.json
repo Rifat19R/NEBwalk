@@ -1,0 +1,26 @@
+{
+  "metadata": {
+    "path_id": "si_vacancy",
+    "stage": "mace_training_export"
+  },
+  "path": "si_train.extxyz",
+  "schema": "nebwalk.dataset.v1",
+  "sha256": "450d0b7ced528278718c6ef18620ebbdb4c1e0a6387d182727c4d5f7592a478e",
+  "summary": {
+    "config_types": {
+      "Default": 4
+    },
+    "dft_settings_hashes": [
+      "6257dd499dc0ca8a79b830a94ab433a76fc367a4d4ec13e353d93f24327b1245"
+    ],
+    "duplicate_count": 0,
+    "elements": [
+      "Si"
+    ],
+    "n_atoms": 252,
+    "n_configurations": 4,
+    "path_ids": [
+      "si_vacancy"
+    ]
+  }
+}
