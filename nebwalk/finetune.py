@@ -194,6 +194,7 @@ def export_mace_training_set(
     campaign_id: str = "vacancy_migration_single_shot",
     calculator_name: str = "quantum_espresso",
     iteration: int = 0,
+    selection_reason_overrides: Mapping[int, str] | None = None,
 ) -> DatasetArtifact:
     """Write DFT-labeled images as a canonical :mod:`nebwalk.datasets` file.
 
@@ -206,12 +207,23 @@ def export_mace_training_set(
     :mod:`nebwalk.campaign` use, so a file written here is guaranteed to load
     back through :func:`nebwalk.datasets.load_dataset` too.
 
+    Every non-reference label defaults to ``selection_reason="peak_plus_
+    neighbors"`` -- correct only if every label really was chosen by that
+    strategy. If some labels were added later for other reasons (e.g.
+    completing full-path DFT coverage of an image the selection strategy
+    never picked), pass ``selection_reason_overrides={label.index: "..."}``
+    so the dataset's own provenance stays accurate; downstream code that
+    needs to know exactly which images a selection strategy chose (e.g. an
+    active-vs-random training-data comparison) depends on this being honest,
+    not just on the file loading successfully.
+
     All labels must share one ``dft_settings_hash`` (they come from the same
     QE setup) -- do not call this once per material with a mixed-settings
     label list. Isolated-atom E0 references are handled separately; see
     :func:`save_isolated_atom_reference` and :data:`TRAINING_SET_DISCLOSURE`
     for why they cannot live in this same file.
     """
+    overrides = selection_reason_overrides or {}
     frames: list[Atoms] = []
     for label in labels:
         atoms = images[label.index].copy()
@@ -222,9 +234,12 @@ def export_mace_training_set(
         atoms.info["iteration"] = iteration
         atoms.info["path_id"] = path_id
         atoms.info["image_index"] = label.index
-        atoms.info["selection_reason"] = (
-            "reference" if label.is_reference else "peak_plus_neighbors"
-        )
+        if label.index in overrides:
+            atoms.info["selection_reason"] = overrides[label.index]
+        elif label.is_reference:
+            atoms.info["selection_reason"] = "reference"
+        else:
+            atoms.info["selection_reason"] = "peak_plus_neighbors"
         atoms.info["calculator_name"] = calculator_name
         atoms.info["dft_settings_hash"] = dft_settings_hash
         atoms.info["structure_hash"] = compute_structure_hash(atoms)

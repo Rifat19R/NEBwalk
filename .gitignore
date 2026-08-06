@@ -104,8 +104,11 @@ examples/v8/
 _pilot_*_vacancy_selected/
 _pilot_*_vacancy_dft_labels/
 _pilot_*_vacancy_dft_labels_qe_workdir/
+_pilot_*_vacancy_dft_labels_index1/
+_pilot_*_vacancy_dft_labels_index1_qe_workdir/
 _fix_*_isolated_atom_qe_workdir/
 _pilot_*_isolated_atom_qe_workdir/
+_convergence_*/
 _vacancy_training_set/
 
 # Ethane/Egret-1t pilot scratch -- abandoned as a fine-tuning target once

@@ -106,6 +106,29 @@ def test_export_mace_training_set_writes_valid_extxyz(tmp_path):
     assert by_index[0].calc is None
 
 
+def test_export_mace_training_set_selection_reason_overrides(tmp_path):
+    images = [_image(offset=0.0), _image(offset=0.3), _image(offset=0.6)]
+    labels = [
+        _label(0, -100.0, np.array([[0.0, 0.0, 0.0]])),
+        _label(1, -99.8, np.array([[0.05, 0.0, 0.0]])),
+        _label(2, -99.5, np.array([[0.1, 0.0, 0.0]])),
+    ]
+
+    artifact = export_mace_training_set(
+        images,
+        labels,
+        tmp_path / "train.extxyz",
+        path_id="al_vacancy",
+        dft_settings_hash="1" * 64,
+        selection_reason_overrides={1: "full_path_completion"},
+    )
+
+    by_index = {c.info["image_index"]: c for c in read(artifact.path, index=":")}
+    assert by_index[0].info["selection_reason"] == "reference"
+    assert by_index[1].info["selection_reason"] == "full_path_completion"
+    assert by_index[2].info["selection_reason"] == "peak_plus_neighbors"
+
+
 def test_export_mace_training_set_loads_through_real_datasets_validator(tmp_path):
     images = [_image()]
     labels = [_label(0, -100.0, np.array([[0.0, 0.0, 0.0]]))]
