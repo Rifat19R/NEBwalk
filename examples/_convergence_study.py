@@ -28,6 +28,7 @@ import dataclasses
 import json
 from pathlib import Path
 
+import numpy as np
 from _pilot_vacancy_dft_labeling import (
     PSEUDOPOTENTIAL_BY_MATERIAL,
     QE_COMMAND,
@@ -37,6 +38,7 @@ from ase.io import read
 from vacancy_benchmark_suite import SYSTEMS
 
 from nebwalk.qe import make_qe_factory
+from nebwalk.recovery import NoOpRecoveryStrategy, run_with_recovery
 
 # (ecutwfc, ecutrho) pairs; ecutrho held at production's ratio to ecutwfc.
 CUTOFF_SWEEP = [(40.0, 320.0), (50.0, 400.0), (60.0, 480.0), (70.0, 560.0)]
@@ -46,6 +48,12 @@ MATERIALS = ["al", "fe"]
 
 
 def _single_point(atoms, params, pseudo_dir, pseudopotentials, base_dir) -> float:
+    """QE single-point with the same recovery machinery the rest of the
+    pipeline uses (nebwalk.qe's factory-attached QERecoveryStrategy via
+    run_with_recovery) -- a bare calculator call has no retry path for SCF
+    non-convergence, which gamma-only k-points on a magnetic system (Fe) can
+    genuinely hit; see RESEARCH_PLAN.md for the real failure this replaced.
+    """
     factory = make_qe_factory(
         params,
         pseudo_dir=pseudo_dir,
@@ -55,7 +63,17 @@ def _single_point(atoms, params, pseudo_dir, pseudopotentials, base_dir) -> floa
     )
     evaluated = atoms.copy()
     evaluated.calc = factory()
-    return float(evaluated.get_potential_energy())
+    strategy = (
+        getattr(evaluated.calc, "recovery_strategy", None) or NoOpRecoveryStrategy()
+    )
+
+    def compute_fn(eval_atoms, _params: dict) -> tuple[float, np.ndarray]:
+        energy = float(eval_atoms.get_potential_energy())
+        forces = np.asarray(eval_atoms.get_forces(), dtype=float)
+        return energy, forces
+
+    energy, _forces = run_with_recovery(compute_fn, strategy, evaluated, {}, 0, [])
+    return energy
 
 
 def main(material: str) -> None:
