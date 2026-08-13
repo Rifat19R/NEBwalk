@@ -1,0 +1,92 @@
+{
+  "schema": "nebwalk.convergence_study.v1",
+  "material": "fe",
+  "symbol": "Fe",
+  "production_ecutwfc": 50.0,
+  "production_ecutrho": 400.0,
+  "production_kpts": [
+    2,
+    2,
+    2
+  ],
+  "note": "barrier_proxy_eV = E(DFT-peak image) - E(reference image) at fixed MACE-MP-0-relaxed geometry (indices 3 and 0 of the 5-image path); tests QE numerical convergence, not geometric relaxation convergence.",
+  "results": [
+    {
+      "sweep": "ecutwfc",
+      "ecutwfc": 40.0,
+      "ecutrho": 320.0,
+      "kpts": [
+        2,
+        2,
+        2
+      ],
+      "barrier_proxy_eV": 0.670716801949311
+    },
+    {
+      "sweep": "ecutwfc",
+      "ecutwfc": 50.0,
+      "ecutrho": 400.0,
+      "kpts": [
+        2,
+        2,
+        2
+      ],
+      "barrier_proxy_eV": 0.6058425498486031
+    },
+    {
+      "sweep": "ecutwfc",
+      "ecutwfc": 60.0,
+      "ecutrho": 480.0,
+      "kpts": [
+        2,
+        2,
+        2
+      ],
+      "barrier_proxy_eV": 0.6068348129483638
+    },
+    {
+      "sweep": "ecutwfc",
+      "ecutwfc": 70.0,
+      "ecutrho": 560.0,
+      "kpts": [
+        2,
+        2,
+        2
+      ],
+      "barrier_proxy_eV": 0.603258965027635
+    },
+    {
+      "sweep": "kpts",
+      "ecutwfc": 50.0,
+      "ecutrho": 400.0,
+      "kpts": [
+        1,
+        1,
+        1
+      ],
+      "barrier_proxy_eV": -2.206157640684978
+    },
+    {
+      "sweep": "kpts",
+      "ecutwfc": 50.0,
+      "ecutrho": 400.0,
+      "kpts": [
+        2,
+        2,
+        2
+      ],
+      "barrier_proxy_eV": 0.6058425498486031
+    },
+    {
+      "sweep": "kpts",
+      "ecutwfc": 50.0,
+      "ecutrho": 400.0,
+      "kpts": [
+        3,
+        3,
+        3
+      ],
+      "barrier_proxy_eV": 0.7228882358467672
+    }
+  ]
+}
