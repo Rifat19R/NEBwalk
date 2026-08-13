@@ -14,7 +14,7 @@ import os
 import shutil
 import sys
 import warnings
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Literal
 
@@ -210,6 +210,47 @@ def make_vacancy_endpoints(system: VacancySystem) -> tuple[Atoms, Atoms, int, fl
 
     distances = np.linalg.norm(base.positions - vacancy_pos, axis=1)
     nn_index = int(np.argmin(distances))
+    nn_distance = float(distances[nn_index])
+
+    initial = base.copy()
+    final = base.copy()
+    final.positions[nn_index] = vacancy_pos
+    return initial, final, nn_index, nn_distance
+
+
+def make_vacancy_endpoints_variant(
+    system: VacancySystem,
+    *,
+    neighbor_shell: int = 1,
+    repeat: tuple[int, int, int] | None = None,
+) -> tuple[Atoms, Atoms, int, float]:
+    """Like make_vacancy_endpoints, but for a genuinely different migration
+    path: a farther neighbor shell (neighbor_shell=2 -> second-nearest, a
+    real, higher-barrier alternate hop, not a symmetry-equivalent repeat of
+    the nearest-neighbor one) and/or a different supercell size (finite-size
+    correction). neighbor_shell=1 with the default repeat reproduces
+    make_vacancy_endpoints's own choice exactly. See RESEARCH_PLAN.md
+    section 5b for why this exists (single-hop, single-supercell vacancy
+    data has no genuine within-element path diversity to draw on).
+    """
+    working_system = system if repeat is None else replace(system, repeat=repeat)
+    full = build_bulk(working_system)
+    vacancy_pos = full.positions[0].copy()
+    base = full.copy()
+    del base[0]
+
+    distances = np.linalg.norm(base.positions - vacancy_pos, axis=1)
+    # Group into shells by rounded distance (fp-noise tolerant); pick the
+    # neighbor_shell-th distinct distance, 1-indexed (1 == nearest).
+    shells = sorted({round(float(d), 6) for d in distances})
+    if neighbor_shell > len(shells):
+        raise ValueError(
+            f"neighbor_shell={neighbor_shell} exceeds {len(shells)} distinct "
+            f"shells available for this supercell size"
+        )
+    target = shells[neighbor_shell - 1]
+    candidates = [i for i, d in enumerate(distances) if round(float(d), 6) == target]
+    nn_index = candidates[0]
     nn_distance = float(distances[nn_index])
 
     initial = base.copy()

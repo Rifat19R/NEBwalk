@@ -1,5 +1,8 @@
-"""RESEARCH_PLAN.md Phase 2: complete full-path DFT coverage for the 5
-publication-subset elements (Al, Cu, Si, Mg, Fe).
+"""RESEARCH_PLAN.md Phase 2: complete full-path DFT coverage for all 13
+vacancy-migration elements (originally scoped to the 5 SSSP-curated
+publication-subset elements; extended to all 13 per section 5b -- Dr. Ali's
+across-system scale request applies to the full set, with the existing
+non-SSSP convergence caveat kept for the other 8).
 
 The existing dataset has DFT labels at path indices [0, 2, 3, 4] of each
 element's 5-image vacancy-migration path (reference + peak_plus_neighbors
@@ -41,7 +44,7 @@ from nebwalk.active import SelectedImage
 from nebwalk.label import label_selected_images
 from nebwalk.qe import make_qe_factory
 
-MATERIALS = ["al", "cu", "si", "mg", "fe"]
+MATERIALS = list(PSEUDOPOTENTIAL_BY_MATERIAL)
 
 
 def main(material: str) -> None:
