@@ -90,6 +90,15 @@ examples/test_idpp_ethane.py
 # Local briefing documents
 MENTOR_CLAUDE_v2.md
 
+# Internal planning/audit docs -- local only, never public
+RESEARCH_PLAN.md
+AUDIT_REPORT_*.md
+PHASE1_ARTIFACT_MANIFEST.json
+PHASE1_LIMITATIONS.md
+PHASE1_RELEASE_CHECKLIST.md
+PHASE1_VALIDATION_REPORT.json
+PHASE1_VALIDATION_REPORT.md
+
 # Misplaced CI files
 tests.yml
 
