@@ -54,6 +54,16 @@ include = ["nebwalk*"]
 testpaths = ["tests"]
 addopts = "--strict-config --strict-markers"
 
+filterwarnings = [
+    # MACE 0.3.x intentionally sets TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD
+    # during import; this warning originates from e3nn's constants loader.
+    'ignore:Environment variable TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD detected.*:UserWarning:e3nn\.o3\._wigner',
+
+    # Upstream PyTorch/MACE/e3nn TorchScript deprecation.
+    'ignore:`torch\.jit\.script` is deprecated.*:DeprecationWarning:torch\.jit\._script',
+]
+
+
 [tool.ruff]
 line-length = 88
 target-version = "py39"
