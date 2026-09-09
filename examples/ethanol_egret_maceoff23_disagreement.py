@@ -23,7 +23,7 @@ def main() -> None:
         title="Ethanol C-C torsion",
         initial=initial,
         final=final,
-        output_dir="ethanol_egret_maceoff23_disagreement_selected",
+        output_dir="examples/organic_disagreement/ethanol_egret_maceoff23_disagreement_selected",
     )
 
 

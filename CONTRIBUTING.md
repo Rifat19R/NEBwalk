@@ -12,7 +12,7 @@ reproducible scientific benchmarks are welcome.
    ```bash
    ruff check .
    ruff format --check .
-   mypy nebwalk
+   mypy src/nebwalk
    pytest --cov=nebwalk
    python -m build
    twine check dist/*

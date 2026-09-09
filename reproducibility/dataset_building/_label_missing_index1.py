@@ -18,7 +18,7 @@ Output goes to a separate directory per material
 validated 4-label directory is never touched; a later script merges the two.
 
 Run:
-    python examples/_label_missing_index1.py <material>
+    python reproducibility/dataset_building/_label_missing_index1.py <material>
 """
 
 from __future__ import annotations

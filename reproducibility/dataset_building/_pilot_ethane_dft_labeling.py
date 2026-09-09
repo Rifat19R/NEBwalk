@@ -7,7 +7,7 @@ validate nebwalk.label.label_selected_images() against a real QE run before
 deciding whether/how to turn this into a documented example.
 
 Run:
-    python examples/_pilot_ethane_dft_labeling.py
+    python reproducibility/dataset_building/_pilot_ethane_dft_labeling.py
 """
 
 from __future__ import annotations

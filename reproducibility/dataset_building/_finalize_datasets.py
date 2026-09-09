@@ -22,7 +22,7 @@ already; this script's own per-material export is what makes it safe to
 rerun (idempotent) to refresh the validation checkpoint and manifest.
 
 Run:
-    python examples/_finalize_datasets.py
+    python reproducibility/dataset_building/_finalize_datasets.py
 """
 
 from __future__ import annotations

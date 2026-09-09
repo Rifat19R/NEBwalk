@@ -12,7 +12,7 @@ datasets/<Symbol>/ entries for these 5 elements only -- the other 8
 elements' entries in datasets/manifest.json are untouched.
 
 Run (after all 5 elements have their index-1 label):
-    python examples/_rebuild_publication_datasets.py
+    python reproducibility/dataset_building/_rebuild_publication_datasets.py
 """
 
 from __future__ import annotations

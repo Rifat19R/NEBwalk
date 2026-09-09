@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 message: "If you use nebwalk, please cite this software and the NEB methods it implements."
-title: "nebwalk: transparent ASE-compatible nudged elastic band workflows"
+title: "nebwalk: a calculator-agnostic nudged elastic band library with MLIP-assisted barrier pre-screening"
 type: software
 authors:
   - family-names: Khandaker

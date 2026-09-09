@@ -49,7 +49,7 @@ espresso.pwo
 # Local calculation working directories
 campaign-output/
 nebwalk_campaigns/
-validation/**/generated/
+reproducibility/validation/**/generated/
 dataset_v*.extxyz
 labels.extxyz
 selected_candidates.extxyz
@@ -108,8 +108,9 @@ examples/v8/
 
 # Active-learning vacancy pilot: raw/intermediate QE + NEB working data.
 # The curated, checksummed, schema-validated output lives in datasets/ --
-# these are local scratch inputs to examples/_finalize_datasets.py, not
-# meant to be committed (mirrors the QE-working-directory policy above).
+# these are local scratch inputs to
+# reproducibility/dataset_building/_finalize_datasets.py, not meant to be
+# committed (mirrors the QE-working-directory policy above).
 _pilot_*_vacancy_selected/
 _pilot_*_vacancy_dft_labels/
 _pilot_*_vacancy_dft_labels_qe_workdir/
@@ -122,9 +123,13 @@ _vacancy_training_set/
 
 # Ethane/Egret-1t pilot scratch -- abandoned as a fine-tuning target once
 # the DFT-reference-level mismatch was found (Egret-1t trained on
-# B97M-D3BJ/def2-TZVPPD, not QE/PBE); see _pilot_ethane_dft_labeling.py.
+# B97M-D3BJ/def2-TZVPPD, not QE/PBE); see
+# reproducibility/dataset_building/_pilot_ethane_dft_labeling.py.
 _pilot_ethane_selected/
 _pilot_ethane_dft_labels/
+
+# Maintainer's LinkedIn draft -- never published, local only
+docs/linkedin_post.md
 
 # Smoke-training validation (Al/Cu/Ag 1-epoch mace_run_train pipeline
 # check) -- explicitly a throwaway pipeline smoke test, not published

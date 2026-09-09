@@ -13,12 +13,12 @@ atom count than the 2x2x2 one, so it MUST be a separate path_id, not merged
 into the original file).
 
 Run:
-    python examples/_pilot_multipath_dft_labeling.py al 2nn
-    python examples/_pilot_multipath_dft_labeling.py al 3x3x3
-    python examples/_pilot_multipath_dft_labeling.py cu 3x3x3
-    python examples/_pilot_multipath_dft_labeling.py fe 3x3x3
-    python examples/_pilot_multipath_dft_labeling.py mg 3x3x3
-    python examples/_pilot_multipath_dft_labeling.py si 3x3x3
+    python reproducibility/dataset_building/_pilot_multipath_dft_labeling.py al 2nn
+    python reproducibility/dataset_building/_pilot_multipath_dft_labeling.py al 3x3x3
+    python reproducibility/dataset_building/_pilot_multipath_dft_labeling.py cu 3x3x3
+    python reproducibility/dataset_building/_pilot_multipath_dft_labeling.py fe 3x3x3
+    python reproducibility/dataset_building/_pilot_multipath_dft_labeling.py mg 3x3x3
+    python reproducibility/dataset_building/_pilot_multipath_dft_labeling.py si 3x3x3
 """
 
 from __future__ import annotations

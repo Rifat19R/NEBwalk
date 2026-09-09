@@ -23,7 +23,7 @@ def main() -> None:
         title="Propane terminal methyl torsion",
         initial=initial,
         final=final,
-        output_dir="propane_egret_maceoff23_disagreement_selected",
+        output_dir="examples/organic_disagreement/propane_egret_maceoff23_disagreement_selected",
     )
 
 

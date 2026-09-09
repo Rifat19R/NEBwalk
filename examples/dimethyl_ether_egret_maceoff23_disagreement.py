@@ -23,7 +23,7 @@ def main() -> None:
         title="Dimethyl ether methyl torsion",
         initial=initial,
         final=final,
-        output_dir="dimethyl_ether_egret_maceoff23_disagreement_selected",
+        output_dir="examples/organic_disagreement/dimethyl_ether_egret_maceoff23_disagreement_selected",
     )
 
 

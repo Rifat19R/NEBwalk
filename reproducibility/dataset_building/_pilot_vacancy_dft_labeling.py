@@ -12,7 +12,7 @@ datasets/<Symbol>/ directory, so concurrent runs are safe from file
 collisions but QE itself is not set up here for concurrent execution.
 
 Run:
-    python examples/_pilot_vacancy_dft_labeling.py <material>
+    python reproducibility/dataset_building/_pilot_vacancy_dft_labeling.py <material>
 
 where <material> is one of: al cu ag ni pd au pt w mo si mg li fe
 """
@@ -392,7 +392,7 @@ def main(material: str) -> None:
     print(f"    Training set : {artifact.path}")
     print(f"    Summary      : {summary}")
     print(
-        "    NOTE: run examples/_finalize_datasets.py separately to add "
+        "    NOTE: run reproducibility/dataset_building/_finalize_datasets.py separately to add "
         "the full validation checkpoint (cohesive energy, SCF convergence, "
         "MACE/nebwalk.datasets loader checks) and update datasets/manifest.json."
     )
