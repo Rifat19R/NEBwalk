@@ -97,7 +97,7 @@ nebwalk campaign run campaign.json
 
 Start from
 [`examples/active_learning_templates/mace_qe_campaign.json`](examples/active_learning_templates/mace_qe_campaign.json)
-and read the [active-learning guide](docs/active_learning.md). MACE and QE are
+and read the [active-learning guide](docs/how-to/active_learning.md). MACE and QE are
 optional external tools; importing `nebwalk` does not import PyTorch or MACE.
 Committee disagreement is an uncertainty proxy, not calibrated uncertainty,
 and sparse QE checks are not a full DFT NEB.
@@ -635,27 +635,9 @@ Long-term priorities:
 
 ---
 
-## Release checklist for maintainers
+## For maintainers
 
-Use this when publishing a new release:
-
-```bash
-python -m pip install --upgrade build twine
-rm -rf dist/ build/ *.egg-info
-python -m build
-python -m twine check dist/*
-python -m twine upload dist/*
-VERSION=v0.10.0
-git tag -a "$VERSION" -m "nebwalk $VERSION"
-git push origin main "$VERSION"
-```
-
-After release:
-
-```bash
-pip install --upgrade nebwalk
-python -c "import nebwalk; print(nebwalk.__version__ if hasattr(nebwalk, '__version__') else 'installed')"
-```
+Release steps live in [`scripts/RELEASING.md`](scripts/RELEASING.md).
 
 ---
 

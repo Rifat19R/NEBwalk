@@ -27,7 +27,7 @@ REF_energy at image_index 0, recomputed here as a cross-check against the
 DFTLabel-derived value already in its validation_summary.json).
 
 Run:
-    python examples/_build_leave_one_out_pools.py
+    python reproducibility/finetuning/_build_leave_one_out_pools.py
 """
 
 from __future__ import annotations

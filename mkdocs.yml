@@ -7,18 +7,19 @@ theme:
   name: readthedocs
 nav:
   - Home: index.md
-  - Getting started: getting-started.md
-  - Scientific guidance: scientific-guidance.md
-  - Production use: production.md
-  - Release guide: pypi_release.md
-  - Project announcement: linkedin_post.md
-  - Active learning: active_learning.md
-  - Dataset schema: dataset_schema.md
-  - MACE fine-tuning: mlip_finetuning.md
-  - QE labeling: qe_labeling.md
-  - Campaign recovery: campaign_recovery.md
-  - API reference: api.md
-  - Contributing: contributing.md
+  - Getting started: getting-started/index.md
+  - Tutorials: tutorials/index.md
+  - How-to:
+      - Active learning: how-to/active_learning.md
+      - MLIP fine-tuning: how-to/mlip_finetuning.md
+      - QE labeling: how-to/qe_labeling.md
+      - Campaign recovery: how-to/campaign_recovery.md
+      - Production use: how-to/production.md
+  - Reference:
+      - API reference: reference/api.md
+      - Dataset schema: reference/dataset_schema.md
+      - Scientific guidance: reference/scientific-guidance.md
+      - Contributing: reference/contributing.md
 markdown_extensions:
   - admonition
   - fenced_code

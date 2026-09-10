@@ -18,8 +18,8 @@ than merely "the SSSP defaults," without re-running this for every element
 in the deepened dataset.
 
 Run:
-    python examples/_convergence_study.py al
-    python examples/_convergence_study.py fe
+    python reproducibility/dataset_building/_convergence_study.py al
+    python reproducibility/dataset_building/_convergence_study.py fe
 """
 
 from __future__ import annotations

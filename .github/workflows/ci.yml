@@ -49,7 +49,7 @@ jobs:
       - run: pip install -e ".[dev,docs]"
       - run: ruff check .
       - run: ruff format --check .
-      - run: mypy nebwalk
+      - run: mypy src/nebwalk
       - run: python -m build
       - run: twine check dist/*
       - name: Wheel installation smoke test

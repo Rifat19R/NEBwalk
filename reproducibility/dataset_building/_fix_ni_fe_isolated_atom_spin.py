@@ -1,11 +1,16 @@
-"""Recompute isolated-atom E0 references for Al, Cu, Ag with the correct
-atomic ground-state spin (nspin=2, see ATOMIC_UNPAIRED_ELECTRONS in
-_pilot_vacancy_dft_labeling.py) and replace their old nspin=1 entries in the
+"""Recompute isolated-atom E0 references for Ni and Fe with the robust
+tot_magnetization-constrained spin treatment (see ATOMIC_UNPAIRED_ELECTRONS
+in _pilot_vacancy_dft_labeling.py) and replace their existing entries in the
 master training set. Bulk path data for these materials is unaffected and
 is left untouched -- only the IsolatedAtom config per element is replaced.
 
+Ni's existing isolated-atom entry happened to converge to a plausible
+nonzero moment under the old seed-only approach, but Fe's collapsed to
+exactly 0 Bohr mag/cell and failed to converge in 300 iterations -- both
+get redone here for one consistent methodology across the dataset.
+
 Run:
-    python examples/_fix_isolated_atom_spin.py
+    python reproducibility/dataset_building/_fix_ni_fe_isolated_atom_spin.py
 """
 
 from __future__ import annotations
@@ -13,6 +18,7 @@ from __future__ import annotations
 import dataclasses
 
 from _pilot_vacancy_dft_labeling import (
+    ELECTRON_MAXSTEP_OVERRIDE,
     ISOLATED_ATOM_CELL_ANGSTROM,
     PSEUDOPOTENTIAL_BY_MATERIAL,
     QE_COMMAND,
@@ -26,7 +32,7 @@ from nebwalk.finetune import compute_isolated_atom_reference
 from nebwalk.qe import make_qe_factory
 
 MASTER_TRAIN_FILE = "_vacancy_training_set/vacancy_train.extxyz"
-MATERIALS_TO_FIX = ["al", "cu", "ag"]
+MATERIALS_TO_FIX = ["ni", "fe"]
 
 
 def main() -> None:
@@ -41,7 +47,7 @@ def main() -> None:
         )
 
     kept = [c for c in configs if not is_old_isolated_atom(c)]
-    print(f"Kept {len(kept)}/{len(configs)} (dropped old nspin=1 isolated atoms)")
+    print(f"Kept {len(kept)}/{len(configs)} (dropped old Ni/Fe isolated atoms)")
 
     new_isolated = []
     for material in MATERIALS_TO_FIX:
@@ -49,8 +55,15 @@ def main() -> None:
         pseudo_dir, pseudo_file = PSEUDOPOTENTIAL_BY_MATERIAL[material]
         pseudopotentials = {system.symbol: pseudo_file}
         base_params = qe_params_for(system)
-        if "oncv" in pseudo_file.lower():
-            base_params = dataclasses.replace(base_params, ecutwfc=60.0, ecutrho=240.0)
+        max_step = ELECTRON_MAXSTEP_OVERRIDE.get(material)
+        if max_step is not None:
+            base_params = dataclasses.replace(
+                base_params,
+                extra_electrons={
+                    **base_params.extra_electrons,
+                    "electron_maxstep": max_step,
+                },
+            )
         isolated_params = isolated_atom_qe_params(
             material, system, dataclasses.replace(base_params, kpts=(1, 1, 1))
         )
@@ -75,7 +88,7 @@ def main() -> None:
             pbc=True,
         )
         ref = compute_isolated_atom_reference(atom, factory)
-        print(f"  Isolated {system.symbol} (QE/PBE, nspin=2): {ref.energy_eV:.6f} eV")
+        print(f"  Isolated {system.symbol} (QE/PBE, corrected): {ref.energy_eV:.6f} eV")
         new_isolated.append(ref.atoms)
 
     write(MASTER_TRAIN_FILE, kept + new_isolated, format="extxyz")

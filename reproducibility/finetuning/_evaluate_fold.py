@@ -18,7 +18,7 @@ mace_run_train writes a *.model file directly into --model_dir; the most
 recently written one is loaded via mace.calculators.MACECalculator.
 
 Run:
-    python examples/_evaluate_fold.py <held_out>
+    python reproducibility/finetuning/_evaluate_fold.py <held_out>
 """
 
 from __future__ import annotations

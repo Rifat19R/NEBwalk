@@ -14,7 +14,7 @@ def main() -> None:
         title="Ethane methyl torsion",
         initial=ethane(60.0),
         final=ethane(180.0),
-        output_dir="ethane_egret_maceoff23_disagreement_selected",
+        output_dir="examples/organic_disagreement/ethane_egret_maceoff23_disagreement_selected",
     )
 
 

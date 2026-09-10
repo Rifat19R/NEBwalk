@@ -23,7 +23,7 @@ def main() -> None:
         title="Methanol hydroxyl torsion",
         initial=initial,
         final=final,
-        output_dir="methanol_egret_maceoff23_disagreement_selected",
+        output_dir="examples/organic_disagreement/methanol_egret_maceoff23_disagreement_selected",
     )
 
 
