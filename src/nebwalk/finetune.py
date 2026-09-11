@@ -95,9 +95,11 @@ def _dft_single_point(
     """Single-point DFT energy+forces at a fixed geometry, with QE recovery."""
     evaluated = atoms.copy()
     evaluated.calc = dft_calculator_factory()
-    strategy = recovery_strategy or getattr(
-        evaluated.calc, "recovery_strategy", None
-    ) or NoOpRecoveryStrategy()
+    strategy = (
+        recovery_strategy
+        or getattr(evaluated.calc, "recovery_strategy", None)
+        or NoOpRecoveryStrategy()
+    )
 
     def compute_fn(eval_atoms: Atoms, _params: dict) -> tuple[float, FloatArray]:
         energy = float(eval_atoms.get_potential_energy())

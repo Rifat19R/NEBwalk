@@ -101,14 +101,10 @@ def build_fold(held_out: str) -> Path:
 
     held_out_frames = _load_element_frames(held_out)
     ref_energy = next(
-        f.info["REF_energy"]
-        for f in held_out_frames
-        if f.info["image_index"] == 0
+        f.info["REF_energy"] for f in held_out_frames if f.info["image_index"] == 0
     )
     peak_energy = next(
-        f.info["REF_energy"]
-        for f in held_out_frames
-        if f.info["image_index"] == 3
+        f.info["REF_energy"] for f in held_out_frames if f.info["image_index"] == 3
     )
     fold_log["held_out_true_barrier_eV"] = peak_energy - ref_energy
 

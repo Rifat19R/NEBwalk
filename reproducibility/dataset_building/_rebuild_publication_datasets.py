@@ -169,10 +169,9 @@ def main() -> None:
         other_entries = [
             e for e in existing_manifest["materials"] if e["material"] not in MATERIALS
         ]
-        other_paths = {
-            e["material"]: e["dataset_path"] for e in other_entries
-        }
+        other_paths = {e["material"]: e["dataset_path"] for e in other_entries}
         all_dataset_paths = {**other_paths, **dataset_paths}
+
         # Reconstruct summaries for the untouched 8 from the existing manifest
         # entries (write_manifest only needs material/symbol/n_labeled/
         # n_failed/passed, already present there).

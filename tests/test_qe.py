@@ -183,7 +183,7 @@ def test_factory_uses_qe_control_defaults(mock_espresso, tmp_path: Path) -> None
     assert control["tstress"] is False
     assert control["disk_io"] == "low"
     assert Path(control["pseudo_dir"]) == pseudo_dir.resolve()
-    assert control["outdir"].endswith("image_000/tmp")
+    assert Path(control["outdir"]) == (tmp_path / "qe" / "image_000" / "tmp").resolve()
 
 
 @patch("nebwalk.qe.Espresso", autospec=True)

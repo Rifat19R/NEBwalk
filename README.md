@@ -148,7 +148,7 @@ from ase.calculators.emt import EMT
 from nebwalk import NEBRunConfig, run_neb_calculation
 
 initial = ...  # relaxed ase.Atoms endpoint
-final = ...    # relaxed ase.Atoms endpoint
+final = ...  # relaxed ase.Atoms endpoint
 
 config = NEBRunConfig(
     n_images=7,
@@ -230,13 +230,16 @@ from mace.calculators import MACECalculator, mace_off
 from nebwalk import NEBRunConfig
 from nebwalk.active import MLIPActiveNEBConfig, run_mlip_assisted_neb
 
+
 def make_egret():
     return MACECalculator(
         model_paths="EGRET_1T.model", device="cpu", default_dtype="float32"
     )
 
+
 def make_mace_off23():
     return mace_off(model="medium", device="cpu", default_dtype="float64")
+
 
 result = run_mlip_assisted_neb(
     initial=ethane(60.0),
@@ -266,6 +269,7 @@ documented domain-failure list before trusting results outside that domain.
 from mace.calculators import mace_mp
 from nebwalk import NEBRunConfig, run_neb_calculation
 
+
 def make_calc():
     return mace_mp(
         model="medium",
@@ -273,6 +277,7 @@ def make_calc():
         default_dtype="float64",
         device="cpu",  # use "cuda" if available
     )
+
 
 config = NEBRunConfig(
     n_images=5,
@@ -492,39 +497,43 @@ from nebwalk import run_neb_calculation, NEBRunConfig
 from nebwalk.qe import QEParams, make_qe_factory, validate_qe_setup
 
 params = QEParams(
-    ecutwfc                = 60.0,       # plane-wave cutoff (Ry)
-    ecutrho                = 480.0,      # 8× ecutwfc for PAW
-    kpts                   = (4, 4, 1), # k-point grid for metal slab
-    occupations            = "smearing",
-    smearing               = "marzari-vanderbilt",
-    degauss                = 0.02,
-    nspin                  = 2,          # required for Fe, Co, Ni, Mn
-    starting_magnetization = {1: 0.5},   # species 1 = 50% spin-up
+    ecutwfc=60.0,  # plane-wave cutoff (Ry)
+    ecutrho=480.0,  # 8× ecutwfc for PAW
+    kpts=(4, 4, 1),  # k-point grid for metal slab
+    occupations="smearing",
+    smearing="marzari-vanderbilt",
+    degauss=0.02,
+    nspin=2,  # required for Fe, Co, Ni, Mn
+    starting_magnetization={1: 0.5},  # species 1 = 50% spin-up
 )
 
 # Validates pw.x binary and all UPF files exist before starting
 validate_qe_setup(
-    pseudo_dir       = "/path/to/pseudo",
-    pseudopotentials = {"Fe": "Fe.pbe-spn-kjpaw_psl.1.0.0.UPF",
-                        "N":  "N.pbe-n-radius_5.UPF"},
-    command          = "/absolute/path/to/pw.x",
+    pseudo_dir="/path/to/pseudo",
+    pseudopotentials={
+        "Fe": "Fe.pbe-spn-kjpaw_psl.1.0.0.UPF",
+        "N": "N.pbe-n-radius_5.UPF",
+    },
+    command="/absolute/path/to/pw.x",
 )
 
 # Each image gets an independent subdirectory — prevents wavefunction conflicts
 factory = make_qe_factory(
-    params           = params,
-    pseudo_dir       = "/path/to/pseudo",
-    pseudopotentials = {"Fe": "Fe.pbe-spn-kjpaw_psl.1.0.0.UPF",
-                        "N":  "N.pbe-n-radius_5.UPF"},
-    base_dir         = "neb_qe_workdir",
-    command          = "/absolute/path/to/pw.x",   # or "mpirun -np 4 /absolute/path/to/pw.x"
+    params=params,
+    pseudo_dir="/path/to/pseudo",
+    pseudopotentials={
+        "Fe": "Fe.pbe-spn-kjpaw_psl.1.0.0.UPF",
+        "N": "N.pbe-n-radius_5.UPF",
+    },
+    base_dir="neb_qe_workdir",
+    command="/absolute/path/to/pw.x",  # or "mpirun -np 4 /absolute/path/to/pw.x"
 )
 
 result = run_neb_calculation(
-    initial            = initial,
-    final              = final,
-    calculator_factory = factory,
-    config             = NEBRunConfig(n_images=7, climb=True, fmax=0.05),
+    initial=initial,
+    final=final,
+    calculator_factory=factory,
+    config=NEBRunConfig(n_images=7, climb=True, fmax=0.05),
 )
 print(f"Barrier: {result.barrier:.3f} eV")
 ```
@@ -562,7 +571,9 @@ software environment, SHA-256 checksums, and a rerun template.
 from nebwalk import run_neb_calculation, NEBRunConfig
 
 result = run_neb_calculation(
-    initial, final, calculator_factory,
+    initial,
+    final,
+    calculator_factory,
     config=NEBRunConfig(n_images=7, climb=True),
     reproduce_dir="my_run_repro",
     calc_params={"type": "MACE-MP-0", "model": "small", "device": "cpu"},
@@ -575,11 +586,14 @@ result = run_neb_calculation(
 from nebwalk import save_bundle
 
 bundle = save_bundle(
-    result, initial, final, config,
+    result,
+    initial,
+    final,
+    config,
     calc_params={"type": "EMT"},
     compress=True,
 )
-print(bundle.tarball)   # Path to .tar.gz
+print(bundle.tarball)  # Path to .tar.gz
 ```
 
 **Verify a stored run:**

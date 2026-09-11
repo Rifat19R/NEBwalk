@@ -13,5 +13,5 @@ verification.
 - QE setup validation and failed-image recovery
 - Reproducibility bundles and MLIP/DFT disagreement diagnostics
 
-Start with [Getting started](getting-started.md), then read the
-[scientific guidance](scientific-guidance.md) before interpreting barriers.
+Start with [Getting started](getting-started/index.md), then read the
+[scientific guidance](reference/scientific-guidance.md) before interpreting barriers.

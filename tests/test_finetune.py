@@ -50,9 +50,7 @@ class _NonRetryableStrategy(NoOpRecoveryStrategy):
 
 
 def _image(symbol: str = "Al", offset: float = 0.0) -> Atoms:
-    return Atoms(
-        symbol, positions=[[offset, 0.0, 0.0]], cell=[10, 10, 10], pbc=True
-    )
+    return Atoms(symbol, positions=[[offset, 0.0, 0.0]], cell=[10, 10, 10], pbc=True)
 
 
 def _isolated_ref(symbol: str, energy: float) -> IsolatedAtomReference:
