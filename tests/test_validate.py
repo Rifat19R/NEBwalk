@@ -398,6 +398,7 @@ def _make_summary(
         mace_loader_config_types=["Default"],
         scf_converged_cleanly=passed,
         scf_problems=[] if passed else ["image_001: SCF did not converge"],
+        scf_images_checked=3,
         nebwalk_dataset_ok=passed,
         nebwalk_dataset_error=None if passed else "dataset validation failed",
         passed=passed,

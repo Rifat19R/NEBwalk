@@ -326,16 +326,24 @@ def fire_optimize(
         else:
             k_curr = k
 
-        if climb and not climb_active and step >= climb_delay:
-            climb_active = True
+        if climb and step >= climb_delay:
+            # Re-identify the highest-energy image every step, not just on
+            # activation: the current max can still shift for several steps
+            # after climb_delay, before the path is well relaxed. Locking
+            # climb_index at first activation would keep force-inverting a
+            # stale image while the true saddle relaxes as an ordinary
+            # spring-coupled image (matches ASE's own NEB, which recomputes
+            # imax on every force evaluation once climbing is enabled).
             climb_index = _find_climb_index(energies)
-            if verbose:
-                logger.info(
-                    "CI-NEB active at step %d, image %d (E = %.4f eV)",
-                    step,
-                    climb_index,
-                    energies[climb_index],
-                )
+            if not climb_active:
+                climb_active = True
+                if verbose:
+                    logger.info(
+                        "CI-NEB active at step %d, image %d (E = %.4f eV)",
+                        step,
+                        climb_index,
+                        energies[climb_index],
+                    )
 
         neb_forces = compute_neb_forces(
             images,

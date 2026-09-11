@@ -242,6 +242,7 @@ class MaterialValidationSummary:
     mace_loader_config_types: list[str]
     scf_converged_cleanly: bool
     scf_problems: list[str]
+    scf_images_checked: int
     nebwalk_dataset_ok: bool
     nebwalk_dataset_error: str | None
     passed: bool
@@ -287,8 +288,11 @@ def build_material_validation_summary(
     dataset_check = nebwalk_dataset_validation_check(training_set_path)
 
     scf_problems: list[str] = []
+    scf_images_checked = 0
     for workdir in qe_workdirs:
-        scf_problems.extend(check_qe_scf_converged(workdir)["problems"])
+        scf_result = check_qe_scf_converged(workdir)
+        scf_problems.extend(scf_result["problems"])
+        scf_images_checked += scf_result["checked"]
 
     passed = (
         not finite_problems
@@ -312,6 +316,7 @@ def build_material_validation_summary(
         mace_loader_config_types=loader_result["config_types"],
         scf_converged_cleanly=not scf_problems,
         scf_problems=scf_problems,
+        scf_images_checked=scf_images_checked,
         nebwalk_dataset_ok=dataset_check["ok"],
         nebwalk_dataset_error=dataset_check["error"],
         passed=passed,
@@ -366,7 +371,12 @@ def _render_summary_markdown(summary: MaterialValidationSummary) -> str:
         f"config_types={summary.mace_loader_config_types})",
         "- QE SCF convergence: "
         + (
-            "OK"
+            (
+                "OK (0 images checked -- no qe_workdirs supplied; "
+                "this is NOT confirmation of convergence)"
+                if summary.scf_images_checked == 0
+                else f"OK ({summary.scf_images_checked} images checked)"
+            )
             if summary.scf_converged_cleanly
             else "FAILED: " + "; ".join(summary.scf_problems)
         ),

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import math
+import shutil
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import asdict, dataclass, field, replace
 from pathlib import Path
@@ -401,6 +402,21 @@ class ActiveLearningCampaign:
     def _iteration_dir(self, state: CampaignState) -> Path:
         return self.root / f"iteration_{state.iteration:03d}"
 
+    @staticmethod
+    def _clear_stale_attempt(output_dir: Path) -> None:
+        """Remove a directory left by a previously failed train/evaluate call.
+
+        ``MaceTrainer.train``/``evaluate`` refuse to run into a non-empty
+        directory (to avoid silently mixing two runs' artifacts). On resume
+        after a recorded failure, the completion marker (model_manifest.json
+        / the expected result file) is absent by definition, so any leftover
+        directory here is from the failed attempt, not a completed run --
+        safe to clear so the retry can proceed instead of raising
+        FileExistsError and permanently wedging the campaign.
+        """
+        if output_dir.exists():
+            shutil.rmtree(output_dir)
+
     def _active_model(self, state: CampaignState) -> ModelRegistryEntry | None:
         return (
             self.registry.get_model(state.active_model_id)
@@ -640,6 +656,7 @@ class ActiveLearningCampaign:
             if (member_dir / "model_manifest.json").is_file():
                 artifacts.append(self._artifact_from_member_dir(member_dir))
                 continue
+            self._clear_stale_attempt(member_dir)
             config = replace(
                 self.config.fine_tuning,
                 name=f"{self.config.fine_tuning.name}_i{state.iteration:03d}_m{member:02d}",
@@ -707,6 +724,7 @@ class ActiveLearningCampaign:
             output_dir = (
                 self._iteration_dir(state) / "evaluation" / f"member_{member:02d}"
             )
+            self._clear_stale_attempt(output_dir)
             evaluation = self.trainer.evaluate(artifact, split.valid_file, output_dir)
             if evaluation.n_failures:
                 raise RuntimeError("model evaluation contains failed configurations")
@@ -752,6 +770,7 @@ class ActiveLearningCampaign:
                 ): artifact
                 for member, artifact in enumerate(artifacts)
             }
+            self._clear_stale_attempt(test_output)
             test_evaluation = self.trainer.evaluate(
                 artifact_by_id[best.model_id], split.test_file, test_output
             )

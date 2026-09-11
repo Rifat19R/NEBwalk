@@ -34,6 +34,13 @@ class CommitteeImageDiagnostics:
     mean_energy: float
     mean_forces: np.ndarray
     energy_std: float
+    """Std of RAW absolute member energies. Only meaningful when every
+    committee member shares the same absolute-energy reference convention
+    (e.g. one foundation model, different training seeds). Independently
+    trained or cross-domain models have unrelated energy zero points, so
+    this value is not a valid disagreement metric for such committees --
+    use ``relative_energy_std`` (from ``evaluate_path``, zeroed against a
+    shared reference_index) instead."""
     relative_energy_std: float | None
     force_component_std: np.ndarray
     rms_force_disagreement: float
@@ -55,7 +62,20 @@ class CommitteePathDiagnostics:
 
 
 class CommitteeEvaluator:
-    """Evaluate ordered independent calculators without mutating input atoms."""
+    """Evaluate ordered independent calculators without mutating input atoms.
+
+    This class does not and cannot check chemical-domain compatibility
+    between ``calculator_factories`` -- it has no model metadata to check
+    against. Committee disagreement (``energy_std``, ``force_component_std``,
+    ``relative_energy_std``, ``barrier_std``) is only a meaningful uncertainty
+    proxy when every member is trained on/valid for the same chemical
+    domain (e.g. several seeds of one fine-tuned model, or several
+    inorganic-domain foundation models together). Mixing domain-incompatible
+    models (e.g. an inorganic foundation model with an organic one) produces
+    numbers that look like a disagreement metric but reflect reference-domain
+    mismatch, not prediction uncertainty -- callers are responsible for only
+    registering/committing domain-compatible members.
+    """
 
     def __init__(
         self,

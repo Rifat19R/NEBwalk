@@ -38,6 +38,10 @@ class NEB:
                 f"got {len(images)}."
             )
         validate_calculators(images)
+        if float(k) <= 0:
+            raise ValueError(f"k must be > 0, got {k}.")
+        if k_min is not None and float(k_min) <= 0:
+            raise ValueError(f"k_min must be > 0, got {k_min}.")
         if k_min is not None and float(k_min) >= float(k):
             raise ValueError(f"k_min ({k_min}) must be strictly less than k ({k}).")
         if int(n_workers) < 1:

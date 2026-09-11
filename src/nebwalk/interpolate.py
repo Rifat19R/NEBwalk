@@ -2,11 +2,15 @@
 
 from __future__ import annotations
 
+import logging
+
 import numpy as np
 from ase import Atoms
 from ase.geometry import find_mic
 from numpy.typing import ArrayLike, NDArray
 from scipy.optimize import minimize
+
+logger = logging.getLogger(__name__)
 
 FloatArray = NDArray[np.float64]
 
@@ -143,6 +147,14 @@ def idpp_interpolate(
             jac=True,
             options={"maxiter": max_iter, "ftol": tol, "gtol": tol},
         )
+        if not result.success:
+            logger.warning(
+                "IDPP interpolation did not converge for image %d/%d: %s "
+                "(the resulting path may be a poor NEB initial guess)",
+                k,
+                n_total - 1,
+                result.message,
+            )
         images[k].set_positions(result.x.reshape(n_atoms, 3))
 
     return images
@@ -297,6 +309,14 @@ def geodesic_interpolate(
             jac=True,
             options={"maxiter": max_iter, "ftol": tol, "gtol": tol},
         )
+        if not result.success:
+            logger.warning(
+                "Geodesic interpolation did not converge for image %d/%d: %s "
+                "(the resulting path may be a poor NEB initial guess)",
+                k,
+                n_total - 1,
+                result.message,
+            )
         images[k].set_positions(result.x.reshape(n_atoms, 3))
 
     return images

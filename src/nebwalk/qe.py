@@ -66,10 +66,14 @@ class QERecoveryStrategy:
 
     def classify(self, error, raw_output=None):
         text = raw_output or str(error)
-        if "JOB DONE." in text:
-            return FailureType.UNKNOWN
+        # Check for non-convergence before "JOB DONE." -- QE prints
+        # "JOB DONE." on exit even when the SCF cycle never converged, so
+        # checking JOB DONE. first would misclassify a real convergence
+        # failure as FailureType.UNKNOWN and skip the retryable path.
         if "convergence NOT achieved" in text:
             return FailureType.CONVERGENCE_FAILURE
+        if "JOB DONE." in text:
+            return FailureType.UNKNOWN
         geometry_markers = (
             "S matrix not positive definite",
             "negative bond length",
@@ -172,6 +176,13 @@ def _attach_qe_output_capture(calc: Any, image_dir: Path) -> Any:
         if not hasattr(exc, "qe_output"):
             setattr(exc, "qe_output", raw_output)
         if "JOB DONE" not in raw_output:
+            raise exc
+        if "convergence NOT achieved" in raw_output:
+            # QE writes "JOB DONE." on exit regardless of whether the SCF
+            # cycle actually converged -- never fabricate a "successful"
+            # energy/forces result from a non-converged run. Re-raise so
+            # run_with_recovery's classify() can route this to a real
+            # convergence-failure retry instead of silently succeeding.
             raise exc
         if "energy" not in fallback_results or "forces" not in fallback_results:
             energy, forces = _parse_qe_energy_forces(raw_output)
