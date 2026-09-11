@@ -10,6 +10,7 @@ nav:
   - Getting started: getting-started/index.md
   - Tutorials: tutorials/index.md
   - How-to:
+      - Overview: how-to/index.md
       - Active learning: how-to/active_learning.md
       - MLIP fine-tuning: how-to/mlip_finetuning.md
       - QE labeling: how-to/qe_labeling.md

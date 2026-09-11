@@ -10,4 +10,4 @@ the fastest way to see nebwalk end to end is:
   change.
 
 For task-oriented guides (active learning, MLIP fine-tuning, QE labeling,
-campaign recovery), see [How-to](../how-to/).
+campaign recovery), see [How-to](../how-to/index.md).

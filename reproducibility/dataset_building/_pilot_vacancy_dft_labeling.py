@@ -90,7 +90,7 @@ PSEUDOPOTENTIAL_BY_MATERIAL: dict[str, tuple[str, str]] = {
 # else here rather than being asserted from memory.
 PSEUDOPOTENTIAL_NOTES: dict[str, str] = {
     "au": (
-        "Au_ONCV_PBE-1.0.oncvpsp.upf: relativistic=\"scalar\" (scalar-"
+        'Au_ONCV_PBE-1.0.oncvpsp.upf: relativistic="scalar" (scalar-'
         "relativistic core, no explicit spin-orbit coupling -- standard for "
         "non-collinear-off pw.x). z_valence=19 (5s^2 5p^6 5d^10 6s^1: "
         "semicore 5s/5p included as valence, not frozen into the core). "
@@ -98,7 +98,7 @@ PSEUDOPOTENTIAL_NOTES: dict[str, str] = {
         "used elsewhere in this run set."
     ),
     "pt": (
-        "pt_pbe_v1.4.uspp.F.UPF: \"Scalar-Relativistic Calculation\" per "
+        'pt_pbe_v1.4.uspp.F.UPF: "Scalar-Relativistic Calculation" per '
         "PP_INFO (no spin-orbit coupling). z_valence=16 (5p^6 5d^9.5 6s^0.5 "
         "reference config: USPP generation uses a symmetrized fractional-"
         "occupation reference, not the atom's true 5d^9 6s^1 ground state --"
@@ -392,8 +392,9 @@ def main(material: str) -> None:
     print(f"    Training set : {artifact.path}")
     print(f"    Summary      : {summary}")
     print(
-        "    NOTE: run reproducibility/dataset_building/_finalize_datasets.py separately to add "
-        "the full validation checkpoint (cohesive energy, SCF convergence, "
+        "    NOTE: run "
+        "reproducibility/dataset_building/_finalize_datasets.py separately to "
+        "add the full validation checkpoint (cohesive energy, SCF convergence, "
         "MACE/nebwalk.datasets loader checks) and update datasets/manifest.json."
     )
 

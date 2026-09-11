@@ -18,7 +18,8 @@ datasets/<Symbol>/isolated_atom_reference.json for the 4 training elements
 it needs no E0 entry here).
 
 Run:
-    python reproducibility/finetuning/_run_finetune_fold.py <held_out> <al|random> <seed>
+    python reproducibility/finetuning/_run_finetune_fold.py \
+        <held_out> <al|random> <seed>
 """
 
 from __future__ import annotations
@@ -64,7 +65,8 @@ def main(held_out: str, condition: str, seed: int) -> None:
     pool_path = POOLS_DIR / held_out / f"{condition}_pool.extxyz"
     if not pool_path.exists():
         raise SystemExit(
-            f"missing {pool_path}; run reproducibility/finetuning/_build_leave_one_out_pools.py first"
+            f"missing {pool_path}; run "
+            "reproducibility/finetuning/_build_leave_one_out_pools.py first"
         )
 
     e0s = e0s_for(held_out)
