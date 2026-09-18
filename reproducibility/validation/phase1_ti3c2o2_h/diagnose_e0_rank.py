@@ -59,7 +59,7 @@ def diagnose(design_dir: Path) -> dict[str, object]:
     )
     underdetermined = rank < len(elements)
     return {
-        "schema": "nebwalk.phase1_e0_rank.v1",
+        "schema": "NEBwalk.phase1_e0_rank.v1",
         "design_manifest": str((design_dir / "group_manifest.json").resolve()),
         "training_groups": training_groups,
         "n_training_configurations": len(frames),

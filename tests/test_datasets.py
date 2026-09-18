@@ -9,7 +9,7 @@ import pytest
 from ase import Atoms
 from ase.constraints import FixAtoms
 
-from nebwalk.datasets import (
+from NEBwalk.datasets import (
     DatasetValidationError,
     compute_dataset_checksum,
     compute_structure_hash,

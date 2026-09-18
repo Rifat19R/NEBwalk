@@ -1,6 +1,6 @@
-# Contributing to nebwalk
+# Contributing to NEBwalk
 
-Thank you for improving nebwalk. Focused bug fixes, tests, documentation, and
+Thank you for improving NEBwalk. Focused bug fixes, tests, documentation, and
 reproducible scientific benchmarks are welcome.
 
 ## Development workflow
@@ -12,8 +12,8 @@ reproducible scientific benchmarks are welcome.
    ```bash
    ruff check .
    ruff format --check .
-   mypy src/nebwalk
-   pytest --cov=nebwalk
+   mypy src/NEBwalk
+   pytest --cov=NEBwalk
    python -m build
    twine check dist/*
    mkdocs build --strict
@@ -39,6 +39,6 @@ small, reviewable, and accompanied by exact reproduction commands.
 
 ## Compatibility
 
-nebwalk follows semantic versioning. Removing or changing public names requires
+NEBwalk follows semantic versioning. Removing or changing public names requires
 a deprecation period except when repairing unsafe or scientifically incorrect
 behavior. Python and ASE support changes must be documented in the changelog.

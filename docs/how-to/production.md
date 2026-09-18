@@ -1,6 +1,6 @@
 # Production use
 
-Pin nebwalk, ASE, NumPy, SciPy, calculator, model, and pseudopotential versions.
+Pin NEBwalk, ASE, NumPy, SciPy, calculator, model, and pseudopotential versions.
 Store a reproducibility bundle for every reported calculation. Run expensive
 jobs in isolated work directories and preserve raw calculator logs outside the
 Git repository.

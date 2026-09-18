@@ -1,6 +1,6 @@
 # How-to guides
 
-Task-oriented guides for getting specific things done with nebwalk. Each
+Task-oriented guides for getting specific things done with NEBwalk. Each
 guide assumes you have already completed [Getting started](../getting-started/index.md)
 and are working toward a concrete goal rather than learning the library.
 

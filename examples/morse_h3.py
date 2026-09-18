@@ -3,7 +3,7 @@ Example 1: Collinear H-atom exchange  HA•••HB-HC → HA-HB•••HC
 
 Uses a simplified SEAM (Sum of Morse pairs) potential for demonstration.
 This is NOT physically accurate for H+H2; the LEPS potential would be needed
-for quantitative barriers.  The purpose here is to verify that nebwalk finds
+for quantitative barriers.  The purpose here is to verify that NEBwalk finds
 a smooth saddle-point profile without any external calculator.
 
 Key point: HA (index 0) and HC (index 2) are fixed across all intermediate
@@ -19,7 +19,7 @@ import numpy as np
 from ase import Atoms
 from ase.constraints import FixAtoms
 
-from nebwalk import NEB, linear_interpolate
+from NEBwalk import NEB, linear_interpolate
 
 # ---------------------------------------------------------------------------
 # Morse potential parameters for H2

@@ -22,8 +22,8 @@ from ase import Atoms
 from ase.io import read, write
 from vacancy_benchmark_suite import SYSTEMS, qe_params_for
 
-from nebwalk.finetune import compute_isolated_atom_reference
-from nebwalk.qe import make_qe_factory
+from NEBwalk.finetune import compute_isolated_atom_reference
+from NEBwalk.qe import make_qe_factory
 
 MASTER_TRAIN_FILE = "_vacancy_training_set/vacancy_train.extxyz"
 MATERIALS_TO_FIX = ["al", "cu", "ag"]

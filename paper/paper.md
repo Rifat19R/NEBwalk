@@ -1,5 +1,5 @@
 ---
-title: 'nebwalk: a calculator-agnostic nudged elastic band library with MLIP-assisted barrier pre-screening'
+title: 'NEBwalk: a calculator-agnostic nudged elastic band library with MLIP-assisted barrier pre-screening'
 tags:
   - Python
   - computational chemistry
@@ -23,8 +23,8 @@ bibliography: paper.bib
 
 # Summary
 
-nebwalk is a Python library for nudged elastic band (NEB) calculations. The
-user provides two relaxed structures, a reactant and a product. nebwalk builds
+NEBwalk is a Python library for nudged elastic band (NEB) calculations. The
+user provides two relaxed structures, a reactant and a product. NEBwalk builds
 an interpolated path between them, optimizes that path, and reports the
 minimum-energy path along with the forward and reverse activation barriers.
 
@@ -41,7 +41,7 @@ Egret-1t machine-learned potentials for cheap screening, and Quantum ESPRESSO
 [@giannozzi2009] for DFT. Each QE image runs in its own working directory so
 that wavefunction files from different images do not overwrite each other.
 
-nebwalk also includes a two-stage workflow for combining machine-learned
+NEBwalk also includes a two-stage workflow for combining machine-learned
 potentials with DFT. It runs the NEB once with a fast potential, picks out the
 few images that matter most for the barrier, and writes them to disk ready for
 DFT single-point checks or for an active-learning dataset. A separate module
@@ -60,7 +60,7 @@ Getting a machine-learned potential into either of these takes real effort.
 ASE [@larsen2017] ships its own NEB, which is more flexible, but its default
 optimizer is L-BFGS. That choice is not ideal here, because the NEB force is
 not the gradient of a single energy function and quasi-Newton methods assume
-that it is [@bitzek2006]. nebwalk uses FIRE everywhere instead, which does not
+that it is [@bitzek2006]. NEBwalk uses FIRE everywhere instead, which does not
 make that assumption.
 
 The other gap is more recent. Universal machine-learned potentials like
@@ -72,7 +72,7 @@ chemistry. The common fix, rerunning the whole NEB in DFT, is expensive and
 usually overkill. What is actually needed is a way to use the cheap result to
 decide which images deserve a DFT calculation.
 
-nebwalk does this. It runs the cheap NEB, selects the three to five images that
+NEBwalk does this. It runs the cheap NEB, selects the three to five images that
 carry the most information about the barrier, and exports them in a form ready
 for DFT or for active learning. Anyone who wants the speed of a machine-learned
 potential together with the accuracy of DFT can use this without writing their
@@ -94,7 +94,7 @@ path search should be done with a machine-learned potential and only selected
 images should later be checked with DFT.
 
 ASE [@larsen2017] provides a general Python NEB interface and is the closest
-software foundation to nebwalk. nebwalk builds on the same calculator-agnostic
+software foundation to NEBwalk. NEBwalk builds on the same calculator-agnostic
 idea, but narrows the workflow around reproducible barrier screening: FIRE is
 the default optimizer, IDPP and minimum-image interpolation are part of the
 standard path setup, every QE image gets an isolated working directory, and the
@@ -105,14 +105,14 @@ rather than a set of scripts around ASE.
 Other transition-state tools focus on different parts of the problem. Sella is
 designed for direct saddle-point optimization once a reasonable transition-state
 guess is available. Engine-specific NEB drivers focus on robust DFT
-execution. nebwalk occupies the space between them: it is a lightweight Python
+execution. NEBwalk occupies the space between them: it is a lightweight Python
 library for building and optimizing full paths with any ASE-compatible
 calculator, then preserving the path, metadata, and selected images needed for
 DFT validation or active learning.
 
 # Implementation
 
-nebwalk is pure Python and depends on ASE [@larsen2017], NumPy, SciPy, and
+NEBwalk is pure Python and depends on ASE [@larsen2017], NumPy, SciPy, and
 Matplotlib. MACE and Egret are optional and are only imported if the user's own
 calculator factory imports them. Quantum ESPRESSO support goes through ASE's
 Espresso interface and needs a working pw.x and UPF pseudopotential files.
@@ -125,7 +125,7 @@ single velocity array across all the moving images. For periodic cells, every
 displacement between neighboring images is wrapped with ASE's `find_mic` so
 that an atom crossing a cell boundary does not create a false jump in the path.
 
-The two-stage workflow lives in `nebwalk.active`. The function
+The two-stage workflow lives in `NEBwalk.active`. The function
 `run_mlip_assisted_neb()` takes any ASE calculator factory, runs the NEB, and
 hands the energies to the selection module. The default rule,
 `peak_plus_neighbors`, keeps the highest-energy image and the images on either
@@ -133,7 +133,7 @@ side of it. The selected images are written out as `.xyz`, `.traj`, and `.json`
 with their metadata. The selection rule is a named component, so a different
 rule can be added without touching the core code.
 
-The reproducibility module is `nebwalk.reproduce`, with one main function,
+The reproducibility module is `NEBwalk.reproduce`, with one main function,
 `save_bundle()`. It writes the two endpoints in extended XYZ, the full
 configuration as JSON, the results and the per-step convergence history, the
 whole path trajectory, the output of `pip freeze`, SHA-256 checksums for every
@@ -152,7 +152,7 @@ package is on PyPI and is tested on every push through GitHub Actions.
 
 # Software design
 
-nebwalk is organized around small modules with one responsibility each. The core
+NEBwalk is organized around small modules with one responsibility each. The core
 NEB force projection and optimizer live separately from interpolation, image
 selection, QE calculator setup, and reproducibility output. This keeps the
 scientific algorithm easy to inspect while allowing optional workflows, such as
@@ -161,7 +161,7 @@ the package.
 
 The main user-facing object is an ASE `Atoms` path with an attached calculator
 factory. Users can provide any calculator that returns energies and forces, and
-nebwalk does not need to know whether that calculator is EMT, a machine-learned
+NEBwalk does not need to know whether that calculator is EMT, a machine-learned
 potential, or a DFT wrapper. File-writing code is similarly separated from the
 optimization loop, so validation examples can write plots, CSV files,
 trajectories, and reproducibility bundles without changing the NEB force
@@ -169,12 +169,14 @@ routine.
 
 # Validation
 
-Nineteen system-calculator combinations across the four backends were checked
+Twenty system-calculator combinations across the four backends were checked
 against DFT-PBE or experimental references. A few are shown below; the full set
 with per-system notes is in the repository README. Where the error is large,
 such as the Pt vacancy with EMT (34.8%) or the Al vacancy with MACE-MP-0 (17%),
 the cause is the calculator, not the NEB. EMT has no relativistic terms for Pt,
-and MACE-MP-0 is known to underbind vacancy migration barriers. In every case
+and in this benchmark set MACE-MP-0 underestimates several vacancy migration
+barriers, though the effect is system dependent rather than universal (see
+the README benchmark table). In every case
 the path converged and the two endpoints came out equal to within 1 meV for
 symmetric hops, which is the internal check that the optimization itself is
 sound.
@@ -195,7 +197,7 @@ cell would bring the barriers closer to the reference values.
 
 # Research impact statement
 
-nebwalk is intended for researchers who need activation barriers but cannot run
+NEBwalk is intended for researchers who need activation barriers but cannot run
 every candidate path directly in DFT. It supports a practical screening pattern:
 run many paths cheaply with a machine-learned potential, identify the important
 images, and reserve DFT for the small number of structures that control the
@@ -203,7 +205,7 @@ barrier. This is useful for vacancy migration, surface diffusion, catalytic
 elementary steps, and other materials problems where the same transition search
 must be repeated across many sites, compositions, or adsorbates.
 An ongoing study of hydrogen migration on Ti₃C₂O₂, Ti₃C₂(OH)₂, and Ti₃C₂F₂
-MXene surfaces uses nebwalk to manage the QE/PBE NEB workflow and extract
+MXene surfaces uses NEBwalk to manage the QE/PBE NEB workflow and extract
 termination-dependent activation barriers, which demonstrates the library's
 applicability to realistic periodic slab systems.
 

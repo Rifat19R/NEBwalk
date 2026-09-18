@@ -1,12 +1,12 @@
 cff-version: 1.2.0
-message: "If you use nebwalk, please cite this software and the NEB methods it implements."
-title: "nebwalk: a calculator-agnostic nudged elastic band library with MLIP-assisted barrier pre-screening"
+message: "If you use NEBwalk, please cite this software and the NEB methods it implements."
+title: "NEBwalk: a calculator-agnostic nudged elastic band library with MLIP-assisted barrier pre-screening"
 type: software
 authors:
   - family-names: Khandaker
     given-names: Md. Rifat
-repository-code: "https://github.com/Rifat19R/nebwalk"
-url: "https://github.com/Rifat19R/nebwalk"
+repository-code: "https://github.com/Rifat19R/NEBwalk"
+url: "https://github.com/Rifat19R/NEBwalk"
 license: MIT
 version: 0.10.0
 date-released: 2026-06-18

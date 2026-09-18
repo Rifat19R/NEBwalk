@@ -23,9 +23,9 @@ from ase.io import read
 from ase.io.trajectory import Trajectory
 from ase.optimize import BFGS
 
-from nebwalk import NEBRunConfig
-from nebwalk.active import MLIPActiveNEBConfig, run_mlip_assisted_neb
-from nebwalk.selection import peak_plus_neighbors
+from NEBwalk import NEBRunConfig
+from NEBwalk.active import MLIPActiveNEBConfig, run_mlip_assisted_neb
+from NEBwalk.selection import peak_plus_neighbors
 
 NAME = "active_al_vacancy_emt"
 REFERENCE_BARRIER_EV = 0.61

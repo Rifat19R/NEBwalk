@@ -1,7 +1,7 @@
 """MLIP-assisted NEB template using MACE.
 
 Requires:
-    pip install "nebwalk[mace]"
+    pip install "NEBwalk[mace]"
 
 This is a template. Users must provide chemically meaningful relaxed endpoints.
 """
@@ -10,8 +10,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from nebwalk import NEBRunConfig
-from nebwalk.active import MLIPActiveNEBConfig, run_mlip_assisted_neb
+from NEBwalk import NEBRunConfig
+from NEBwalk.active import MLIPActiveNEBConfig, run_mlip_assisted_neb
 
 
 def make_mace_calc():
@@ -20,7 +20,7 @@ def make_mace_calc():
     except ImportError as exc:
         raise ImportError(
             "MACE is not installed. Install optional support with: "
-            'pip install "nebwalk[mace]"'
+            'pip install "NEBwalk[mace]"'
         ) from exc
 
     return mace_mp(

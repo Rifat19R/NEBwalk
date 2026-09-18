@@ -8,11 +8,11 @@ import numpy as np
 import pytest
 from ase import Atoms
 
-import nebwalk.labeling as labeling_module
-from nebwalk.datasets import load_dataset
-from nebwalk.labeling import QEReferenceLabeler
-from nebwalk.qe import QEParams
-from nebwalk.recovery import FailureType, NoOpRecoveryStrategy
+import NEBwalk.labeling as labeling_module
+from NEBwalk.datasets import load_dataset
+from NEBwalk.labeling import QEReferenceLabeler
+from NEBwalk.qe import QEParams
+from NEBwalk.recovery import FailureType, NoOpRecoveryStrategy
 
 
 class ConstantCalculator:

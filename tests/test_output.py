@@ -10,7 +10,7 @@ from ase import Atoms
 from ase.calculators.singlepoint import SinglePointCalculator
 from ase.io import read
 
-from nebwalk.output import plot_energy_profile, save_csv, save_trajectory
+from NEBwalk.output import plot_energy_profile, save_csv, save_trajectory
 
 matplotlib.use("Agg")
 

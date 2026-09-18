@@ -6,8 +6,8 @@ Describe the problem and the smallest solution implemented.
 
 - [ ] Tests added or updated
 - [ ] `ruff check .` and `ruff format --check .` pass
-- [ ] `mypy nebwalk` passes
-- [ ] `pytest --cov=nebwalk` passes
+- [ ] `mypy NEBwalk` passes
+- [ ] `pytest --cov=NEBwalk` passes
 - [ ] Scientific claims include reproducible inputs and references
 - [ ] Public API and behavior changes are documented in `CHANGELOG.md`
 

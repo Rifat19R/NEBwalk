@@ -1,16 +1,16 @@
 """MACE-compatible training-set export for DFT-labeled NEB images.
 
 This is stage 3 of the active-learning loop (stage 1: MLIP-assisted
-selection in :mod:`nebwalk.active`; stage 2: DFT labeling in
-:mod:`nebwalk.label`). It formats DFT labels as :mod:`nebwalk.datasets`
+selection in :mod:`NEBwalk.active`; stage 2: DFT labeling in
+:mod:`NEBwalk.label`). It formats DFT labels as :mod:`NEBwalk.datasets`
 records -- the same canonical, checksum-verified, structure-hash-validated
-schema :mod:`nebwalk.campaign`/:mod:`nebwalk.labeling` use -- so a
+schema :mod:`NEBwalk.campaign`/:mod:`NEBwalk.labeling` use -- so a
 DFT-labeled NEB path is written and validated through one real, shared code
 path rather than a second bespoke writer, and computes a correct
 isolated-atom energy reference for the labeling run's own DFT setup.
 
 It does not invoke MACE, choose hyperparameters, or run any training --
-fine-tuning itself stays external to nebwalk; see
+fine-tuning itself stays external to NEBwalk; see
 :func:`generate_finetune_command` for a documented, reviewable command
 template rather than an executed one.
 """
@@ -38,8 +38,8 @@ FloatArray = NDArray[np.float64]
 MIN_RECOMMENDED_CONFIGS = 50
 
 TRAINING_SET_DISCLOSURE = (
-    "This file was exported by nebwalk.finetune.export_mace_training_set()\n"
-    "via nebwalk.datasets.write_dataset() -- it passed that module's real\n"
+    "This file was exported by NEBwalk.finetune.export_mace_training_set()\n"
+    "via NEBwalk.datasets.write_dataset() -- it passed that module's real\n"
     "geometry/duplicate/provenance validation, not just a bespoke check\n"
     "local to this module. It is correctly *formatted* for MACE, but a\n"
     "handful of configs from a single NEB path is NOT enough data to\n"
@@ -56,7 +56,7 @@ TRAINING_SET_DISCLOSURE = (
     "This file does NOT contain an IsolatedAtom entry: an isolated atom in a\n"
     "vacuum cell is evaluated at different QE settings (gamma-only, no\n"
     "smearing) than the bulk path, so it has a different dft_settings_hash\n"
-    "and nebwalk.datasets.write_dataset() correctly refuses to mix that into\n"
+    "and NEBwalk.datasets.write_dataset() correctly refuses to mix that into\n"
     "one dataset file. Its energy reference is instead saved alongside this\n"
     "file (see isolated_atom_reference.json / save_isolated_atom_reference())\n"
     "and should be passed to mace_run_train explicitly via --E0s, not fit\n"
@@ -65,7 +65,7 @@ TRAINING_SET_DISCLOSURE = (
     "families (e.g. VASP/PAW vs. Quantum ESPRESSO/PSL) have unrelated\n"
     "absolute energy zeros even under the same nominal functional, so\n"
     "reusing the foundation model's E0s here would reintroduce the same\n"
-    "reference-energy mismatch nebwalk.label guards against one stage\n"
+    "reference-energy mismatch NEBwalk.label guards against one stage\n"
     "earlier."
 )
 
@@ -77,7 +77,7 @@ class IsolatedAtomReference:
     Computed at the same DFT code/pseudopotential as the path labels it will
     accompany, but at its own (cheaper, gamma-only) QE settings -- see
     :func:`compute_isolated_atom_reference`. Kept out of the path's
-    :mod:`nebwalk.datasets` file for that reason; see
+    :mod:`NEBwalk.datasets` file for that reason; see
     :func:`save_isolated_atom_reference`.
     """
 
@@ -198,16 +198,16 @@ def export_mace_training_set(
     iteration: int = 0,
     selection_reason_overrides: Mapping[int, str] | None = None,
 ) -> DatasetArtifact:
-    """Write DFT-labeled images as a canonical :mod:`nebwalk.datasets` file.
+    """Write DFT-labeled images as a canonical :mod:`NEBwalk.datasets` file.
 
     Each label becomes one ``config_type=Default`` frame carrying every
-    field :data:`nebwalk.datasets.REQUIRED_INFO_KEYS` requires
-    (``structure_hash`` via :func:`nebwalk.datasets.compute_structure_hash`,
+    field :data:`NEBwalk.datasets.REQUIRED_INFO_KEYS` requires
+    (``structure_hash`` via :func:`NEBwalk.datasets.compute_structure_hash`,
     ``selection_reason`` derived from ``label.is_reference``, and so on), then
-    :func:`nebwalk.datasets.write_dataset` validates, checksums, and writes
-    it atomically -- this is the same writer :mod:`nebwalk.labeling` and
-    :mod:`nebwalk.campaign` use, so a file written here is guaranteed to load
-    back through :func:`nebwalk.datasets.load_dataset` too.
+    :func:`NEBwalk.datasets.write_dataset` validates, checksums, and writes
+    it atomically -- this is the same writer :mod:`NEBwalk.labeling` and
+    :mod:`NEBwalk.campaign` use, so a file written here is guaranteed to load
+    back through :func:`NEBwalk.datasets.load_dataset` too.
 
     Every non-reference label defaults to ``selection_reason="peak_plus_
     neighbors"`` -- correct only if every label really was chosen by that
@@ -255,7 +255,7 @@ def export_mace_training_set(
 
     readme = artifact.path.parent / f"{artifact.path.stem}_README.md"
     readme.write_text(
-        "# nebwalk MACE training-set export\n\n"
+        "# NEBwalk MACE training-set export\n\n"
         f"{artifact.summary.n_configurations} configuration(s), path_id="
         f"{path_id!r}, elements: {', '.join(artifact.summary.elements)}.\n"
         f"sha256: {artifact.checksum}\n\n"
@@ -268,7 +268,7 @@ def export_mace_training_set(
 def summarize_training_set(path: str | Path) -> dict[str, Any]:
     """Read back an exported training file and summarize its contents.
 
-    Loads through :func:`nebwalk.datasets.load_dataset`, so this also
+    Loads through :func:`NEBwalk.datasets.load_dataset`, so this also
     re-validates the file (geometry, duplicates, provenance) on every call.
     """
     from .datasets import load_dataset
@@ -340,7 +340,7 @@ def combine_training_sets(
 
     This is a deliberately permissive, non-validated concatenation -- unlike
     :func:`export_mace_training_set`, it does not go through
-    :func:`nebwalk.datasets.write_dataset`, because different materials
+    :func:`NEBwalk.datasets.write_dataset`, because different materials
     legitimately have different ``dft_settings_hash`` values (different
     pseudopotentials/cutoffs per element), which that writer's validation
     refuses to mix into one canonical dataset. This reads each material's own

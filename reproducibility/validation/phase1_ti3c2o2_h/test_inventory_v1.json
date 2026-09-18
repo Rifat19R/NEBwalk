@@ -1,5 +1,5 @@
 {
-  "schema": "nebwalk.phase1_test_inventory.v1",
+  "schema": "NEBwalk.phase1_test_inventory.v1",
   "package_version": "0.10.0",
   "environment": {
     "platform": "WSL Ubuntu",
@@ -10,12 +10,12 @@
   },
   "distributions": {
     "wheel": {
-      "filename": "nebwalk-0.10.0-py3-none-any.whl",
+      "filename": "NEBwalk-0.10.0-py3-none-any.whl",
       "sha256": "dc9c20ce2befc87bec732a2dbda3580b70e571dba3a23aad00cd96be7299ca6c",
       "twine_check": "passed"
     },
     "sdist": {
-      "filename": "nebwalk-0.10.0.tar.gz",
+      "filename": "NEBwalk-0.10.0.tar.gz",
       "sha256": "688766f1be19862567daf697871dc0f4f79d7c9f738bd82632b980bba5f1702e",
       "twine_check": "passed"
     }

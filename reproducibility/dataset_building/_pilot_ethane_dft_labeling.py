@@ -3,7 +3,7 @@ Stage 1 (MLIP-assisted NEB + uncertainty-disagreement selection) picked out
 for the ethane/Egret-1t torsion.
 
 This is a throwaway pilot script, not a permanent example -- it exists to
-validate nebwalk.label.label_selected_images() against a real QE run before
+validate NEBwalk.label.label_selected_images() against a real QE run before
 deciding whether/how to turn this into a documented example.
 
 Run:
@@ -22,8 +22,8 @@ from organic_disagreement_common import (
     run_organic_disagreement_example,
 )
 
-from nebwalk.label import label_selected_images
-from nebwalk.qe import QEParams, make_qe_factory
+from NEBwalk.label import label_selected_images
+from NEBwalk.qe import QEParams, make_qe_factory
 
 ENDPOINT_RELAX_FMAX = 0.05
 

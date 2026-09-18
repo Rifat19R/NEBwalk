@@ -1,7 +1,7 @@
 # H/Cu(111) Surface Diffusion Benchmark
 
 **Calculator:** MACE-MP-0 (small, float64)
-**nebwalk version:** 0.6.0
+**NEBwalk version:** 0.6.0
 **System:** H adatom diffusion on Cu(111) surface
 
 ## Mechanisms studied
@@ -34,7 +34,7 @@ universal potential on surface adsorbate chemistry.
 ## Reproduce
 
 ```bash
-pip install nebwalk
+pip install NEBwalk
 cd scripts/
 bash run_h_cu111_fcc_to_hcp.sh
 ```

@@ -5,10 +5,10 @@ from __future__ import annotations
 import json
 import sys
 
-from nebwalk.cli import build_parser, main
-from nebwalk.datasets import compute_structure_hash, write_dataset
-from nebwalk.dryrun import run_dry_campaign
-from nebwalk.reporting import write_campaign_summary, write_iteration_report
+from NEBwalk.cli import build_parser, main
+from NEBwalk.datasets import compute_structure_hash, write_dataset
+from NEBwalk.dryrun import run_dry_campaign
+from NEBwalk.reporting import write_campaign_summary, write_iteration_report
 from tests.test_datasets import _frame
 
 

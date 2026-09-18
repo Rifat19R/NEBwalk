@@ -12,8 +12,8 @@ from ase import Atoms
 from ase.geometry import get_distances
 from ase.io import read, write
 
-from nebwalk.datasets import compute_structure_hash
-from nebwalk.interpolate import idpp_interpolate
+from NEBwalk.datasets import compute_structure_hash
+from NEBwalk.interpolate import idpp_interpolate
 
 ROOT = Path(__file__).resolve().parents[2]
 HERE = Path(__file__).resolve().parent
@@ -205,7 +205,7 @@ def main() -> None:
     if len(role_by_path) != len(set(role_by_path)):
         raise RuntimeError("path IDs are not unique")
     manifest = {
-        "schema": "nebwalk.phase1_dataset_design.v2",
+        "schema": "NEBwalk.phase1_dataset_design.v2",
         "source_endpoints": {
             "initial": str(INITIAL.relative_to(ROOT)),
             "initial_sha256": _file_sha256(INITIAL),

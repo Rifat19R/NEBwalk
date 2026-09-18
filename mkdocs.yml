@@ -1,8 +1,8 @@
-site_name: nebwalk
+site_name: NEBwalk
 site_description: Transparent ASE-compatible NEB and CI-NEB workflows
-site_url: https://rifat19r.github.io/nebwalk/
-repo_url: https://github.com/Rifat19R/nebwalk
-repo_name: Rifat19R/nebwalk
+site_url: https://rifat19r.github.io/NEBwalk/
+repo_url: https://github.com/Rifat19R/NEBwalk
+repo_name: Rifat19R/NEBwalk
 theme:
   name: readthedocs
 nav:

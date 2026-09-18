@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Al vacancy migration with nebwalk and Quantum ESPRESSO.
+"""Al vacancy migration with NEBwalk and Quantum ESPRESSO.
 
 System:   FCC Al, 2x2x2 cubic supercell, one vacancy
 Method:   QE/PBE with PAW pseudopotential
@@ -28,8 +28,8 @@ from ase.build import bulk
 from ase.io import write
 from ase.optimize import BFGS
 
-from nebwalk import NEB, idpp_interpolate
-from nebwalk.qe import QEParams, make_qe_factory, validate_qe_setup
+from NEBwalk import NEB, idpp_interpolate
+from NEBwalk.qe import QEParams, make_qe_factory, validate_qe_setup
 
 PSEUDO_DIR = Path(os.environ["ESPRESSO_PSEUDO"]).expanduser()
 PSEUDO = {"Al": os.environ.get("AL_PSEUDO", "Al.pbe-n-kjpaw_psl.1.0.0.UPF")}
@@ -157,7 +157,7 @@ def main() -> None:
         clean_previous_outputs()
 
     print("=" * 72)
-    print("nebwalk + Quantum ESPRESSO: Al vacancy migration")
+    print("NEBwalk + Quantum ESPRESSO: Al vacancy migration")
     print("=" * 72)
     print(f"Live log: {LOG_FILE.resolve()}")
     if CLEAN_RUN:

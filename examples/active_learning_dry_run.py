@@ -6,7 +6,7 @@ import argparse
 import tempfile
 from pathlib import Path
 
-from nebwalk.dryrun import run_dry_campaign
+from NEBwalk.dryrun import run_dry_campaign
 
 
 def main() -> None:
@@ -19,7 +19,7 @@ def main() -> None:
         print(f"reason={result.state.stopping_reason}")
         print(f"campaign={result.campaign_dir}")
         return
-    with tempfile.TemporaryDirectory(prefix="nebwalk-dry-run-") as temporary:
+    with tempfile.TemporaryDirectory(prefix="NEBwalk-dry-run-") as temporary:
         result = run_dry_campaign(temporary)
         print(f"state={result.state.stage.value}")
         print(f"reason={result.state.stopping_reason}")

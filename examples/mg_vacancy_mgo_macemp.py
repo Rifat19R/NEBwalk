@@ -7,7 +7,7 @@ Mechanism        : Mg²⁺ vacancy hop between nearest-neighbour sites
 Supercell        : 2×2×2 conventional cell, 63 atoms (64 - 1 vacancy)
 Calculator       : MACE-MP-0 small, float64
 Reference barrier: ~2.2 eV (DFT-PBE; range 1.9–2.5 eV)
-nebwalk result   : 2.254 eV  (2.5% error)
+NEBwalk result   : 2.254 eV  (2.5% error)
 
 Usage
 -----
@@ -31,7 +31,7 @@ from ase.build import make_supercell
 from ase.optimize import FIRE
 from mace.calculators import mace_mp
 
-from nebwalk import NEBRunConfig, run_neb_calculation
+from NEBwalk import NEBRunConfig, run_neb_calculation
 
 # ── Reference ─────────────────────────────────────────────────────────────────
 REF_BARRIER = 2.20  # eV, DFT-PBE central estimate

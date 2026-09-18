@@ -9,9 +9,9 @@ import numpy as np
 import pytest
 from ase import Atoms
 
-from nebwalk.active import SelectedImage
-from nebwalk.label import DFTLabel, label_selected_images
-from nebwalk.recovery import FailureType, NoOpRecoveryStrategy
+from NEBwalk.active import SelectedImage
+from NEBwalk.label import DFTLabel, label_selected_images
+from NEBwalk.recovery import FailureType, NoOpRecoveryStrategy
 
 
 class ConstantCalculator:

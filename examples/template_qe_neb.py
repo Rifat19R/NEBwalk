@@ -1,7 +1,7 @@
-"""Template for running nebwalk with Quantum ESPRESSO via ASE.
+"""Template for running NEBwalk with Quantum ESPRESSO via ASE.
 
 This example is intentionally explicit. It expects relaxed endpoint structures
-and local pseudopotentials, then delegates all repeated NEB setup to nebwalk's
+and local pseudopotentials, then delegates all repeated NEB setup to NEBwalk's
 shared engine and QE calculator factory.
 
 Before running, configure the paths and command below for a native Linux QE
@@ -14,7 +14,7 @@ from pathlib import Path
 
 from ase.io import read
 
-from nebwalk import (
+from NEBwalk import (
     NEBRunConfig,
     QEParams,
     make_qe_factory,

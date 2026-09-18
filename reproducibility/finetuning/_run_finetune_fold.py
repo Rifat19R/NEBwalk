@@ -12,7 +12,7 @@ specific images ended up as data points.
 E0s are passed explicitly (not --E0s=average, known unreliable from this
 project's own earlier smoke-test debugging, and not the foundation model's
 built-in E0s, which use a different DFT reference level -- see
-nebwalk.finetune.TRAINING_SET_DISCLOSURE), built from the already-validated
+NEBwalk.finetune.TRAINING_SET_DISCLOSURE), built from the already-validated
 datasets/<Symbol>/isolated_atom_reference.json for the 4 training elements
 (the held-out element's atoms never appear in the training pool at all, so
 it needs no E0 entry here).
@@ -32,7 +32,7 @@ from pathlib import Path
 from ase.data import atomic_numbers
 from vacancy_benchmark_suite import SYSTEMS
 
-from nebwalk.finetune import load_isolated_atom_reference
+from NEBwalk.finetune import load_isolated_atom_reference
 
 MATERIALS = ["al", "cu", "si", "mg", "fe"]
 POOLS_DIR = Path("phase3_pools")

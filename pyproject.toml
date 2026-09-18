@@ -3,7 +3,7 @@ requires = ["setuptools>=77", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "nebwalk"
+name = "NEBwalk"
 version = "0.10.0"
 description = "Calculator-agnostic nudged elastic band library with MLIP-assisted barrier pre-screening and DFT validation workflows"
 readme = "README.md"
@@ -35,20 +35,20 @@ classifiers = [
 mace = ["mace-torch>=0.3.12,<0.4"]
 training = ["mace-torch>=0.3.12,<0.4"]
 test = ["pytest>=7", "pytest-cov>=5", "numpy"]
-dev = ["nebwalk[test]", "build", "mypy==2.3.1", "numpy<2.5", "ruff==0.16.7", "twine"]
+dev = ["NEBwalk[test]", "build", "mypy==2.3.1", "numpy<2.5", "ruff==0.16.7", "twine"]
 docs = ["mkdocs>=1.6", "mkdocstrings[python]>=0.25"]
 
 [project.urls]
-Homepage = "https://github.com/Rifat19R/nebwalk"
-Repository = "https://github.com/Rifat19R/nebwalk"
-Issues = "https://github.com/Rifat19R/nebwalk/issues"
+Homepage = "https://github.com/Rifat19R/NEBwalk"
+Repository = "https://github.com/Rifat19R/NEBwalk"
+Issues = "https://github.com/Rifat19R/NEBwalk/issues"
 
 [project.scripts]
-nebwalk = "nebwalk.cli:main"
+NEBwalk = "NEBwalk.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
-include = ["nebwalk*"]
+include = ["NEBwalk*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -74,11 +74,11 @@ select = ["E", "F", "W", "I"]
 ignore = []
 
 [tool.ruff.lint.isort]
-known-first-party = ["nebwalk"]
+known-first-party = ["NEBwalk"]
 
 [tool.mypy]
 python_version = "3.10"
-files = ["src/nebwalk"]
+files = ["src/NEBwalk"]
 check_untyped_defs = true
 no_implicit_optional = true
 warn_redundant_casts = true
@@ -88,7 +88,7 @@ ignore_missing_imports = true
 
 [tool.coverage.run]
 branch = true
-source = ["nebwalk"]
+source = ["NEBwalk"]
 
 [tool.coverage.report]
 show_missing = true

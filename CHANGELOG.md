@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to **nebwalk** are documented here.
+All notable changes to **NEBwalk** are documented here.
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
@@ -32,7 +32,7 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   validation-based model activation, iterative NEB selection, explicit
   stopping decisions, failure tracebacks and stage resume, immutable iteration
   artifacts, and separate sparse/full-QE final validation semantics.
-- `nebwalk` CLI commands for dataset validation/splitting, MACE environment
+- `NEBwalk` CLI commands for dataset validation/splitting, MACE environment
   checks/fine-tuning/evaluation, and campaign initialization, execution,
   status, resume, and final validation; deterministic JSON, Markdown, and CSV
   reports; a dependency-free campaign dry run; and editable campaign templates.
@@ -50,9 +50,19 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   and explicit caveats that these runs are exploratory checks, not DFT
   validation or calibrated uncertainty quantification.
 - Pt vacancy migration added to `vacancy_benchmark_suite.py` (EMT), kept as a
-  documented calculator-limitation case rather than a nebwalk bug.
+  documented calculator-limitation case rather than a NEBwalk bug.
 
 ### Changed
+- **Breaking:** package/import renamed from `nebwalk` to `NEBwalk`
+  (`import NEBwalk`, `src/NEBwalk/`, CLI command `NEBwalk`, PyPI project
+  `NEBwalk`, GitHub repo `Rifat19R/NEBwalk`). Existing `pip install nebwalk`
+  users must update `import nebwalk` to `import NEBwalk`; the PyPI
+  distribution name is unchanged after PEP 503 normalization, so
+  `pip install nebwalk`/`pip install NEBwalk` both still resolve to the same
+  project. Internal data-format identifiers (the `"schema": "nebwalk.*.v1"`
+  strings written into dataset manifests, campaign state, and reproducibility
+  bundles) are intentionally left as `nebwalk.*` so already-frozen artifacts
+  from prior releases keep loading without a schema-version bump.
 - `ag/au/cu/ni/pd/pt_vacancy_emt.py` collapsed into thin wrappers around
   `vacancy_benchmark_suite.main()`; removes ~600 lines of duplicated
   build/relax/NEB/report boilerplate across the six scripts.
@@ -94,7 +104,7 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ### Added
 - Cross-model disagreement (uncertainty proxy) image selection strategy:
   `uncertainty_disagreement`.
-- `nebwalk.uncertainty` module with `DisagreementResult` and
+- `NEBwalk.uncertainty` module with `DisagreementResult` and
   `compute_cross_model_disagreement()`.
 - Secondary-calculator support in `MLIPActiveNEBConfig` for comparing
   converged primary MLIP images against a second organic-domain MLIP.
@@ -155,7 +165,7 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [0.8.0] — 2026-06-13
 
 ### Added
-- `nebwalk.reproduce` module: `save_bundle()` and `ReproBundle`.
+- `NEBwalk.reproduce` module: `save_bundle()` and `ReproBundle`.
   Exports input structures, NEBRunConfig, results, energy profile, trajectory,
   SHA-256 manifest, software environment, and a human-editable rerun template
   into a self-contained directory and optional `.tar.gz`.
@@ -199,9 +209,9 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [0.7.0] — 2026-06-12
 
 ### Added
-- `nebwalk.active` module with `run_mlip_assisted_neb()` high-level workflow.
+- `NEBwalk.active` module with `run_mlip_assisted_neb()` high-level workflow.
 - `MLIPActiveNEBConfig`, `MLIPActiveNEBResult`, and `SelectedImage` dataclasses.
-- `nebwalk.selection` module with `peak_plus_neighbors` image selection strategy.
+- `NEBwalk.selection` module with `peak_plus_neighbors` image selection strategy.
 - Selected-image export to `.xyz`, `.traj`, and `.json` formats.
 - Examples for MLIP-assisted NEB using EMT and MACE template.
 - Tests for selection logic and active workflow exports.
@@ -223,7 +233,7 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   interpolation with overlap repulsion, not the mass-weighted internal-coordinate
   geodesic method; a heuristic alternative to plain IDPP for large conformational
   changes.
-- **Quantum ESPRESSO interface** (`nebwalk.qe`): `QEParams`, `make_qe_factory`,
+- **Quantum ESPRESSO interface** (`NEBwalk.qe`): `QEParams`, `make_qe_factory`,
   `validate_qe_setup` — generate and validate QE PWSCF input files for
   DFT-level NEB workflows.
 - `.gitattributes` for consistent cross-platform line endings.

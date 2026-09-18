@@ -7,7 +7,7 @@ NEB, then QE/PBE labels ALL 5 images -- not just peak_plus_neighbors -- since
 the point here is maximum information per path, not minimum DFT cost), and
 exports it as its own path_id under datasets/<Symbol>/, distinct from the
 element's original 1st-nearest-neighbor 2x2x2-supercell path so per-path_id
-provenance stays honest (nebwalk.datasets requires consistent atom
+provenance stays honest (NEBwalk.datasets requires consistent atom
 count/cell/pbc within one path_id; a 3x3x3-supercell path has a different
 atom count than the 2x2x2 one, so it MUST be a separate path_id, not merged
 into the original file).
@@ -39,10 +39,10 @@ from vacancy_benchmark_suite import (
     relax_endpoint,
 )
 
-from nebwalk import MLIPActiveNEBConfig, NEBRunConfig, run_mlip_assisted_neb
-from nebwalk.active import SelectedImage
-from nebwalk.label import label_selected_images
-from nebwalk.qe import make_qe_factory
+from NEBwalk import MLIPActiveNEBConfig, NEBRunConfig, run_mlip_assisted_neb
+from NEBwalk.active import SelectedImage
+from NEBwalk.label import label_selected_images
+from NEBwalk.qe import make_qe_factory
 
 VARIANTS = {
     "2nn": {"neighbor_shell": 2, "repeat": None, "path_suffix": "2nn_hop"},

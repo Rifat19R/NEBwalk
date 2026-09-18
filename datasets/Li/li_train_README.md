@@ -1,10 +1,10 @@
-# nebwalk MACE training-set export
+# NEBwalk MACE training-set export
 
 4 configuration(s), path_id='li_vacancy', elements: Li.
 sha256: 4f543b865a0d50fe50b60e44113e7740b2d3d82e6e7160a27f0eb06c2065852d
 
-This file was exported by nebwalk.finetune.export_mace_training_set()
-via nebwalk.datasets.write_dataset() -- it passed that module's real
+This file was exported by NEBwalk.finetune.export_mace_training_set()
+via NEBwalk.datasets.write_dataset() -- it passed that module's real
 geometry/duplicate/provenance validation, not just a bespoke check
 local to this module. It is correctly *formatted* for MACE, but a
 handful of configs from a single NEB path is NOT enough data to
@@ -23,7 +23,7 @@ REF_ prefix, which also matches mace.data.utils.DefaultKeys.
 This file does NOT contain an IsolatedAtom entry: an isolated atom in a
 vacuum cell is evaluated at different QE settings (gamma-only, no
 smearing) than the bulk path, so it has a different dft_settings_hash
-and nebwalk.datasets.write_dataset() correctly refuses to mix that into
+and NEBwalk.datasets.write_dataset() correctly refuses to mix that into
 one dataset file. Its energy reference is instead saved alongside this
 file (see isolated_atom_reference.json / save_isolated_atom_reference())
 and should be passed to mace_run_train explicitly via --E0s, not fit
@@ -32,5 +32,5 @@ model's own built-in E0s -- different codes and pseudopotential
 families (e.g. VASP/PAW vs. Quantum ESPRESSO/PSL) have unrelated
 absolute energy zeros even under the same nominal functional, so
 reusing the foundation model's E0s here would reintroduce the same
-reference-energy mismatch nebwalk.label guards against one stage
+reference-energy mismatch NEBwalk.label guards against one stage
 earlier.

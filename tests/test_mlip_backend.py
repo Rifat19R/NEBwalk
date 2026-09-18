@@ -10,8 +10,8 @@ import numpy as np
 import pytest
 from ase.io import write
 
-from nebwalk.datasets import compute_structure_hash, split_dataset_by_group
-from nebwalk.mlip import (
+from NEBwalk.datasets import compute_structure_hash, split_dataset_by_group
+from NEBwalk.mlip import (
     FineTuningConfig,
     FineTuningProtocol,
     MACEBackendError,
@@ -376,7 +376,7 @@ def test_evaluation_calculates_metrics_from_official_cli_output(tmp_path):
     def runner(argv, **kwargs):
         output = Path(argv[argv.index("--output") + 1])
         predictions = __import__(
-            "nebwalk.datasets", fromlist=["load_dataset"]
+            "NEBwalk.datasets", fromlist=["load_dataset"]
         ).load_dataset(split.test_file)
         for frame in predictions:
             frame.info["MACE_energy"] = frame.info["REF_energy"] + 0.2

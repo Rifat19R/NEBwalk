@@ -1,5 +1,5 @@
 {
-  "schema": "nebwalk.flagship_qe_protocol.v1",
+  "schema": "NEBwalk.flagship_qe_protocol.v1",
   "protocol_id": "phase1-qe-pbe-ci-neb-v1",
   "qe_version": "7.4.1",
   "functional": "PBE",

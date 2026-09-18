@@ -13,7 +13,7 @@ minor releases are not maintained unless a backport is announced explicitly.
 ## Reporting a vulnerability
 
 Do not open a public issue for a suspected vulnerability. Use GitHub's private
-security-advisory reporting for `Rifat19R/nebwalk`. Include affected versions,
+security-advisory reporting for `Rifat19R/NEBwalk`. Include affected versions,
 a minimal reproduction, impact, and any proposed mitigation. Expect an initial
 response within seven days. Confirmed reports will receive a remediation plan;
 coordinated disclosure and reporter credit are offered when appropriate.

@@ -8,7 +8,7 @@ from ase import Atoms
 from ase.calculators.singlepoint import SinglePointCalculator
 from ase.mep import NEB as ASENEB
 
-from nebwalk.forces import compute_neb_forces
+from NEBwalk.forces import compute_neb_forces
 
 
 def _image(x: float, energy: float, force: tuple[float, float, float]) -> Atoms:

@@ -7,17 +7,17 @@ import pytest
 from ase import Atoms
 from ase.calculators.emt import EMT
 
-from nebwalk import NEBRunConfig, run_neb_calculation
-from nebwalk.optimize import _apply_calc_params
-from nebwalk.qe import QERecoveryStrategy
-from nebwalk.recovery import (
+from NEBwalk import NEBRunConfig, run_neb_calculation
+from NEBwalk.optimize import _apply_calc_params
+from NEBwalk.qe import QERecoveryStrategy
+from NEBwalk.recovery import (
     FailureType,
     NoOpRecoveryStrategy,
     RecoveryAttempt,
     RecoveryExhausted,
     run_with_recovery,
 )
-from nebwalk.reproduce import save_bundle
+from NEBwalk.reproduce import save_bundle
 
 
 def test_noop_recovery_strategy_classifies_unknown_and_never_retries() -> None:

@@ -3,7 +3,7 @@ systems: relax endpoints under MACE-MP-0, run NEB + peak_plus_neighbors
 selection, QE/PBE single-point DFT label the selected + reference images,
 compute an isolated-atom QE reference, and export the material's own
 canonical dataset directly into datasets/<Symbol>/ via
-nebwalk.finetune.export_mace_training_set() (nebwalk.datasets-schema,
+NEBwalk.finetune.export_mace_training_set() (NEBwalk.datasets-schema,
 validated on write).
 
 This is a throwaway pilot script, not a permanent example. Run materials
@@ -34,17 +34,17 @@ from vacancy_benchmark_suite import (
     relax_endpoint,
 )
 
-from nebwalk import MLIPActiveNEBConfig, NEBRunConfig, run_mlip_assisted_neb
-from nebwalk.finetune import (
+from NEBwalk import MLIPActiveNEBConfig, NEBRunConfig, run_mlip_assisted_neb
+from NEBwalk.finetune import (
     compute_isolated_atom_reference,
     export_mace_training_set,
     generate_finetune_command,
     save_isolated_atom_reference,
     summarize_training_set,
 )
-from nebwalk.label import label_selected_images
-from nebwalk.qe import QEParams, make_qe_factory
-from nebwalk.validate import qe_settings_hash, qe_settings_record
+from NEBwalk.label import label_selected_images
+from NEBwalk.qe import QEParams, make_qe_factory
+from NEBwalk.validate import qe_settings_hash, qe_settings_record
 
 SSSP_DIR = "/mnt/d/Rifat_kh/SSSP_1.3.0_PBE_efficiency"
 DAC_DIR = "/home/duets/DAC_ML_v2/pseudo"
@@ -227,7 +227,7 @@ def qe_params_for_material(material: str, system) -> QEParams:
     max_step = ELECTRON_MAXSTEP_OVERRIDE.get(material)
     if max_step is not None:
         # electron_maxstep is a QE &ELECTRONS namelist parameter, not
-        # &CONTROL -- extra_electrons maps to &ELECTRONS in nebwalk.qe.
+        # &CONTROL -- extra_electrons maps to &ELECTRONS in NEBwalk.qe.
         params = dataclasses.replace(
             params,
             extra_electrons={**params.extra_electrons, "electron_maxstep": max_step},
@@ -379,7 +379,7 @@ def main(material: str) -> None:
     (material_dir / "finetune_command.sh").write_text(
         "#!/usr/bin/env bash\n"
         "# Reviewable starting point -- see\n"
-        "# nebwalk.finetune.generate_finetune_command/TRAINING_SET_DISCLOSURE\n"
+        "# NEBwalk.finetune.generate_finetune_command/TRAINING_SET_DISCLOSURE\n"
         "# before running.\n"
         + generate_finetune_command(
             train_file=artifact.path,
@@ -395,7 +395,7 @@ def main(material: str) -> None:
         "    NOTE: run "
         "reproducibility/dataset_building/_finalize_datasets.py separately to "
         "add the full validation checkpoint (cohesive energy, SCF convergence, "
-        "MACE/nebwalk.datasets loader checks) and update datasets/manifest.json."
+        "MACE/NEBwalk.datasets loader checks) and update datasets/manifest.json."
     )
 
 

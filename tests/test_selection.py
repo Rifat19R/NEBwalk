@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from nebwalk.selection import select_images, select_peak_plus_neighbors
+from NEBwalk.selection import select_images, select_peak_plus_neighbors
 
 
 def test_selects_peak_plus_neighbors():

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Reviewable starting point -- see
-# nebwalk.finetune.generate_finetune_command/TRAINING_SET_DISCLOSURE
+# NEBwalk.finetune.generate_finetune_command/TRAINING_SET_DISCLOSURE
 # before running.
 mace_run_train \
     --name=w_vacancy_finetune \

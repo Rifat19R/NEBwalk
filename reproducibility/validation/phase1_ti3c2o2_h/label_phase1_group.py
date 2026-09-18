@@ -11,8 +11,8 @@ from pathlib import Path
 from ase import Atoms
 from ase.io import read
 
-from nebwalk.labeling import QEReferenceLabeler
-from nebwalk.qe import QEParams, QERecoveryStrategy, validate_qe_setup
+from NEBwalk.labeling import QEReferenceLabeler
+from NEBwalk.qe import QEParams, QERecoveryStrategy, validate_qe_setup
 
 HERE = Path(__file__).resolve().parent
 DESIGN = HERE / "generated" / "phase1_dataset_design_v2"

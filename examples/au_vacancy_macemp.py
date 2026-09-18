@@ -21,7 +21,7 @@ from ase.build import bulk
 from ase.optimize import BFGS
 from mace.calculators import mace_mp
 
-from nebwalk import NEB, linear_interpolate
+from NEBwalk import NEB, linear_interpolate
 
 logging.disable(logging.INFO)
 warnings.filterwarnings("ignore")

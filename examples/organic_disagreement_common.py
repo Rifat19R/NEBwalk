@@ -11,9 +11,9 @@ from ase import Atoms
 from ase.build import molecule
 from mace.calculators import MACECalculator, mace_off
 
-from nebwalk import NEBRunConfig
-from nebwalk.active import MLIPActiveNEBConfig, run_mlip_assisted_neb
-from nebwalk.uncertainty import compute_cross_model_disagreement
+from NEBwalk import NEBRunConfig
+from NEBwalk.active import MLIPActiveNEBConfig, run_mlip_assisted_neb
+from NEBwalk.uncertainty import compute_cross_model_disagreement
 
 EGRET_MODEL = Path("EGRET_1T.model")
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"

@@ -28,8 +28,8 @@ from .qe import QEParams
 def check_qe_scf_converged(qe_workdir: str | Path) -> dict[str, Any]:
     """Scan a QE workdir's per-image ``.pwo`` files for SCF non-convergence.
 
-    ASE's own Espresso reader (and nebwalk's own fallback parser in
-    ``nebwalk.qe``) will happily return a final energy/forces block even
+    ASE's own Espresso reader (and NEBwalk's own fallback parser in
+    ``NEBwalk.qe``) will happily return a final energy/forces block even
     when QE printed "convergence NOT achieved ... stopping" before "JOB
     DONE." -- QE writes "JOB DONE." on exit regardless of whether the SCF
     cycle actually converged, so "reading the output didn't raise" is not
@@ -91,8 +91,8 @@ def qe_settings_hash(record: QESettingsRecord) -> str:
     Two materials (or a material's bulk path vs. its isolated-atom
     reference) that used genuinely different QE settings must get different
     hashes -- this feeds ``dft_settings_hash`` in
-    :mod:`nebwalk.datasets`-schema exports, which
-    :func:`nebwalk.datasets.validate_dataset` uses to reject silently mixing
+    :mod:`NEBwalk.datasets`-schema exports, which
+    :func:`NEBwalk.datasets.validate_dataset` uses to reject silently mixing
     incompatible DFT setups into one dataset file.
     """
     encoded = json.dumps(
@@ -174,7 +174,7 @@ def mace_loader_read_test(extxyz_path: str | Path) -> dict[str, Any]:
     """Confirm MACE's own extxyz parser -- not just ASE's -- accepts the file.
 
     Reads with REF_energy/REF_forces (mace.data.utils.DefaultKeys), matching
-    what :func:`nebwalk.finetune.export_mace_training_set` writes. Raises
+    what :func:`NEBwalk.finetune.export_mace_training_set` writes. Raises
     RuntimeError if mace-torch is not installed or the file is rejected --
     this check is meant to fail loudly, not be skipped silently.
     """
@@ -183,7 +183,7 @@ def mace_loader_read_test(extxyz_path: str | Path) -> dict[str, Any]:
     except ImportError as exc:
         raise RuntimeError(
             "mace-torch is required for mace_loader_read_test(); "
-            'install with pip install "nebwalk[mace]"'
+            'install with pip install "NEBwalk[mace]"'
         ) from exc
 
     key_spec = KeySpecification.from_defaults()
@@ -199,9 +199,9 @@ def mace_loader_read_test(extxyz_path: str | Path) -> dict[str, Any]:
 
 
 def nebwalk_dataset_validation_check(training_set_path: str | Path) -> dict[str, Any]:
-    """Confirm the exported file passes :mod:`nebwalk.datasets`'s real validator.
+    """Confirm the exported file passes :mod:`NEBwalk.datasets`'s real validator.
 
-    :mod:`nebwalk.campaign` and :mod:`nebwalk.labeling` are built entirely
+    :mod:`NEBwalk.campaign` and :mod:`NEBwalk.labeling` are built entirely
     around that module's schema (structure-hash identity, per-path_id
     consistency, duplicate/settings-mixing checks) -- passing this module's
     own checks above is not the same claim as being accepted by the
@@ -380,7 +380,7 @@ def _render_summary_markdown(summary: MaterialValidationSummary) -> str:
             if summary.scf_converged_cleanly
             else "FAILED: " + "; ".join(summary.scf_problems)
         ),
-        "- nebwalk.datasets schema validation (real load_dataset() call): "
+        "- NEBwalk.datasets schema validation (real load_dataset() call): "
         + (
             "OK"
             if summary.nebwalk_dataset_ok
@@ -399,7 +399,7 @@ def write_manifest(
 
     This is a manifest, not a merged dataset -- each material's own
     directory (and its own validation_summary.json) remains the source of
-    truth. See :func:`nebwalk.finetune.combine_training_sets` for producing
+    truth. See :func:`NEBwalk.finetune.combine_training_sets` for producing
     an actual combined training file when one is needed for
     ``mace_run_train``.
     """

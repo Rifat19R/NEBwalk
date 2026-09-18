@@ -12,8 +12,8 @@ from pathlib import Path
 from ase.build import bulk
 from ase.calculators.emt import EMT
 
-from nebwalk import NEBRunConfig
-from nebwalk.active import MLIPActiveNEBConfig, run_mlip_assisted_neb
+from NEBwalk import NEBRunConfig
+from NEBwalk.active import MLIPActiveNEBConfig, run_mlip_assisted_neb
 
 
 def make_initial_final():

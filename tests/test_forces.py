@@ -1,5 +1,5 @@
 """
-Tests for nebwalk.forces.
+Tests for NEBwalk.forces.
 
 Uses a MockCalculator so no external DFT/ML code is required.
 All shape checks and physics invariants are tested analytically.
@@ -9,8 +9,8 @@ import numpy as np
 import pytest
 from ase import Atoms
 
-from nebwalk import NEB
-from nebwalk.forces import (
+from NEBwalk import NEB
+from NEBwalk.forces import (
     _improved_tangent,
     compute_neb_forces,
     variable_spring_constants,
@@ -321,7 +321,7 @@ def test_mic_disp_nopbc_unchanged():
     """With pbc=False, _mic_disp must return dr unchanged."""
     from ase.cell import Cell
 
-    from nebwalk.forces import _mic_disp
+    from NEBwalk.forces import _mic_disp
 
     dr = np.array([[3.0, -1.5, 0.2]])
     cell = Cell([[5, 0, 0], [0, 5, 0], [0, 0, 5]])
@@ -334,7 +334,7 @@ def test_mic_disp_wraps_correctly():
     """Atom displaced by 0.9*a should be wrapped to -0.1*a (shorter path)."""
     from ase.cell import Cell
 
-    from nebwalk.forces import _mic_disp
+    from NEBwalk.forces import _mic_disp
 
     a = 5.0
     cell = Cell([[a, 0, 0], [0, a, 0], [0, 0, a]])
@@ -351,7 +351,7 @@ def test_mic_disp_partial_pbc():
     """With pbc=[True,True,False], only x and y are wrapped, not z."""
     from ase.cell import Cell
 
-    from nebwalk.forces import _mic_disp
+    from NEBwalk.forces import _mic_disp
 
     a = 4.0
     cell = Cell([[a, 0, 0], [0, a, 0], [0, 0, 20.0]])

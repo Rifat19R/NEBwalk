@@ -3,12 +3,12 @@
 Install the stable release:
 
 ```bash
-python -m pip install nebwalk
+python -m pip install NEBwalk
 ```
 
 ```python
 from ase.calculators.emt import EMT
-from nebwalk import NEBRunConfig, run_neb_calculation
+from NEBwalk import NEBRunConfig, run_neb_calculation
 
 config = NEBRunConfig(
     n_images=7,

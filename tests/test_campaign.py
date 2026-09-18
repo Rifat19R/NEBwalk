@@ -11,7 +11,7 @@ import numpy as np
 import pytest
 from ase import Atoms
 
-from nebwalk.campaign import (
+from NEBwalk.campaign import (
     ActiveLearningCampaign,
     ActiveLearningConfig,
     CampaignPath,
@@ -19,17 +19,17 @@ from nebwalk.campaign import (
     StoppingCriteriaConfig,
     evaluate_stopping_criteria,
 )
-from nebwalk.campaign_state import (
+from NEBwalk.campaign_state import (
     CampaignLock,
     CampaignLockError,
     CampaignStage,
     CampaignStateError,
     CampaignStateStore,
 )
-from nebwalk.candidate_selection import CandidateSelectionConfig
-from nebwalk.datasets import compute_structure_hash, write_dataset
-from nebwalk.labeling import LabelingResult, ReferenceLabel
-from nebwalk.mlip import (
+from NEBwalk.candidate_selection import CandidateSelectionConfig
+from NEBwalk.datasets import compute_structure_hash, write_dataset
+from NEBwalk.labeling import LabelingResult, ReferenceLabel
+from NEBwalk.mlip import (
     FineTuningConfig,
     ModelEvaluation,
     ModelMetrics,

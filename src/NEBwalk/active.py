@@ -19,7 +19,7 @@ DISAGREEMENT_DISCLOSURE = (
     "Selection used cross-model disagreement between two independently-trained MLIPs\n"
     "as an uncertainty proxy, not a calibrated uncertainty quantification method (no\n"
     "committee/ensemble was trained). This proxy is only meaningful where both\n"
-    "calculators are within their validated chemical domain; consult nebwalk's\n"
+    "calculators are within their validated chemical domain; consult NEBwalk's\n"
     "documented domain-failure list before trusting results outside that domain."
 )
 
@@ -72,7 +72,7 @@ class MLIPActiveNEBResult:
 
 def _nebwalk_version() -> str:
     try:
-        return importlib_metadata.version("nebwalk")
+        return importlib_metadata.version("NEBwalk")
     except importlib_metadata.PackageNotFoundError:
         return "0.7.1"
 
@@ -126,7 +126,7 @@ def export_selected_images(
     readme = out / "README.md"
     strategy = selected[0].reason if selected else "unknown"
     readme_text = (
-        "# nebwalk selected images\n\n"
+        "# NEBwalk selected images\n\n"
         "These images were selected from an MLIP-assisted NEB path using the "
         f"`{strategy}` strategy.\n\n"
         "They are intended for DFT/QE refinement, single-point validation, or "

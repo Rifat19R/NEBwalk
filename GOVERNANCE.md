@@ -1,6 +1,6 @@
 # Governance
 
-nebwalk is currently maintainer-led. The maintainer has final responsibility
+NEBwalk is currently maintainer-led. The maintainer has final responsibility
 for releases, security response, API stability, and scientific claims.
 
 Decisions should be recorded in issues or pull requests with alternatives,

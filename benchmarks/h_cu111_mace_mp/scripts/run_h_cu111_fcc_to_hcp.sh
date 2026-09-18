@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# H diffusion on Cu(111) with nebwalk + MACE-MP-0.
+# H diffusion on Cu(111) with NEBwalk + MACE-MP-0.
 # This script runs:
 #   Step 1: build and relax Cu(111)+H at fcc hollow
 #   Step 2: create fcc and neighboring hcp endpoints
@@ -212,7 +212,7 @@ import numpy as np
 from ase.io import read
 from ase.constraints import FixAtoms
 from mace.calculators import mace_mp
-from nebwalk import NEBRunConfig, run_neb_calculation
+from NEBwalk import NEBRunConfig, run_neb_calculation
 
 N_FREEZE_LAYERS = 2
 N_IMAGES = 5

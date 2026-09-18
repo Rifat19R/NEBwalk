@@ -6,12 +6,12 @@ import numpy as np
 import pytest
 from ase import Atoms
 
-from nebwalk.candidate_selection import (
+from NEBwalk.candidate_selection import (
     CandidateInput,
     CandidateSelectionConfig,
     select_active_learning_candidates,
 )
-from nebwalk.mlip import (
+from NEBwalk.mlip import (
     CommitteeCalculator,
     CommitteeEvaluationError,
     CommitteeEvaluator,

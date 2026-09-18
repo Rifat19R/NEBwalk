@@ -58,7 +58,7 @@ def analyze(reference_path: Path, prediction_path: Path) -> dict[str, object]:
     absolute = np.asarray(absolute_errors)
     relative = np.asarray(relative_errors)
     return {
-        "schema": "nebwalk.relative_energy_evaluation.v1",
+        "schema": "NEBwalk.relative_energy_evaluation.v1",
         "reference": str(reference_path.resolve()),
         "predictions": str(prediction_path.resolve()),
         "n_configurations": len(references),

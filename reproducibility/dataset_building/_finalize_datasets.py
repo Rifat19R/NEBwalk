@@ -1,16 +1,16 @@
 """Final restructuring: rebuild datasets/<Symbol>/ through the canonical
-nebwalk.datasets writer/validator instead of a bespoke extxyz writer.
+NEBwalk.datasets writer/validator instead of a bespoke extxyz writer.
 
 Per material this writes:
-  - <material>_train.extxyz (+ .manifest.json) via nebwalk.datasets.write_dataset(),
+  - <material>_train.extxyz (+ .manifest.json) via NEBwalk.datasets.write_dataset(),
     config_type=Default, one dft_settings_hash (the bulk vacancy-path QE setup).
   - isolated_atom_reference.json: the isolated-atom E0 reference, kept OUT of
     the training file because it was computed at different QE settings
     (gamma-only, no smearing) and therefore has a different dft_settings_hash
-    -- nebwalk.datasets.write_dataset() correctly refuses to mix that into
-    one dataset file. See nebwalk.finetune.TRAINING_SET_DISCLOSURE.
+    -- NEBwalk.datasets.write_dataset() correctly refuses to mix that into
+    one dataset file. See NEBwalk.finetune.TRAINING_SET_DISCLOSURE.
   - validation_summary.json / VALIDATION_SUMMARY.md, now including a real
-    nebwalk.datasets.load_dataset() pass, not just this module's own checks.
+    NEBwalk.datasets.load_dataset() pass, not just this module's own checks.
   - finetune_command.sh: a ready-to-review mace_run_train command with E0s
     passed explicitly (not --E0s=average).
 
@@ -40,14 +40,14 @@ from _pilot_vacancy_dft_labeling import (
 from ase.io import read
 from vacancy_benchmark_suite import SYSTEMS
 
-from nebwalk.finetune import (
+from NEBwalk.finetune import (
     IsolatedAtomReference,
     export_mace_training_set,
     generate_finetune_command,
     save_isolated_atom_reference,
 )
-from nebwalk.label import DFTLabel
-from nebwalk.validate import (
+from NEBwalk.label import DFTLabel
+from NEBwalk.validate import (
     build_material_validation_summary,
     qe_settings_hash,
     qe_settings_record,
@@ -161,7 +161,7 @@ def main() -> None:
         (material_dir / "finetune_command.sh").write_text(
             "#!/usr/bin/env bash\n"
             "# Reviewable starting point -- see\n"
-            "# nebwalk.finetune.generate_finetune_command/TRAINING_SET_DISCLOSURE\n"
+            "# NEBwalk.finetune.generate_finetune_command/TRAINING_SET_DISCLOSURE\n"
             "# before running.\n"
             + generate_finetune_command(
                 train_file=artifact.path,

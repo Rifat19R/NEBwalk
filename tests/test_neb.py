@@ -7,7 +7,7 @@ from ase import Atoms
 from ase.calculators.emt import EMT
 from ase.io import write
 
-from nebwalk import NEB, NEBRunConfig, run_neb_calculation
+from NEBwalk import NEB, NEBRunConfig, run_neb_calculation
 
 
 def test_from_trajectory_attaches_fresh_calculators(tmp_path):

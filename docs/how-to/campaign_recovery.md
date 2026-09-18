@@ -6,8 +6,8 @@ timestamp, and artifact hashes. Failures record their type, message, and
 traceback before releasing the lock.
 
 ```bash
-nebwalk campaign status campaign-output
-nebwalk campaign resume campaign.json
+NEBwalk campaign status campaign-output
+NEBwalk campaign resume campaign.json
 ```
 
 Resume verifies the state and re-enters the first incomplete stage. Completed
@@ -30,4 +30,4 @@ checksums, stopping decisions, and final-validation records.
 Campaign JSON is trusted configuration, not executable code. Endpoint paths may
 refer outside the campaign directory, but every generated artifact recorded by
 the state store must resolve inside `campaign_dir`. Use reviewed local JSON;
-nebwalk does not fetch or execute code named by campaign configuration.
+NEBwalk does not fetch or execute code named by campaign configuration.

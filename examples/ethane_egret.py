@@ -22,7 +22,7 @@ from ase import Atoms
 from ase.optimize import BFGS
 from mace.calculators import MACECalculator
 
-from nebwalk import NEB, idpp_interpolate
+from NEBwalk import NEB, idpp_interpolate
 
 # ---------------------------------------------------------------------------
 # Configuration

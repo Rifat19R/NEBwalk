@@ -11,7 +11,7 @@ never persisted to disk. This reruns Stage 0+1 (MACE-MP-0 relax + NEB,
 deterministic given fixed structures/settings) to regenerate the full path in
 memory, then DFT-labels index 1 specifically by constructing a
 MLIPActiveNEBResult with selected_images overridden to just that index,
-reusing nebwalk.label.label_selected_images() end to end (recovery, output
+reusing NEBwalk.label.label_selected_images() end to end (recovery, output
 export, disclosure README) rather than hand-rolling a parallel QE call.
 Output goes to a separate directory per material
 (_pilot_<material>_vacancy_dft_labels_index1/) so the existing, already-
@@ -39,10 +39,10 @@ from vacancy_benchmark_suite import (
     relax_endpoint,
 )
 
-from nebwalk import MLIPActiveNEBConfig, NEBRunConfig, run_mlip_assisted_neb
-from nebwalk.active import SelectedImage
-from nebwalk.label import label_selected_images
-from nebwalk.qe import make_qe_factory
+from NEBwalk import MLIPActiveNEBConfig, NEBRunConfig, run_mlip_assisted_neb
+from NEBwalk.active import SelectedImage
+from NEBwalk.label import label_selected_images
+from NEBwalk.qe import make_qe_factory
 
 MATERIALS = list(PSEUDOPOTENTIAL_BY_MATERIAL)
 

@@ -18,10 +18,10 @@ The campaign workflow follows a fixed, auditable order:
 Copy and edit `examples/active_learning_templates/mace_qe_campaign.json`, then:
 
 ```bash
-nebwalk campaign init campaign.json
-nebwalk campaign run campaign.json
-nebwalk campaign status campaign-output
-nebwalk campaign validate-final campaign.json
+NEBwalk campaign init campaign.json
+NEBwalk campaign run campaign.json
+NEBwalk campaign status campaign-output
+NEBwalk campaign validate-final campaign.json
 ```
 
 For a no-MACE, no-QE workflow check:

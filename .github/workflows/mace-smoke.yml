@@ -21,4 +21,4 @@ jobs:
       - name: Install optional training stack
         run: pip install -e ".[training]"
       - name: Verify official MACE CLI contract
-        run: nebwalk mlip check --protocol naive
+        run: NEBwalk mlip check --protocol naive

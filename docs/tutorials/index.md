@@ -1,10 +1,10 @@
 # Tutorials
 
 Longer worked walkthroughs are planned for this section. Until they land,
-the fastest way to see nebwalk end to end is:
+the fastest way to see NEBwalk end to end is:
 
 - [Getting started](../getting-started/index.md) — install and run your first NEB.
-- [examples/](https://github.com/Rifat19R/nebwalk/tree/main/examples) — runnable,
+- [examples/](https://github.com/Rifat19R/NEBwalk/tree/main/examples) — runnable,
   self-contained scripts covering EMT, MACE, Egret-1t, and QE calculators
   across vacancy migration, surface diffusion, and organic conformational
   change.

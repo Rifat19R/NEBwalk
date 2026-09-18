@@ -8,8 +8,8 @@ from types import SimpleNamespace
 import pytest
 from ase import Atoms
 
-from nebwalk import NEBRunConfig
-from nebwalk.active import (
+from NEBwalk import NEBRunConfig
+from NEBwalk.active import (
     MLIPActiveNEBConfig,
     SelectedImage,
     export_selected_images,
@@ -130,7 +130,7 @@ def test_run_mlip_assisted_neb_returns_selection_and_export(monkeypatch, tmp_pat
         assert calculator_factory() == "calc"
         return neb_result
 
-    monkeypatch.setattr("nebwalk.active.run_neb_calculation", fake_runner)
+    monkeypatch.setattr("NEBwalk.active.run_neb_calculation", fake_runner)
 
     result = run_mlip_assisted_neb(
         initial=images[0],
@@ -158,7 +158,7 @@ def test_run_mlip_assisted_neb_can_skip_export(monkeypatch):
     neb_result = SimpleNamespace(neb=neb, barrier=0.5)
 
     monkeypatch.setattr(
-        "nebwalk.active.run_neb_calculation",
+        "NEBwalk.active.run_neb_calculation",
         lambda initial, final, calculator_factory, config: neb_result,
     )
 

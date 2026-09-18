@@ -30,7 +30,7 @@ jobs:
       - name: Install
         run: pip install -e ".[test]"
       - name: Run tests
-        run: pytest tests/ -v --cov=nebwalk --cov-report=term-missing --cov-report=xml
+        run: pytest tests/ -v --cov=NEBwalk --cov-report=term-missing --cov-report=xml
       - name: Upload coverage
         if: matrix.python-version == '3.12'
         uses: actions/upload-artifact@v7
@@ -49,12 +49,12 @@ jobs:
       - run: pip install -e ".[dev,docs]"
       - run: ruff check .
       - run: ruff format --check .
-      - run: mypy src/nebwalk
+      - run: mypy src/NEBwalk
       - run: python -m build
       - run: twine check dist/*
       - name: Wheel installation smoke test
         run: |
-          python -m venv /tmp/nebwalk-wheel
-          /tmp/nebwalk-wheel/bin/pip install dist/*.whl
-          /tmp/nebwalk-wheel/bin/python -c "import nebwalk; from nebwalk.cli import build_parser; build_parser()"
+          python -m venv /tmp/NEBwalk-wheel
+          /tmp/NEBwalk-wheel/bin/pip install dist/*.whl
+          /tmp/NEBwalk-wheel/bin/python -c "import NEBwalk; from NEBwalk.cli import build_parser; build_parser()"
       - run: mkdocs build --strict

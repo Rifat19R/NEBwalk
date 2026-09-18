@@ -1,10 +1,10 @@
-"""Tests for nebwalk.interpolate."""
+"""Tests for NEBwalk.interpolate."""
 
 import numpy as np
 import pytest
 from ase import Atoms
 
-from nebwalk.interpolate import geodesic_interpolate, linear_interpolate
+from NEBwalk.interpolate import geodesic_interpolate, linear_interpolate
 
 
 def _make_endpoints(n_atoms=3, shift=2.0):

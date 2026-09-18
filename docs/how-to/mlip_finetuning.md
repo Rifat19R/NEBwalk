@@ -3,8 +3,8 @@
 Install the tested MACE integration range separately from the core package:
 
 ```bash
-pip install "nebwalk[training]"
-nebwalk mlip check --protocol naive
+pip install "NEBwalk[training]"
+NEBwalk mlip check --protocol naive
 ```
 
 The core package never imports PyTorch or MACE at import time. The backend uses
@@ -18,8 +18,8 @@ the required flags. Put backend-specific switches in `extra_args` as explicit
 flag/value pairs; they are validated and never interpolated into a shell.
 
 ```bash
-nebwalk mlip finetune split fine_tuning.json model-output
-nebwalk mlip evaluate model-output/model_manifest.json split/test.extxyz evaluation
+NEBwalk mlip finetune split fine_tuning.json model-output
+NEBwalk mlip evaluate model-output/model_manifest.json split/test.extxyz evaluation
 ```
 
 Model activation is based on a configured validation metric, not training loss.
@@ -38,5 +38,5 @@ Environment probing defaults to a 60-second timeout and evaluation to 300
 seconds. Training limits are deployment-specific and default to `None`; set
 `training_timeout_seconds` on `MACEFineTuningBackend` for unattended jobs.
 `KeyboardInterrupt` records an interrupted result before propagating.
-`nebwalk mlip check` records installed Torch metadata without importing Torch;
+`NEBwalk mlip check` records installed Torch metadata without importing Torch;
 add `--probe-accelerator` only when CUDA initialization is known to be safe.

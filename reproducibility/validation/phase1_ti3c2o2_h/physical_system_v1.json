@@ -1,5 +1,5 @@
 {
-  "schema": "nebwalk.flagship_physical_system.v1",
+  "schema": "NEBwalk.flagship_physical_system.v1",
   "system_id": "phase1-ti3c2o2-h-hcp-hop-v1",
   "chemical_formula": "Ti12C8O8H",
   "conventional_formula": "2x2 Ti3C2O2 slab plus one H",

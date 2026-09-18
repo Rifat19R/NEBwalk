@@ -1,6 +1,6 @@
-# nebwalk
+# NEBwalk
 
-nebwalk is a compact, transparent implementation of NEB and CI-NEB workflows
+NEBwalk is a compact, transparent implementation of NEB and CI-NEB workflows
 for ASE calculators. It is intended for inspectable research workflows—not as
 a substitute for calculator validation, convergence studies, or transition-state
 verification.

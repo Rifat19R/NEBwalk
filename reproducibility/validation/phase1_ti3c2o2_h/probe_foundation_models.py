@@ -67,7 +67,7 @@ def main() -> None:
             }
         )
     output = {
-        "schema": "nebwalk.foundation_model_probe.v1",
+        "schema": "NEBwalk.foundation_model_probe.v1",
         "device": "cpu",
         "endpoint_structure_hash": physical["initial_structure_hash"],
         "models": records,

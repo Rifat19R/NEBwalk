@@ -1,5 +1,5 @@
 """
-Tests for nebwalk.interpolate.idpp_interpolate.
+Tests for NEBwalk.interpolate.idpp_interpolate.
 
 Run with:  pytest tests/test_idpp.py -v
 """
@@ -8,7 +8,7 @@ import numpy as np
 import pytest
 from ase import Atoms
 
-from nebwalk.interpolate import (
+from NEBwalk.interpolate import (
     _idpp_obj_and_grad,
     _pairwise,
     _pairwise_mic,

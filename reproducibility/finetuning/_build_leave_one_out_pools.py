@@ -13,13 +13,13 @@ extxyz files:
     reproducible and auditable.
 
 Both pools are written with plain ase.io.write(), not
-nebwalk.datasets.write_dataset() -- a genuine multi-element pool has
+NEBwalk.datasets.write_dataset() -- a genuine multi-element pool has
 different dft_settings_hash per element by construction (different
 pseudopotentials/cutoffs), which write_dataset()'s validator correctly
 refuses to mix into one canonical dataset. This mirrors the existing,
-documented precedent in nebwalk.finetune.combine_training_sets() for the
+documented precedent in NEBwalk.finetune.combine_training_sets() for the
 same reason. Each source file was already individually validated through
-nebwalk.datasets.load_dataset() before being combined here.
+NEBwalk.datasets.load_dataset() before being combined here.
 
 The held-out element's own full 5-frame path is copied alongside as the
 evaluation ground truth (its DFT barrier = REF_energy at image_index 3 minus
@@ -40,7 +40,7 @@ from pathlib import Path
 from ase.io import write
 from vacancy_benchmark_suite import SYSTEMS
 
-from nebwalk.datasets import load_dataset
+from NEBwalk.datasets import load_dataset
 
 MATERIALS = ["al", "cu", "si", "mg", "fe"]
 N_RANDOM_DRAW = 3  # matches peak_plus_neighbors' non-reference frame count

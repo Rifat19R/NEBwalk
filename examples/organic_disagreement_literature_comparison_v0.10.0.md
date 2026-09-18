@@ -1,6 +1,6 @@
 # Organic Disagreement Runs vs Literature-Scale Barriers
 
-nebwalk v0.10.0 examples used Egret-1t as the primary calculator and
+NEBwalk v0.10.0 examples used Egret-1t as the primary calculator and
 MACE-OFF23 medium as the secondary calculator with `default_dtype="float64"`.
 Selection strategy was `uncertainty_disagreement` with the default
 `force_disagreement` metric.
@@ -21,7 +21,7 @@ Conversion used: `1 eV = 96.485 kJ/mol = 23.061 kcal/mol`.
 
 ## Summary
 
-| System | Torsion path in script | nebwalk barrier (eV) | nebwalk barrier (kJ/mol) | Selected images | Literature-scale target | Difference vs target | Verdict |
+| System | Torsion path in script | NEBwalk barrier (eV) | NEBwalk barrier (kJ/mol) | Selected images | Literature-scale target | Difference vs target | Verdict |
 | --- | --- | ---: | ---: | --- | ---: | ---: | --- |
 | Ethane | C-C methyl torsion | 0.109619 | 10.58 | (1, 4, 7) | ~0.1296 eV / 12.5 kJ/mol | -15.4% | Good scale; slightly low |
 | Propane | terminal methyl C-C torsion | 0.124756 | 12.04 | (3, 4, 5) | ~0.140 eV / ~13.5 kJ/mol | -10.9% | Good scale |
@@ -35,7 +35,7 @@ Conversion used: `1 eV = 96.485 kJ/mol = 23.061 kcal/mol`.
 
 - Literature expectation: staggered ethane lower than eclipsed by about
   12.5 kJ/mol.
-- nebwalk gives 10.58 kJ/mol, about 15% low.
+- NEBwalk gives 10.58 kJ/mol, about 15% low.
 - Energy disagreement peaks at image 4 (`+0.00443009 eV`), matching the
   expected eclipsed region.
 - Default force-disagreement selection picks `(1, 4, 7)` because force
@@ -47,7 +47,7 @@ Conversion used: `1 eV = 96.485 kJ/mol = 23.061 kcal/mol`.
 - Literature expectation: propane has staggered minima and eclipsed transition
   states around C-C rotation, similar to ethane but with slightly larger
   substituent effects.
-- nebwalk gives 12.04 kJ/mol, close to the common ~13-14 kJ/mol scale.
+- NEBwalk gives 12.04 kJ/mol, close to the common ~13-14 kJ/mol scale.
 - Both energy and force disagreement peak around image 4.
 - Selected `(3, 4, 5)` is the cleanest pattern in this set.
 
@@ -55,7 +55,7 @@ Conversion used: `1 eV = 96.485 kJ/mol = 23.061 kcal/mol`.
 
 - Literature expectation: methanol is a classic internal-rotor system; useful
   spectroscopic descriptions use torsional constants including `V3`.
-- nebwalk gives 5.21 kJ/mol, close to the internal-rotor scale around
+- NEBwalk gives 5.21 kJ/mol, close to the internal-rotor scale around
   4.5 kJ/mol.
 - Signal is shallow. Selected `(1, 3, 7)` is force-driven, not a clean
   energy-peak cluster.
@@ -66,7 +66,7 @@ Conversion used: `1 eV = 96.485 kJ/mol = 23.061 kcal/mol`.
 - Literature expectation: gas-phase ethanol has coupled methyl rotors and
   close trans/gauche conformers; trans/gauche torsional motion is known to be
   floppy and quantum-delocalized.
-- nebwalk gives 11.73 kJ/mol, close to the rough conformer-scale target.
+- NEBwalk gives 11.73 kJ/mol, close to the rough conformer-scale target.
 - Force disagreement strongly peaks at image 4, while energy disagreement is
   small and broad.
 - Selected `(1, 4, 7)` is reasonable for the default force metric.
@@ -76,7 +76,7 @@ Conversion used: `1 eV = 96.485 kJ/mol = 23.061 kcal/mol`.
 - Literature expectation: dimethyl ether has coupled methyl internal rotors and
   low-energy torsional levels; literature spectroscopy reports torsional
   fundamentals/overtones in the few-hundred cm^-1 range.
-- nebwalk gives 9.75 kJ/mol, close to the internal-rotor barrier scale.
+- NEBwalk gives 9.75 kJ/mol, close to the internal-rotor barrier scale.
 - Both energy and force disagreement peak near image 4.
 - Selected `(3, 4, 5)` is physically clean.
 

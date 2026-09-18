@@ -10,7 +10,7 @@ Run:
 
 from __future__ import annotations
 
-from nebwalk.selection import peak_plus_neighbors
+from NEBwalk.selection import peak_plus_neighbors
 
 
 def main() -> None:

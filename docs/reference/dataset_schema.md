@@ -1,6 +1,6 @@
 # Reference dataset schema
 
-nebwalk stores reference data as ASE extended XYZ. Each frame must contain a
+NEBwalk stores reference data as ASE extended XYZ. Each frame must contain a
 finite scalar `REF_energy` in `Atoms.info` and an `(n_atoms, 3)` finite
 `REF_forces` array. `REF_stress` is optional.
 
@@ -15,9 +15,9 @@ conflicting labels, incompatible settings, and inconsistent atom order within
 a path. Mixed DFT settings are rejected by default.
 
 ```bash
-nebwalk dataset validate references.extxyz
-nebwalk dataset summarize references.extxyz
-nebwalk dataset split references.extxyz split --group-key path_id --seed 17
+NEBwalk dataset validate references.extxyz
+NEBwalk dataset summarize references.extxyz
+NEBwalk dataset split references.extxyz split --group-key path_id --seed 17
 ```
 
 Splits are group-aware: every `path_id` belongs to exactly one of train,

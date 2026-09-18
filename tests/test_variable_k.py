@@ -7,7 +7,7 @@ Run with:  pytest tests/test_variable_k.py -v
 import numpy as np
 import pytest
 
-from nebwalk.forces import compute_neb_forces, variable_spring_constants
+from NEBwalk.forces import compute_neb_forces, variable_spring_constants
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -198,7 +198,7 @@ class TestNEBVariableK:
         """k_min >= k must raise ValueError."""
         from unittest.mock import MagicMock
 
-        from nebwalk import NEB
+        from NEBwalk import NEB
 
         imgs = []
         for i in range(5):
@@ -214,7 +214,7 @@ class TestNEBVariableK:
 
         import numpy as np
 
-        from nebwalk import NEB
+        from NEBwalk import NEB
 
         n = 5
         imgs = []
@@ -234,7 +234,7 @@ class TestNEBVariableK:
 
         import numpy as np
 
-        from nebwalk import NEB
+        from NEBwalk import NEB
 
         energies = [0.0, 0.3, 1.0, 0.3, 0.0]
         imgs = []

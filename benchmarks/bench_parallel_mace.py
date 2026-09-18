@@ -6,7 +6,7 @@
 #
 # Requirements:
 #   - EGRET_1T.model in current directory (download from rowansci.com)
-#   - pip install nebwalk[mace]
+#   - pip install NEBwalk[mace]
 #
 # Usage:
 #   cd benchmarks/
@@ -19,7 +19,7 @@ import torch
 from ase.build import molecule
 from mace.calculators import mace_off
 
-from nebwalk import NEB, idpp_interpolate
+from NEBwalk import NEB, idpp_interpolate
 
 MODEL = "EGRET_1T.model"
 N_IMAGES = 7

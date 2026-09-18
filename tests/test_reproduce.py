@@ -8,8 +8,8 @@ import json
 from ase import Atoms
 from ase.calculators.emt import EMT
 
-import nebwalk
-from nebwalk import NEBRunConfig, ReproBundle, run_neb_calculation, save_bundle
+import NEBwalk
+from NEBwalk import NEBRunConfig, ReproBundle, run_neb_calculation, save_bundle
 
 
 def _sha256(path):
@@ -182,7 +182,7 @@ def test_rerun_template_is_valid_python(tmp_path):
 def test_rerun_template_contains_nebwalk_version(tmp_path):
     output_dir, _, _, _ = _save(tmp_path)
 
-    assert nebwalk.__version__ in (output_dir / "rerun_template.py").read_text()
+    assert NEBwalk.__version__ in (output_dir / "rerun_template.py").read_text()
 
 
 def test_engine_reproduce_dir_kwarg(tmp_path):
@@ -216,7 +216,7 @@ def test_save_bundle_returns_reprobundle(tmp_path):
 
     assert isinstance(bundle, ReproBundle)
     assert bundle.output_dir == output_dir
-    assert bundle.nebwalk_version == nebwalk.__version__
+    assert bundle.nebwalk_version == NEBwalk.__version__
 
 
 def test_environment_txt_written_when_include_env_true(tmp_path):

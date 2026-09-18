@@ -3,7 +3,7 @@
     "campaign_id": "replace-me",
     "campaign_dir": "campaign-output",
     "fine_tuning": {
-      "name": "nebwalk-mace",
+      "name": "NEBwalk-mace",
       "foundation_model": "/absolute/path/to/foundation.model",
       "protocol": "naive",
       "device": "cpu",

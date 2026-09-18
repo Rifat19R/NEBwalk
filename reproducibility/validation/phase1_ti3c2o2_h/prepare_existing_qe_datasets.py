@@ -10,7 +10,7 @@ import numpy as np
 from ase import Atoms
 from ase.io import read
 
-from nebwalk.datasets import (
+from NEBwalk.datasets import (
     compute_structure_hash,
     deduplicate_structures,
     split_dataset_by_group,
@@ -151,7 +151,7 @@ def main() -> None:
         seed=17,
     )
     summary = {
-        "schema": "nebwalk.phase1_existing_qe_datasets.v1",
+        "schema": "NEBwalk.phase1_existing_qe_datasets.v1",
         "dft_settings_hash": _settings_hash(),
         "bootstrap": {
             "path": str(bootstrap_artifact.path),

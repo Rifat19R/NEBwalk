@@ -27,7 +27,7 @@ from ase.calculators.espresso import Espresso, EspressoProfile
 from ase.constraints import FixAtoms
 from ase.optimize import BFGS
 
-from nebwalk import NEB, linear_interpolate
+from NEBwalk import NEB, linear_interpolate
 
 N_IMAGES = 5
 K_MAX = 0.10

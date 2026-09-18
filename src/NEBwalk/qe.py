@@ -1,7 +1,7 @@
-"""Quantum ESPRESSO calculator helpers for nebwalk.
+"""Quantum ESPRESSO calculator helpers for NEBwalk.
 
 The functions here intentionally keep Quantum ESPRESSO optional. Importing
-``nebwalk`` does not import ASE's Espresso calculator or require ``pw.x``;
+``NEBwalk`` does not import ASE's Espresso calculator or require ``pw.x``;
 callers opt in by creating a QE calculator factory.
 """
 

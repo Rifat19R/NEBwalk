@@ -192,7 +192,7 @@ def _campaign_command(args: argparse.Namespace) -> int:
 
 def build_parser() -> argparse.ArgumentParser:
     """Construct the CLI parser without importing optional training frameworks."""
-    parser = argparse.ArgumentParser(prog="nebwalk")
+    parser = argparse.ArgumentParser(prog="NEBwalk")
     commands = parser.add_subparsers(dest="command", required=True)
 
     dataset = commands.add_parser("dataset")
@@ -254,7 +254,7 @@ def main(argv: list[str] | None = None) -> int:
             return _mlip_command(args)
         return _campaign_command(args)
     except Exception as exc:
-        print(f"nebwalk: {type(exc).__name__}: {exc}", file=sys.stderr)
+        print(f"NEBwalk: {type(exc).__name__}: {exc}", file=sys.stderr)
         return 1
 
 

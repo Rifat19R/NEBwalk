@@ -5,9 +5,9 @@ Merges each element's original labels (indices 0, 2, 3, 4, from
 _pilot_<material>_vacancy_dft_labels/) with the newly-labeled index 1 (from
 _pilot_<material>_vacancy_dft_labels_index1/, written by
 _label_missing_index1.py) into one complete 5-image DFTLabel set, then
-re-exports through the same reconciled nebwalk.finetune/nebwalk.datasets
+re-exports through the same reconciled NEBwalk.finetune/NEBwalk.datasets
 pipeline used for the original 13-material dataset (real checksums, real
-nebwalk.datasets.validate_dataset() pass). This supersedes the 4-image
+NEBwalk.datasets.validate_dataset() pass). This supersedes the 4-image
 datasets/<Symbol>/ entries for these 5 elements only -- the other 8
 elements' entries in datasets/manifest.json are untouched.
 
@@ -28,9 +28,9 @@ from _pilot_vacancy_dft_labeling import (
 from ase.io import read
 from vacancy_benchmark_suite import SYSTEMS
 
-from nebwalk.finetune import export_mace_training_set, load_isolated_atom_reference
-from nebwalk.label import DFTLabel
-from nebwalk.validate import (
+from NEBwalk.finetune import export_mace_training_set, load_isolated_atom_reference
+from NEBwalk.label import DFTLabel
+from NEBwalk.validate import (
     build_material_validation_summary,
     qe_settings_hash,
     qe_settings_record,

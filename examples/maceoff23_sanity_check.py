@@ -16,7 +16,7 @@ from organic_disagreement_common import (
     make_mace_off23,
 )
 
-from nebwalk import idpp_interpolate
+from NEBwalk import idpp_interpolate
 
 N_IMAGES = 7
 

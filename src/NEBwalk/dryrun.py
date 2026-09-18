@@ -160,7 +160,7 @@ def run_dry_campaign(output_dir: str | Path):
     """Run bootstrap and retraining to an explicit no-new-candidate stop."""
     output = Path(output_dir)
     config = ActiveLearningConfig(
-        campaign_id="nebwalk-dry-run",
+        campaign_id="NEBwalk-dry-run",
         campaign_dir=output,
         fine_tuning=FineTuningConfig(name="dry", foundation_model="dry-foundation"),
         candidate_selection=CandidateSelectionConfig(

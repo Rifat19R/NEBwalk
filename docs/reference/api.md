@@ -2,58 +2,58 @@
 
 ## High-level engine
 
-::: nebwalk.engine
+::: NEBwalk.engine
 
 ## NEB object
 
-::: nebwalk.neb
+::: NEBwalk.neb
 
 ## Interpolation and forces
 
-::: nebwalk.interpolate
+::: NEBwalk.interpolate
 
-::: nebwalk.forces
+::: NEBwalk.forces
 
 ## MLIP selection and labeling
 
-::: nebwalk.active
+::: NEBwalk.active
 
-::: nebwalk.uncertainty
+::: NEBwalk.uncertainty
 
-::: nebwalk.label
+::: NEBwalk.label
 
-::: nebwalk.labeling
+::: NEBwalk.labeling
 
-::: nebwalk.candidate_selection
+::: NEBwalk.candidate_selection
 
 ## Active-learning campaigns
 
-::: nebwalk.campaign
+::: NEBwalk.campaign
 
-::: nebwalk.campaign_state
+::: NEBwalk.campaign_state
 
-::: nebwalk.datasets
+::: NEBwalk.datasets
 
-::: nebwalk.reporting
+::: NEBwalk.reporting
 
 ## MLIP backends
 
-::: nebwalk.mlip.base
+::: NEBwalk.mlip.base
 
-::: nebwalk.mlip.mace_backend
+::: NEBwalk.mlip.mace_backend
 
-::: nebwalk.mlip.committee
+::: NEBwalk.mlip.committee
 
-::: nebwalk.mlip.metrics
+::: NEBwalk.mlip.metrics
 
-::: nebwalk.mlip.registry
+::: NEBwalk.mlip.registry
 
 ## Quantum ESPRESSO and recovery
 
-::: nebwalk.qe
+::: NEBwalk.qe
 
-::: nebwalk.recovery
+::: NEBwalk.recovery
 
 ## Reproducibility
 
-::: nebwalk.reproduce
+::: NEBwalk.reproduce

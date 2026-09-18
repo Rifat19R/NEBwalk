@@ -1,12 +1,12 @@
-# nebwalk
+# NEBwalk
 
-[![CI](https://github.com/Rifat19R/nebwalk/actions/workflows/ci.yml/badge.svg)](https://github.com/Rifat19R/nebwalk/actions/workflows/ci.yml)
-[![PyPI](https://img.shields.io/pypi/v/nebwalk.svg)](https://pypi.org/project/nebwalk/)
-[![Python](https://img.shields.io/badge/python-3.9%20%7C%203.10%20%7C%203.11%20%7C%203.12-blue)](https://pypi.org/project/nebwalk/)
+[![CI](https://github.com/Rifat19R/NEBwalk/actions/workflows/ci.yml/badge.svg)](https://github.com/Rifat19R/NEBwalk/actions/workflows/ci.yml)
+[![PyPI](https://img.shields.io/pypi/v/NEBwalk.svg)](https://pypi.org/project/NEBwalk/)
+[![Python](https://img.shields.io/badge/python-3.9%20%7C%203.10%20%7C%203.11%20%7C%203.12-blue)](https://pypi.org/project/NEBwalk/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Docs](https://img.shields.io/badge/docs-MkDocs-blue.svg)](https://rifat19r.github.io/nebwalk/)
+[![Docs](https://img.shields.io/badge/docs-MkDocs-blue.svg)](https://rifat19r.github.io/NEBwalk/)
 
-**nebwalk** is a lightweight, transparent, ASE-compatible Nudged Elastic Band
+**NEBwalk** is a lightweight, transparent, ASE-compatible Nudged Elastic Band
 (NEB/CI-NEB) library for minimum-energy paths, transition-state barriers, and
 diffusion mechanisms in atomistic simulations.
 
@@ -14,20 +14,20 @@ It is designed for fast prototyping with classical and machine-learned
 calculators, while remaining compatible with DFT backends through ASE.
 
 ```bash
-pip install nebwalk
+pip install NEBwalk
 ```
 
 Current source version: **v0.10.0**.
 
-Documentation: **[user guide and API reference](https://rifat19r.github.io/nebwalk/)**.
+Documentation: **[user guide and API reference](https://rifat19r.github.io/NEBwalk/)**.
 For development and scientific-evidence requirements, see
 **[CONTRIBUTING.md](CONTRIBUTING.md)**.
 
 ---
 
-## Why nebwalk?
+## Why NEBwalk?
 
-`nebwalk` focuses on one task: making NEB workflows simple, inspectable, and
+`NEBwalk` focuses on one task: making NEB workflows simple, inspectable, and
 calculator-agnostic.
 
 It is useful when you want to:
@@ -58,7 +58,7 @@ around ASE calculators and atomic structures.
 - **GPU note:** thread-parallel image evaluation (`n_workers > 1`) is only safe
   with CPU calculators. With CUDA-backed calculators (MACE-MP-0 or Egret-1t on
   GPU), use `n_workers=1`. GPU parallelism across images requires per-image
-  CUDA streams or process isolation, which is out of scope for nebwalk.
+  CUDA streams or process isolation, which is out of scope for NEBwalk.
 - Restart from ASE `.traj` files with fresh calculator instances.
 - Energy-profile plotting, CSV export, and `.traj` output.
 - Quantum ESPRESSO helper layer through ASE calculator construction.
@@ -89,16 +89,16 @@ validation reports.
 
 ```bash
 pip install -e ".[dev,docs,training]"
-nebwalk mlip check
+NEBwalk mlip check
 python examples/active_learning_dry_run.py
-nebwalk campaign init campaign.json
-nebwalk campaign run campaign.json
+NEBwalk campaign init campaign.json
+NEBwalk campaign run campaign.json
 ```
 
 Start from
 [`examples/active_learning_templates/mace_qe_campaign.json`](examples/active_learning_templates/mace_qe_campaign.json)
 and read the [active-learning guide](docs/how-to/active_learning.md). MACE and QE are
-optional external tools; importing `nebwalk` does not import PyTorch or MACE.
+optional external tools; importing `NEBwalk` does not import PyTorch or MACE.
 Committee disagreement is an uncertainty proxy, not calibrated uncertainty,
 and sparse QE checks are not a full DFT NEB.
 
@@ -109,32 +109,32 @@ and sparse QE checks are not a full DFT NEB.
 ### Stable installation from PyPI
 
 ```bash
-pip install nebwalk
+pip install NEBwalk
 ```
 
 Optional MACE support:
 
 ```bash
-pip install "nebwalk[mace]"
+pip install "NEBwalk[mace]"
 ```
 
 Check the installed version:
 
 ```bash
-python -c "import nebwalk; print(nebwalk.__version__ if hasattr(nebwalk, '__version__') else 'installed')"
+python -c "import NEBwalk; print(NEBwalk.__version__ if hasattr(NEBwalk, '__version__') else 'installed')"
 ```
 
 ### Latest source from GitHub
 
 ```bash
-pip install git+https://github.com/Rifat19R/nebwalk.git
+pip install git+https://github.com/Rifat19R/NEBwalk.git
 ```
 
 ### Development installation
 
 ```bash
-git clone https://github.com/Rifat19R/nebwalk.git
-cd nebwalk
+git clone https://github.com/Rifat19R/NEBwalk.git
+cd NEBwalk
 pip install -e ".[dev]"
 pytest tests/ -v
 ```
@@ -145,7 +145,7 @@ pytest tests/ -v
 
 ```python
 from ase.calculators.emt import EMT
-from nebwalk import NEBRunConfig, run_neb_calculation
+from NEBwalk import NEBRunConfig, run_neb_calculation
 
 initial = ...  # relaxed ase.Atoms endpoint
 final = ...  # relaxed ase.Atoms endpoint
@@ -185,7 +185,7 @@ ASE calculator object across all images.
 
 ## MLIP-assisted NEB workflow
 
-`nebwalk` can now run a fast calculator/MLIP NEB first, identify the
+`NEBwalk` can now run a fast calculator/MLIP NEB first, identify the
 barrier-sensitive images, and export those images for higher-level DFT/QE
 refinement.
 
@@ -194,8 +194,8 @@ the MLIP, automatically label data, or adaptively insert/remove images.
 
 ```python
 from ase.calculators.emt import EMT
-from nebwalk import NEBRunConfig
-from nebwalk.active import MLIPActiveNEBConfig, run_mlip_assisted_neb
+from NEBwalk import NEBRunConfig
+from NEBwalk.active import MLIPActiveNEBConfig, run_mlip_assisted_neb
 
 result = run_mlip_assisted_neb(
     initial=initial,
@@ -221,14 +221,14 @@ or later labeling in an active-learning workflow.
 `uncertainty_disagreement` ranks images by cross-model disagreement
 (uncertainty proxy) between Egret-1t as the primary production calculator and
 MACE-OFF23 as the secondary disagreement calculator. This v0.10.0 path is
-organic-domain-only and is currently exercised in nebwalk on ethane torsion.
+organic-domain-only and is currently exercised in NEBwalk on ethane torsion.
 Do not use this Egret-1t disagreement workflow with MACE-MP-0 or with
 inorganic/vacancy systems.
 
 ```python
 from mace.calculators import MACECalculator, mace_off
-from nebwalk import NEBRunConfig
-from nebwalk.active import MLIPActiveNEBConfig, run_mlip_assisted_neb
+from NEBwalk import NEBRunConfig
+from NEBwalk.active import MLIPActiveNEBConfig, run_mlip_assisted_neb
 
 
 def make_egret():
@@ -258,7 +258,7 @@ result = run_mlip_assisted_neb(
 Selection used cross-model disagreement between two independently-trained MLIPs
 as an uncertainty proxy, not a calibrated uncertainty quantification method (no
 committee/ensemble was trained). This proxy is only meaningful where both
-calculators are within their validated chemical domain; consult nebwalk's
+calculators are within their validated chemical domain; consult NEBwalk's
 documented domain-failure list before trusting results outside that domain.
 
 ---
@@ -267,7 +267,7 @@ documented domain-failure list before trusting results outside that domain.
 
 ```python
 from mace.calculators import mace_mp
-from nebwalk import NEBRunConfig, run_neb_calculation
+from NEBwalk import NEBRunConfig, run_neb_calculation
 
 
 def make_calc():
@@ -298,9 +298,9 @@ for the specific chemistry.
 
 ---
 
-## What materials can nebwalk handle?
+## What materials can NEBwalk handle?
 
-`nebwalk` operates on ASE `Atoms` objects, so the practical materials space is
+`NEBwalk` operates on ASE `Atoms` objects, so the practical materials space is
 defined by the calculator you attach.
 
 Currently demonstrated or directly supported workflow classes include:
@@ -423,8 +423,12 @@ so a lower static flat-terrace barrier is expected.
 | W vacancy / BCC W   | QE/PBE     | benchmark | 1.561 eV | ~1.66 eV (DFT-PBE) | 5.9% |
 | Mo vacancy / BCC Mo | QE/PBE     | benchmark | 1.281 eV | ~1.35 eV (DFT-PBE) | 5.1% |
 
-† MACE-MP-0 systematically underestimates vacancy migration barriers by
-10–20%. Known model limitation, not a nebwalk bug.
+† In the vacancy-migration systems benchmarked here, MACE-MP-0 underestimates
+several reported barriers by roughly 10-20%, but the sign and size of the
+error are system dependent (e.g. Au vacancy with MACE-MP-0 is +6.7%, in the
+opposite direction). This reflects calculator behavior on this benchmark
+set, not a NEBwalk bug, and should not be read as a general, universal
+MACE-MP-0 correction factor.
 
 ‡ EMT does not capture relativistic effects in Pt. NEB converged cleanly
 in 60 steps — error is from the calculator.
@@ -488,13 +492,13 @@ weights are not distributed with this repository.
 
 ## Quantum ESPRESSO Interface
 
-nebwalk includes a built-in interface to [Quantum ESPRESSO](https://www.quantum-espresso.org/)
-via `nebwalk.qe`. Use this for production NEB calculations where universal MLIPs are out of
+NEBwalk includes a built-in interface to [Quantum ESPRESSO](https://www.quantum-espresso.org/)
+via `NEBwalk.qe`. Use this for production NEB calculations where universal MLIPs are out of
 distribution — surface reactions, MXene catalysis, MAX phase defects.
 
 ```python
-from nebwalk import run_neb_calculation, NEBRunConfig
-from nebwalk.qe import QEParams, make_qe_factory, validate_qe_setup
+from NEBwalk import run_neb_calculation, NEBRunConfig
+from NEBwalk.qe import QEParams, make_qe_factory, validate_qe_setup
 
 params = QEParams(
     ecutwfc=60.0,  # plane-wave cutoff (Ry)
@@ -561,14 +565,14 @@ See `examples/template_qe_neb.py` for a complete annotated template and
 
 ## Reproducibility
 
-nebwalk can export a self-contained bundle for every NEB run. The bundle
+NEBwalk can export a self-contained bundle for every NEB run. The bundle
 contains input structures, configuration, results, energy profile, trajectory,
 software environment, SHA-256 checksums, and a rerun template.
 
 **Via `run_neb_calculation`:**
 
 ```python
-from nebwalk import run_neb_calculation, NEBRunConfig
+from NEBwalk import run_neb_calculation, NEBRunConfig
 
 result = run_neb_calculation(
     initial,
@@ -583,7 +587,7 @@ result = run_neb_calculation(
 **Directly:**
 
 ```python
-from nebwalk import save_bundle
+from NEBwalk import save_bundle
 
 bundle = save_bundle(
     result,
@@ -668,7 +672,7 @@ Release steps live in [`scripts/RELEASING.md`](scripts/RELEASING.md).
 ---
 ## Acknowledgments
 
-The development of **nebwalk** benefited from selective AI-assisted support using **Claude** and **OpenAI Codex/ChatGPT** for code review, debugging guidance, documentation refinement, and release-workflow cleanup.
+The development of **NEBwalk** benefited from selective AI-assisted support using **Claude** and **OpenAI Codex/ChatGPT** for code review, debugging guidance, documentation refinement, and release-workflow cleanup.
 
 The scientific direction, algorithmic design, implementation decisions, validation strategy, benchmark interpretation, and release responsibility remain fully maintained by **Md. Rifat Khandaker**. AI tools were used only as auxiliary development aids to improve clarity, review consistency, and workflow efficiency.
 ---
@@ -683,7 +687,7 @@ In addition to the v0.9.0 QE recovery workflow, v0.10.0 adds:
 
 - `uncertainty_disagreement` image selection by cross-model disagreement
   (uncertainty proxy).
-- `nebwalk.uncertainty` with `DisagreementResult` and
+- `NEBwalk.uncertainty` with `DisagreementResult` and
   `compute_cross_model_disagreement()`.
 - Optional secondary calculator factory in `MLIPActiveNEBConfig`.
 - Exported `energy_disagreement` and `force_disagreement` metadata for selected
@@ -696,7 +700,7 @@ In addition to the v0.9.0 QE recovery workflow, v0.10.0 adds:
 In addition to the v0.8.0 reproducibility workflow, v0.9.0 adds:
 
 - Automatic failed-image recovery for Quantum ESPRESSO image calculations.
-- Generic recovery primitives in `nebwalk.recovery`.
+- Generic recovery primitives in `NEBwalk.recovery`.
 - QE-specific `QERecoveryStrategy` with retryable convergence and geometry
   failure handling.
 - Recovery-attempt logging through `neb.recovery_log`.
@@ -706,7 +710,7 @@ In addition to the v0.8.0 reproducibility workflow, v0.9.0 adds:
 
 In addition to the v0.7.x engine and MLIP workflow, v0.8.0 adds:
 
-- Reproducibility bundles via `nebwalk.reproduce.save_bundle()`.
+- Reproducibility bundles via `NEBwalk.reproduce.save_bundle()`.
 - Self-contained output directory: input structures, NEBRunConfig, results,
   trajectory, pip environment capture, SHA-256 checksums, and a rerun script.
 - Optional `.tar.gz` archive of the full bundle.

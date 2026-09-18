@@ -9,10 +9,10 @@ import numpy as np
 import pytest
 from ase import Atoms
 
-from nebwalk import NEBRunConfig
-from nebwalk.active import MLIPActiveNEBConfig, run_mlip_assisted_neb
-from nebwalk.selection import select_images, select_uncertainty_disagreement
-from nebwalk.uncertainty import (
+from NEBwalk import NEBRunConfig
+from NEBwalk.active import MLIPActiveNEBConfig, run_mlip_assisted_neb
+from NEBwalk.selection import select_images, select_uncertainty_disagreement
+from NEBwalk.uncertainty import (
     DisagreementResult,
     compute_cross_model_disagreement,
 )
@@ -154,7 +154,7 @@ def test_run_mlip_assisted_neb_requires_secondary_factory(monkeypatch) -> None:
     images = _images_with_calcs([0.0, 0.1, 0.0])
     neb = SimpleNamespace(images=images, get_energies=lambda: [0.0, 0.1, 0.0])
     monkeypatch.setattr(
-        "nebwalk.active.run_neb_calculation",
+        "NEBwalk.active.run_neb_calculation",
         lambda initial, final, calculator_factory, config: SimpleNamespace(
             neb=neb,
             barrier=0.1,
@@ -180,7 +180,7 @@ def test_run_mlip_assisted_neb_falls_back_when_too_few_valid(monkeypatch) -> Non
     images = _images_with_calcs(energies)
     neb = SimpleNamespace(images=images, get_energies=lambda: energies)
     monkeypatch.setattr(
-        "nebwalk.active.run_neb_calculation",
+        "NEBwalk.active.run_neb_calculation",
         lambda initial, final, calculator_factory, config: SimpleNamespace(
             neb=neb,
             barrier=0.5,
@@ -220,7 +220,7 @@ def test_run_mlip_assisted_neb_uncertainty_happy_path_exports_json(
     images = _images_with_calcs(energies)
     neb = SimpleNamespace(images=images, get_energies=lambda: energies)
     monkeypatch.setattr(
-        "nebwalk.active.run_neb_calculation",
+        "NEBwalk.active.run_neb_calculation",
         lambda initial, final, calculator_factory, config: SimpleNamespace(
             neb=neb,
             barrier=0.5,

@@ -1,11 +1,11 @@
 """DFT single-point labeling for MLIP-selected NEB images.
 
 This is stage 2 of the active-learning loop (stage 1 is MLIP-assisted
-selection in :mod:`nebwalk.active`). It computes reference energies and
+selection in :mod:`NEBwalk.active`). It computes reference energies and
 forces at the *exact* MLIP-relaxed geometry of each selected image, so the
 label scores the same configuration the MLIP actually got wrong. It does not
 re-relax structures, build a fine-tuning-ready training set, or retrain any
-model -- see the module docstring in a future ``nebwalk.finetune`` for those
+model -- see the module docstring in a future ``NEBwalk.finetune`` for those
 stages.
 """
 
@@ -54,7 +54,7 @@ class DFTLabel:
     zeros, so they are not comparable to each other. ``*_relative_energy_eV``
     is each method's energy zeroed against its own value at the labeling
     run's reference image, matching the convention in
-    :func:`nebwalk.uncertainty.compute_cross_model_disagreement`.
+    :func:`NEBwalk.uncertainty.compute_cross_model_disagreement`.
     """
 
     index: int
@@ -78,8 +78,8 @@ class NEBLabelingResult:
     """Result bundle for a DFT labeling pass over selected images.
 
     Named ``NEBLabelingResult`` (not ``LabelingResult``) to stay distinct from
-    :class:`nebwalk.labeling.LabelingResult`, the campaign-level labeling
-    result used by :mod:`nebwalk.campaign` -- the two are unrelated types
+    :class:`NEBwalk.labeling.LabelingResult`, the campaign-level labeling
+    result used by :mod:`NEBwalk.campaign` -- the two are unrelated types
     that happened to want the same short name.
     """
 
@@ -92,7 +92,7 @@ class NEBLabelingResult:
 
 def _nebwalk_version() -> str:
     try:
-        return importlib_metadata.version("nebwalk")
+        return importlib_metadata.version("NEBwalk")
     except importlib_metadata.PackageNotFoundError:
         return "0.10.0"
 
@@ -143,7 +143,7 @@ def label_selected_images(
     reported as failed, since no valid relative baseline exists.
 
     QE images that fail are retried through the same recovery machinery used
-    during NEB optimization (see :mod:`nebwalk.recovery`); images that are
+    during NEB optimization (see :mod:`NEBwalk.recovery`); images that are
     still unrecoverable are reported in ``NEBLabelingResult.failed_indices``
     rather than aborting the whole batch.
     """
@@ -253,7 +253,7 @@ def _export_labels(
 
     readme = out / "README.md"
     readme.write_text(
-        f"# nebwalk DFT labels\n\n{LABELING_DISCLOSURE}\n",
+        f"# NEBwalk DFT labels\n\n{LABELING_DISCLOSURE}\n",
         encoding="utf-8",
     )
     return out

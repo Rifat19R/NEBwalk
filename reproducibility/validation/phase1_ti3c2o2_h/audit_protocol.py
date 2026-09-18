@@ -9,7 +9,7 @@ from pathlib import Path
 import numpy as np
 from ase.io import read
 
-from nebwalk.datasets import compute_structure_hash
+from NEBwalk.datasets import compute_structure_hash
 
 ROOT = Path(__file__).resolve().parents[2]
 HERE = Path(__file__).resolve().parent

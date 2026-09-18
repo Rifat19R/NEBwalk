@@ -99,14 +99,28 @@
   doi     = {10.1088/0953-8984/21/39/395502},
 }
 
+% NOTE (paper/reference_audit.md, 2026-09): this entry previously cited
+% "MACE: Higher Order Equivariant Message Passing Neural Networks for Fast
+% and Accurate Force Fields", journal = Science, doi = 10.1126/science.adi1728.
+% That DOI resolves to a 404 and does not match any Batatia et al. paper we
+% could find; the base MACE architecture paper is actually NeurIPS 2022
+% (Adv. Neural Inf. Process. Syst. 35, 11423-11436), not Science 2024.
+% paper.md cites this key only to support statements about MACE-MP-0 (the
+% foundation model), so the entry below has been corrected to the paper
+% that is actually cited, not the base architecture paper. If the base
+% MACE architecture also needs a citation, add it under a new key (e.g.
+% mace2022); it is not currently referenced in paper.md.
 @article{batatia2024,
-  author    = {Batatia, Ilyes and Kovacs, David Peter and Simm, Gregor N. C.
-               and Ortner, Christoph and Csanyi, Gabor},
-  title     = {MACE: Higher Order Equivariant Message Passing Neural Networks
-               for Fast and Accurate Force Fields},
-  journal   = {Science},
-  volume    = {384},
-  number    = {6688},
-  year      = {2024},
-  doi       = {10.1126/science.adi1728},
+  author    = {Batatia, Ilyes and Benner, Philipp and Chiang, Yuan and others},
+  title     = {A foundation model for atomistic materials chemistry},
+  journal   = {J. Chem. Phys.},
+  volume    = {163},
+  pages     = {184110},
+  year      = {2025},
+  doi       = {10.1063/5.0297006},
 }
+% Full author list is a large multi-institution consortium; only the first
+% three authors (as also used in the manuscript's own reference list, which
+% we verified against the DOI in this session) are given here plus "others".
+% TODO(Rifat): expand to the full author list from the publisher record if
+% the target venue requires it.

@@ -5,7 +5,7 @@ System     : Ni adatom hopping between adjacent 4-fold hollow sites
              on a Ni(100) surface slab (3×3×4 layers, 10 Å vacuum)
 Calculator : EMT (Effective Medium Theory)
 Reference  : ~0.63 eV (DFT-GGA; Feibelman, Surf. Sci. 2001)
-nebwalk    : 0.555 eV  (12% error)
+NEBwalk    : 0.555 eV  (12% error)
 
 Note: EMT underestimates Ni adatom barriers. Ni has strong d-band
 character at the saddle-point geometry — EMT's effective-medium
@@ -27,7 +27,7 @@ from ase.calculators.emt import EMT
 from ase.constraints import FixAtoms
 from ase.optimize import FIRE
 
-from nebwalk import NEBRunConfig, run_neb_calculation
+from NEBwalk import NEBRunConfig, run_neb_calculation
 
 # ── Reference ─────────────────────────────────────────────────────────────────
 REF_BARRIER = 0.63  # eV, DFT-GGA (Feibelman, Surf. Sci. 492, 2001)

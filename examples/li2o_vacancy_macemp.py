@@ -7,7 +7,7 @@ Mechanism        : Li⁺ vacancy hop between adjacent tetrahedral (8c) sites
 Supercell        : 2×2×2 conventional cell, 95 atoms (96 - 1 vacancy)
 Calculator       : MACE-MP-0 small, float64
 Reference barrier: ~0.28 eV (DFT-GGA; range 0.20–0.35 eV)
-nebwalk result   : 0.284 eV  (1.4% error)
+NEBwalk result   : 0.284 eV  (1.4% error)
 
 Usage
 -----
@@ -24,7 +24,7 @@ from ase.build import make_supercell
 from ase.optimize import FIRE
 from mace.calculators import mace_mp
 
-from nebwalk import NEBRunConfig, run_neb_calculation
+from NEBwalk import NEBRunConfig, run_neb_calculation
 
 # ── Reference ─────────────────────────────────────────────────────────────────
 REF_BARRIER = 0.28  # eV, DFT-GGA central estimate

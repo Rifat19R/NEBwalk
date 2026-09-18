@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 from ase import Atoms
 
-from nebwalk import geodesic_interpolate, idpp_interpolate, linear_interpolate
+from NEBwalk import geodesic_interpolate, idpp_interpolate, linear_interpolate
 
 
 def ethane_staggered() -> Atoms:

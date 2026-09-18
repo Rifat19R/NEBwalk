@@ -5,7 +5,7 @@ from unittest.mock import patch
 
 import pytest
 
-from nebwalk.qe import (
+from NEBwalk.qe import (
     QEParams,
     _parse_qe_energy_forces,
     make_qe_factory,
@@ -23,13 +23,13 @@ def write_pseudos(tmp_path: Path, *names: str) -> Path:
 
 @pytest.fixture(autouse=True)
 def _reset_qe_globals():
-    """Reset nebwalk.qe module globals between tests to ensure isolation.
+    """Reset NEBwalk.qe module globals between tests to ensure isolation.
 
     test_factory_rejects_unknown_magnetization_species has no Espresso mock,
     so it triggers the real ASE import and sets module-level EspressoProfile.
     Without this fixture, subsequent tests inherit that state and break.
     """
-    import nebwalk.qe as _qe
+    import NEBwalk.qe as _qe
 
     orig_espresso = _qe.Espresso
     orig_profile = _qe.EspressoProfile
@@ -56,7 +56,7 @@ def test_qe_params_defaults_are_neb_safe() -> None:
 def test_validate_qe_setup_accepts_existing_inputs(tmp_path: Path) -> None:
     pseudo_dir = write_pseudos(tmp_path, "Al.UPF")
 
-    with patch("nebwalk.qe.shutil.which", return_value="/usr/bin/pw.x"):
+    with patch("NEBwalk.qe.shutil.which", return_value="/usr/bin/pw.x"):
         validate_qe_setup(pseudo_dir, {"Al": "Al.UPF"}, command="pw.x")
 
 
@@ -82,7 +82,7 @@ def test_validate_qe_setup_rejects_missing_pseudo_file(tmp_path: Path) -> None:
 def test_validate_qe_setup_rejects_missing_binary(tmp_path: Path) -> None:
     pseudo_dir = write_pseudos(tmp_path, "Al.UPF")
 
-    with patch("nebwalk.qe.shutil.which", return_value=None):
+    with patch("NEBwalk.qe.shutil.which", return_value=None):
         with pytest.raises(FileNotFoundError, match="executable"):
             validate_qe_setup(pseudo_dir, {"Al": "Al.UPF"}, command="missing_pw.x")
 
@@ -95,7 +95,7 @@ def test_validate_qe_setup_checks_mpi_launcher_and_pw(tmp_path: Path) -> None:
         seen.append(binary)
         return f"/usr/bin/{binary}"
 
-    with patch("nebwalk.qe.shutil.which", side_effect=fake_which):
+    with patch("NEBwalk.qe.shutil.which", side_effect=fake_which):
         validate_qe_setup(
             pseudo_dir,
             {"Al": "Al.UPF"},
@@ -105,7 +105,7 @@ def test_validate_qe_setup_checks_mpi_launcher_and_pw(tmp_path: Path) -> None:
     assert seen == ["mpirun", "pw.x"]
 
 
-@patch("nebwalk.qe.Espresso", autospec=True)
+@patch("NEBwalk.qe.Espresso", autospec=True)
 def test_make_qe_factory_returns_callable(mock_espresso, tmp_path: Path) -> None:
     pseudo_dir = write_pseudos(tmp_path, "Al.UPF")
 
@@ -120,7 +120,7 @@ def test_make_qe_factory_returns_callable(mock_espresso, tmp_path: Path) -> None
     mock_espresso.assert_not_called()
 
 
-@patch("nebwalk.qe.Espresso", autospec=True)
+@patch("NEBwalk.qe.Espresso", autospec=True)
 def test_factory_creates_unique_dirs(mock_espresso, tmp_path: Path) -> None:
     pseudo_dir = write_pseudos(tmp_path, "Al.UPF")
     factory = make_qe_factory(
@@ -141,7 +141,7 @@ def test_factory_creates_unique_dirs(mock_espresso, tmp_path: Path) -> None:
     assert (tmp_path / "qe" / "image_001" / "tmp").is_dir()
 
 
-@patch("nebwalk.qe.Espresso", autospec=True)
+@patch("NEBwalk.qe.Espresso", autospec=True)
 def test_counter_resets_per_factory(mock_espresso, tmp_path: Path) -> None:
     pseudo_dir = write_pseudos(tmp_path, "Al.UPF")
     first = make_qe_factory(
@@ -164,7 +164,7 @@ def test_counter_resets_per_factory(mock_espresso, tmp_path: Path) -> None:
     assert mock_espresso.call_args_list[1].kwargs["directory"].endswith("image_000")
 
 
-@patch("nebwalk.qe.Espresso", autospec=True)
+@patch("NEBwalk.qe.Espresso", autospec=True)
 def test_factory_uses_qe_control_defaults(mock_espresso, tmp_path: Path) -> None:
     pseudo_dir = write_pseudos(tmp_path, "Al.UPF")
     factory = make_qe_factory(
@@ -186,7 +186,7 @@ def test_factory_uses_qe_control_defaults(mock_espresso, tmp_path: Path) -> None
     assert Path(control["outdir"]) == (tmp_path / "qe" / "image_000" / "tmp").resolve()
 
 
-@patch("nebwalk.qe.Espresso", autospec=True)
+@patch("NEBwalk.qe.Espresso", autospec=True)
 def test_factory_uses_system_and_electron_params(mock_espresso, tmp_path: Path) -> None:
     pseudo_dir = write_pseudos(tmp_path, "Al.UPF")
     params = QEParams(
@@ -214,7 +214,7 @@ def test_factory_uses_system_and_electron_params(mock_espresso, tmp_path: Path) 
     assert kwargs["koffset"] == (1, 1, 0)
 
 
-@patch("nebwalk.qe.Espresso", autospec=True)
+@patch("NEBwalk.qe.Espresso", autospec=True)
 def test_factory_omits_unused_smearing(mock_espresso, tmp_path: Path) -> None:
     pseudo_dir = write_pseudos(tmp_path, "Al.UPF")
     factory = make_qe_factory(
@@ -231,7 +231,7 @@ def test_factory_omits_unused_smearing(mock_espresso, tmp_path: Path) -> None:
     assert "degauss" not in system
 
 
-@patch("nebwalk.qe.Espresso", autospec=True)
+@patch("NEBwalk.qe.Espresso", autospec=True)
 def test_factory_maps_starting_magnetization(mock_espresso, tmp_path: Path) -> None:
     pseudo_dir = write_pseudos(tmp_path, "Fe.UPF", "O.UPF")
     params = QEParams(nspin=2, starting_magnetization={"Fe": 0.6, "O": 0.1})
@@ -245,7 +245,7 @@ def test_factory_maps_starting_magnetization(mock_espresso, tmp_path: Path) -> N
     assert system["starting_magnetization(2)"] == 0.1
 
 
-@patch("nebwalk.qe.Espresso", autospec=True)
+@patch("NEBwalk.qe.Espresso", autospec=True)
 def test_factory_accepts_integer_magnetization_indices(
     mock_espresso,
     tmp_path: Path,
@@ -260,7 +260,7 @@ def test_factory_accepts_integer_magnetization_indices(
     assert system["starting_magnetization(1)"] == 0.7
 
 
-@patch("nebwalk.qe.Espresso")
+@patch("NEBwalk.qe.Espresso")
 def test_factory_rejects_unknown_magnetization_species(
     mock_espresso,
     tmp_path: Path,
@@ -273,7 +273,7 @@ def test_factory_rejects_unknown_magnetization_species(
         factory()
 
 
-@patch("nebwalk.qe.Espresso", autospec=True)
+@patch("NEBwalk.qe.Espresso", autospec=True)
 def test_factory_passes_extra_input_sections(mock_espresso, tmp_path: Path) -> None:
     pseudo_dir = write_pseudos(tmp_path, "Al.UPF")
     params = QEParams(
@@ -291,7 +291,7 @@ def test_factory_passes_extra_input_sections(mock_espresso, tmp_path: Path) -> N
     assert input_data["electrons"]["electron_maxstep"] == 200
 
 
-@patch("nebwalk.qe.Espresso", autospec=True)
+@patch("NEBwalk.qe.Espresso", autospec=True)
 def test_factory_uses_espresso_profile_when_available(
     mock_espresso,
     tmp_path: Path,
@@ -302,7 +302,7 @@ def test_factory_uses_espresso_profile_when_available(
             self.pseudo_dir = pseudo_dir
 
     pseudo_dir = write_pseudos(tmp_path, "Al.UPF")
-    with patch("nebwalk.qe.EspressoProfile", FakeEspressoProfile):
+    with patch("NEBwalk.qe.EspressoProfile", FakeEspressoProfile):
         factory = make_qe_factory(
             QEParams(kpts=(2, 2, 2)),
             pseudo_dir,

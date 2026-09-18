@@ -17,8 +17,8 @@ import pytest
 from ase.build import bulk
 from ase.calculators.emt import EMT
 
-from nebwalk import NEB, idpp_interpolate
-from nebwalk.optimize import _eval_all, _warn_if_gpu_calculator, fire_optimize
+from NEBwalk import NEB, idpp_interpolate
+from NEBwalk.optimize import _eval_all, _warn_if_gpu_calculator, fire_optimize
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -66,13 +66,13 @@ def test_warn_if_gpu_calculator(caplog):
     class FakeCalcWithoutDevice:
         pass
 
-    with caplog.at_level("WARNING", logger="nebwalk.optimize"):
+    with caplog.at_level("WARNING", logger="NEBwalk.optimize"):
         _warn_if_gpu_calculator([FakeImage(FakeCudaCalc())], n_workers=2)
 
     assert "Thread-parallel evaluation is NOT safe" in caplog.text
 
     caplog.clear()
-    with caplog.at_level("WARNING", logger="nebwalk.optimize"):
+    with caplog.at_level("WARNING", logger="NEBwalk.optimize"):
         _warn_if_gpu_calculator([FakeImage(FakeCpuCalc())], n_workers=2)
         _warn_if_gpu_calculator([FakeImage(FakeCalcWithoutDevice())], n_workers=2)
         _warn_if_gpu_calculator([FakeImage(FakeCudaCalc())], n_workers=1)

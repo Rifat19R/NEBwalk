@@ -1,5 +1,5 @@
 name: Bug report
-description: Report reproducible incorrect behavior in nebwalk
+description: Report reproducible incorrect behavior in NEBwalk
 title: "[Bug]: "
 labels: [bug]
 body:
@@ -25,7 +25,7 @@ body:
     id: environment
     attributes:
       label: Environment
-      description: nebwalk, Python, ASE, NumPy, calculator, OS, CPU/GPU, and QE versions.
+      description: NEBwalk, Python, ASE, NumPy, calculator, OS, CPU/GPU, and QE versions.
     validations:
       required: true
   - type: textarea

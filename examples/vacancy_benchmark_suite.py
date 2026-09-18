@@ -1,8 +1,8 @@
-"""Shared vacancy benchmark helpers for nebwalk examples.
+"""Shared vacancy benchmark helpers for NEBwalk examples.
 
 This module keeps the material definitions, literature reference values, and
 calculator setup in one place so the per-material example files stay small.
-It is an examples-only helper, not part of the public nebwalk API.
+It is an examples-only helper, not part of the public NEBwalk API.
 """
 
 from __future__ import annotations
@@ -25,8 +25,8 @@ from ase.calculators.emt import EMT
 from ase.io import write
 from ase.optimize import BFGS
 
-from nebwalk import NEB, QEParams, idpp_interpolate, linear_interpolate
-from nebwalk.qe import make_qe_factory, validate_qe_setup
+from NEBwalk import NEB, QEParams, idpp_interpolate, linear_interpolate
+from NEBwalk.qe import make_qe_factory, validate_qe_setup
 
 Backend = Literal["emt", "mace", "qe"]
 
@@ -276,7 +276,7 @@ def make_mace_calc(model: str = "small"):
     except ImportError as exc:
         raise RuntimeError(
             "MACE is not installed. Install optional support with: "
-            'pip install "nebwalk[mace]"'
+            'pip install "NEBwalk[mace]"'
         ) from exc
 
     with open(os.devnull, "w", encoding="utf-8") as devnull:

@@ -10,4 +10,4 @@
 - Finite-value check: OK
 - MACE loader read test: OK (4 configs loaded, config_types=['Default'])
 - QE SCF convergence: OK
-- nebwalk.datasets schema validation (real load_dataset() call): OK
+- NEBwalk.datasets schema validation (real load_dataset() call): OK

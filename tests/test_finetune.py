@@ -7,8 +7,8 @@ import pytest
 from ase import Atoms
 from ase.io import read
 
-from nebwalk.datasets import DatasetArtifact, load_dataset
-from nebwalk.finetune import (
+from NEBwalk.datasets import DatasetArtifact, load_dataset
+from NEBwalk.finetune import (
     IsolatedAtomReference,
     combine_training_sets,
     compute_isolated_atom_reference,
@@ -18,8 +18,8 @@ from nebwalk.finetune import (
     save_isolated_atom_reference,
     summarize_training_set,
 )
-from nebwalk.label import DFTLabel
-from nebwalk.recovery import FailureType, NoOpRecoveryStrategy, RecoveryExhausted
+from NEBwalk.label import DFTLabel
+from NEBwalk.recovery import FailureType, NoOpRecoveryStrategy, RecoveryExhausted
 
 
 class ConstantCalculator:

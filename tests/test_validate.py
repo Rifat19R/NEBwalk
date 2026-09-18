@@ -8,10 +8,10 @@ import numpy as np
 import pytest
 from ase import Atoms
 
-from nebwalk.finetune import IsolatedAtomReference, export_mace_training_set
-from nebwalk.label import DFTLabel
-from nebwalk.qe import QEParams
-from nebwalk.validate import (
+from NEBwalk.finetune import IsolatedAtomReference, export_mace_training_set
+from NEBwalk.label import DFTLabel
+from NEBwalk.qe import QEParams
+from NEBwalk.validate import (
     MaterialValidationSummary,
     QESettingsRecord,
     build_material_validation_summary,
@@ -261,7 +261,7 @@ def test_build_material_validation_summary_writes_files(tmp_path):
 
     markdown = (tmp_path / "out" / "VALIDATION_SUMMARY.md").read_text()
     assert "PASSED" in markdown
-    assert "nebwalk.datasets schema validation" in markdown
+    assert "NEBwalk.datasets schema validation" in markdown
 
 
 def _write_pwo(path, converged: bool) -> None:
@@ -353,7 +353,7 @@ def test_build_material_validation_summary_fails_on_broken_dataset_file(tmp_path
     params = QEParams(ecutwfc=50.0, ecutrho=400.0, kpts=(2, 2, 2))
 
     # Well-formed enough for ASE/MACE's own loader (has REF_energy/REF_forces),
-    # but missing nebwalk.datasets.REQUIRED_INFO_KEYS (e.g. structure_hash,
+    # but missing NEBwalk.datasets.REQUIRED_INFO_KEYS (e.g. structure_hash,
     # path_id) -- this is the realistic failure mode the schema gate exists
     # to catch, distinct from a file being unreadable outright.
     broken_path = tmp_path / "broken.extxyz"

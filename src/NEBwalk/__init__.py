@@ -1,4 +1,4 @@
-"""Public API for nebwalk."""
+"""Public API for NEBwalk."""
 
 from __future__ import annotations
 
