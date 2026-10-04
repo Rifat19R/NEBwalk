@@ -1,7 +1,7 @@
 """
 Example 2: Al adatom diffusion on Al(100)  hollow → bridge → hollow
 
-This is the canonical EMT/NEB benchmark used throughout the ASE documentation.
+This is a lightweight EMT/NEB surface-diffusion benchmark.
 EMT gives a barrier of ~0.24 eV for this process.
 
 Demonstrates:
