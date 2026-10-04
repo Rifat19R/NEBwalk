@@ -5,8 +5,8 @@
     "processor": "x86_64",
     "numpy_version": "2.4.6",
     "ase_version": "3.28.0",
-    "nebwalk_version": "0.10.0",
-    "git_commit": "ebbe8bf90c0307a850432321ec40c8d58b390859"
+    "nebwalk_version": "0.11.0",
+    "git_commit": "07df2f8b8ddb64c9980ed782e8885816389cf585"
   },
   "system": "morse_h3_collinear",
   "shared_settings": {
@@ -34,7 +34,7 @@
       -5.749161449203424,
       -5.694303770041204
     ],
-    "wall_time_s": 0.0012626230018213391,
+    "wall_time_s": 0.0012978040031157434,
     "optimizer_defaults": {
       "dt": 0.01,
       "dt_max": 0.1
@@ -57,7 +57,7 @@
       -5.749161449203424,
       -5.694303770041204
     ],
-    "wall_time_s": 0.0036038539838045835,
+    "wall_time_s": 0.0034040649770759046,
     "optimizer_defaults": {
       "dt": 0.1,
       "dt_max": 1.0

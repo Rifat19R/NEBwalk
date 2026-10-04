@@ -5,8 +5,8 @@
     "processor": "x86_64",
     "numpy_version": "2.4.6",
     "ase_version": "3.28.0",
-    "nebwalk_version": "0.10.0",
-    "git_commit": "ebbe8bf90c0307a850432321ec40c8d58b390859"
+    "nebwalk_version": "0.11.0",
+    "git_commit": "07df2f8b8ddb64c9980ed782e8885816389cf585"
   },
   "system": "al100_adatom_emt",
   "shared_settings": {
@@ -34,7 +34,7 @@
       3.3428826932065605,
       3.2811015930147676
     ],
-    "wall_time_s": 0.572967208980117,
+    "wall_time_s": 0.5612982099992223,
     "optimizer_defaults": {
       "dt": 0.01,
       "dt_max": 0.1
@@ -57,7 +57,7 @@
       3.342696075890446,
       3.2811015930147676
     ],
-    "wall_time_s": 0.39699357096105814,
+    "wall_time_s": 0.461535795009695,
     "optimizer_defaults": {
       "dt": 0.1,
       "dt_max": 1.0
