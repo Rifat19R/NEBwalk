@@ -1,0 +1,3 @@
+system,nebwalk_barrier_eV,ase_barrier_eV,barrier_diff_eV,max_per_image_energy_diff_eV,max_geometry_diff_angstrom,nebwalk_converged,ase_converged,n_steps_nebwalk,n_steps_ase
+morse_h3_collinear,0.2002508278070767,0.2002508278070767,0.0,0.0,0.0,True,True,1,0
+al100_adatom_emt,0.2371980062407073,0.2372329912098392,3.498496913190152e-05,0.00018661731611446797,0.002066718084933703,True,True,53,26

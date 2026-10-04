@@ -1,0 +1,76 @@
+{
+  "environment": {
+    "python": "3.12.3",
+    "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "processor": "x86_64",
+    "numpy_version": "2.4.6",
+    "ase_version": "3.28.0",
+    "nebwalk_version": "0.10.0",
+    "git_commit": "ebbe8bf90c0307a850432321ec40c8d58b390859"
+  },
+  "system": "morse_h3_collinear",
+  "shared_settings": {
+    "n_images": 5,
+    "k_spring": 0.1,
+    "fmax": 0.05,
+    "max_steps": 500,
+    "interpolation": "linear (MIC-aware, NEBwalk.linear_interpolate), identical starting images fed to both optimizers",
+    "climb": false
+  },
+  "NEBwalk": {
+    "tool": "NEBwalk",
+    "system": "morse_h3_collinear",
+    "converged": true,
+    "n_steps": 1,
+    "barrier_eV": 0.2002508278070767,
+    "reverse_barrier_eV": 0.2002508278070767,
+    "reaction_energy_eV": 0.0,
+    "energies_eV": [
+      -5.694303770041204,
+      -5.749161449203424,
+      -5.579294680488776,
+      -5.494052942234127,
+      -5.579294680488776,
+      -5.749161449203424,
+      -5.694303770041204
+    ],
+    "wall_time_s": 0.0012626230018213391,
+    "optimizer_defaults": {
+      "dt": 0.01,
+      "dt_max": 0.1
+    }
+  },
+  "ase": {
+    "tool": "ase",
+    "system": "morse_h3_collinear",
+    "converged": true,
+    "n_steps": 0,
+    "barrier_eV": 0.2002508278070767,
+    "reverse_barrier_eV": 0.2002508278070767,
+    "reaction_energy_eV": 0.0,
+    "energies_eV": [
+      -5.694303770041204,
+      -5.749161449203424,
+      -5.579294680488776,
+      -5.494052942234127,
+      -5.579294680488776,
+      -5.749161449203424,
+      -5.694303770041204
+    ],
+    "wall_time_s": 0.0036038539838045835,
+    "optimizer_defaults": {
+      "dt": 0.1,
+      "dt_max": 1.0
+    }
+  },
+  "comparison": {
+    "barrier_diff_eV": 0.0,
+    "reverse_barrier_diff_eV": 0.0,
+    "max_per_image_energy_diff_eV": 0.0,
+    "max_geometry_diff_angstrom": 0.0,
+    "both_converged": true,
+    "n_steps_nebwalk": 1,
+    "n_steps_ase": 0,
+    "note": "Step-count difference is expected and is not evidence of a bug; see module docstring on differing FIRE dt/dt_max defaults."
+  }
+}

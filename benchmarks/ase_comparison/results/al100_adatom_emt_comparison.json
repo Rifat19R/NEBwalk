@@ -1,0 +1,76 @@
+{
+  "environment": {
+    "python": "3.12.3",
+    "platform": "Linux-6.6.87.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "processor": "x86_64",
+    "numpy_version": "2.4.6",
+    "ase_version": "3.28.0",
+    "nebwalk_version": "0.10.0",
+    "git_commit": "ebbe8bf90c0307a850432321ec40c8d58b390859"
+  },
+  "system": "al100_adatom_emt",
+  "shared_settings": {
+    "n_images": 5,
+    "k_spring": 0.1,
+    "fmax": 0.05,
+    "max_steps": 500,
+    "interpolation": "linear (MIC-aware, NEBwalk.linear_interpolate), identical starting images fed to both optimizers",
+    "climb": false
+  },
+  "NEBwalk": {
+    "tool": "NEBwalk",
+    "system": "al100_adatom_emt",
+    "converged": true,
+    "n_steps": 53,
+    "barrier_eV": 0.2371980062407073,
+    "reverse_barrier_eV": 0.23716251037257763,
+    "reaction_energy_eV": 3.5495868129675756e-05,
+    "energies_eV": [
+      3.281066097146638,
+      3.342296088213218,
+      3.4638687796895047,
+      3.518264103387345,
+      3.464299271311394,
+      3.3428826932065605,
+      3.2811015930147676
+    ],
+    "wall_time_s": 0.572967208980117,
+    "optimizer_defaults": {
+      "dt": 0.01,
+      "dt_max": 0.1
+    }
+  },
+  "ase": {
+    "tool": "ase",
+    "system": "al100_adatom_emt",
+    "converged": true,
+    "n_steps": 26,
+    "barrier_eV": 0.2372329912098392,
+    "reverse_barrier_eV": 0.23719749534170953,
+    "reaction_energy_eV": 3.5495868129675756e-05,
+    "energies_eV": [
+      3.281066097146638,
+      3.342111101468399,
+      3.4639758361975943,
+      3.518299088356477,
+      3.464403592444908,
+      3.342696075890446,
+      3.2811015930147676
+    ],
+    "wall_time_s": 0.39699357096105814,
+    "optimizer_defaults": {
+      "dt": 0.1,
+      "dt_max": 1.0
+    }
+  },
+  "comparison": {
+    "barrier_diff_eV": 3.498496913190152e-05,
+    "reverse_barrier_diff_eV": 3.498496913190152e-05,
+    "max_per_image_energy_diff_eV": 0.00018661731611446797,
+    "max_geometry_diff_angstrom": 0.002066718084933703,
+    "both_converged": true,
+    "n_steps_nebwalk": 53,
+    "n_steps_ase": 26,
+    "note": "Step-count difference is expected and is not evidence of a bug; see module docstring on differing FIRE dt/dt_max defaults."
+  }
+}
