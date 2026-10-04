@@ -349,14 +349,22 @@ def main() -> None:
 
     m_init, m_final, m_fixed = build_morse_h3()
     r_morse = compare_system(
-        "morse_h3_collinear", m_init, m_final, m_fixed, MorsePairH3,
+        "morse_h3_collinear",
+        m_init,
+        m_final,
+        m_fixed,
+        MorsePairH3,
         constrain_endpoints=False,
     )
     results.append(r_morse)
 
     a_init, a_final, a_fixed = build_al100_adatom()
     r_al = compare_system(
-        "al100_adatom_emt", a_init, a_final, a_fixed, EMT,
+        "al100_adatom_emt",
+        a_init,
+        a_final,
+        a_fixed,
+        EMT,
         constrain_endpoints=True,
     )
     results.append(r_al)
@@ -370,27 +378,44 @@ def main() -> None:
     summary_path = RESULTS_DIR / "summary.csv"
     with open(summary_path, "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
-        writer.writerow([
-            "system", "nebwalk_barrier_eV", "ase_barrier_eV", "barrier_diff_eV",
-            "max_per_image_energy_diff_eV", "max_geometry_diff_angstrom",
-            "nebwalk_converged", "ase_converged", "n_steps_nebwalk", "n_steps_ase",
-        ])
+        writer.writerow(
+            [
+                "system",
+                "nebwalk_barrier_eV",
+                "ase_barrier_eV",
+                "barrier_diff_eV",
+                "max_per_image_energy_diff_eV",
+                "max_geometry_diff_angstrom",
+                "nebwalk_converged",
+                "ase_converged",
+                "n_steps_nebwalk",
+                "n_steps_ase",
+            ]
+        )
         for r in results:
             c = r["comparison"]
-            writer.writerow([
-                r["system"], r["NEBwalk"]["barrier_eV"], r["ase"]["barrier_eV"],
-                c["barrier_diff_eV"], c["max_per_image_energy_diff_eV"],
-                c["max_geometry_diff_angstrom"], r["NEBwalk"]["converged"],
-                r["ase"]["converged"], c["n_steps_nebwalk"], c["n_steps_ase"],
-            ])
+            writer.writerow(
+                [
+                    r["system"],
+                    r["NEBwalk"]["barrier_eV"],
+                    r["ase"]["barrier_eV"],
+                    c["barrier_diff_eV"],
+                    c["max_per_image_energy_diff_eV"],
+                    c["max_geometry_diff_angstrom"],
+                    r["NEBwalk"]["converged"],
+                    r["ase"]["converged"],
+                    c["n_steps_nebwalk"],
+                    c["n_steps_ase"],
+                ]
+            )
     print(f"Wrote {summary_path}")
 
     print("\n=== Summary ===")
     for r in results:
         c = r["comparison"]
         print(
-            f"{r['system']}: barrier diff = {c['barrier_diff_eV']*1000:.4f} meV, "
-            f"max geometry diff = {c['max_geometry_diff_angstrom']*1000:.4f} mÅ, "
+            f"{r['system']}: barrier diff = {c['barrier_diff_eV'] * 1000:.4f} meV, "
+            f"max geometry diff = {c['max_geometry_diff_angstrom'] * 1000:.4f} mÅ, "
             f"both converged = {c['both_converged']}"
         )
 

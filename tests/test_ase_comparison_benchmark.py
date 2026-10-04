@@ -86,6 +86,6 @@ def test_nebwalk_matches_ase_on_periodic_al100_emt():
 
     # Deliberately looser than the observed values. These are regression
     # tolerances for implementation consistency, not fitted acceptance limits.
-    assert comparison["barrier_diff_eV"] < 5e-4       # 0.5 meV
+    assert comparison["barrier_diff_eV"] < 5e-4  # 0.5 meV
     assert comparison["max_per_image_energy_diff_eV"] < 1e-3
     assert comparison["max_geometry_diff_angstrom"] < 5e-3  # 5 mÅ
