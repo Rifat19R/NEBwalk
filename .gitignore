@@ -137,3 +137,17 @@ docs/linkedin_post.md
 examples/_smoke_validate_al_cu_ag.py
 _smoke_al_cu_ag/
 mp_finetuning-smoke_*
+
+# Local manuscript working copies and review/audit artefacts
+paper/backup/
+paper/*.docx
+paper/*.pdf
+paper/_audit_*
+paper/_extracted_media/
+paper/_sync_edit.py
+paper/FIGURE1_SPEC.md
+paper/REVIEWER_FIX_REPORT.md
+paper/reference_audit.md
+paper/validation_audit.md
+paper/build_section6.py
+paper/fix_numbering.py

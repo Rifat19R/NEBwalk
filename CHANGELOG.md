@@ -8,7 +8,12 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [0.11.0] — 2026-10-05
+
 ### Added
+- Reproducible NEBwalk-versus-ASE implementation-consistency benchmark for
+  analytical Morse-H3 and periodic Al-adatom/Al(100) paths, including
+  provenance-locked JSON/CSV results and automated regression tests.
 - Canonical extended-XYZ reference datasets with strict energy/force and
   provenance validation, deterministic structure and dataset checksums,
   conflicting-label detection, atomic manifests, conflict-aware merge and
@@ -53,6 +58,11 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   documented calculator-limitation case rather than a NEBwalk bug.
 
 ### Changed
+- Re-audited the historical README benchmark table: quantitative claims are
+  restricted to 13 cases supported by surviving artefacts; seven historical
+  entries are explicitly excluded from the current validation count, and the
+  38-system development scaffold is no longer described as an executed public
+  benchmark suite.
 - **Breaking:** package/import renamed from `nebwalk` to `NEBwalk`
   (`import NEBwalk`, `src/NEBwalk/`, CLI command `NEBwalk`, PyPI project
   `NEBwalk`, GitHub repo `Rifat19R/NEBwalk`). Existing `pip install nebwalk`

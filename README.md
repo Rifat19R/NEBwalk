@@ -17,7 +17,7 @@ calculators, while remaining compatible with DFT backends through ASE.
 pip install NEBwalk
 ```
 
-Current source version: **v0.10.0**.
+Current source version: **v0.11.0**.
 
 Documentation: **[user guide and API reference](https://rifat19r.github.io/NEBwalk/)**.
 For development and scientific-evidence requirements, see
@@ -79,7 +79,7 @@ In addition to the v0.6.x NEB/CI-NEB engine, v0.7.0 adds:
 - Selected-image export as `.xyz`, `.traj`, and `.json`.
 - Clean handoff from MLIP/MACE NEB to DFT/QE refinement.
 
-### Closed-loop MACE + QE campaigns (source / Unreleased)
+### Closed-loop MACE + QE campaigns (v0.11.0)
 
 The source tree also includes an auditable, resumable active-learning loop:
 canonical reference datasets, grouped splits, optional MACE fine-tuning,
@@ -220,8 +220,9 @@ or later labeling in an active-learning workflow.
 
 `uncertainty_disagreement` ranks images by cross-model disagreement
 (uncertainty proxy) between Egret-1t as the primary production calculator and
-MACE-OFF23 as the secondary disagreement calculator. This v0.10.0 path is
-organic-domain-only and is currently exercised in NEBwalk on ethane torsion.
+MACE-OFF23 as the secondary disagreement calculator. This workflow is
+organic-domain-only and is exercised in NEBwalk on ethane, propane, methanol,
+ethanol, and dimethyl ether torsional paths.
 Do not use this Egret-1t disagreement workflow with MACE-MP-0 or with
 inorganic/vacancy systems.
 
@@ -391,53 +392,49 @@ so a lower static flat-terrace barrier is expected.
 
 ---
 
-## Validated results
+## Audited benchmark evidence
 
-> EMT is included for fast local testing only — no GPU, no download required.
-> For quantitative results use MACE-MP-0 or DFT (QE). Errors attributed to
-> the calculator are documented explicitly; convergence of the NEB path itself
-> is verified in every case by checking endpoint ΔE ≈ 0 for symmetric hops.
+The quantitative benchmark claims below were re-audited against surviving
+output artefacts and source records in September 2026. Thirteen cases were
+reconfirmed and are retained as the quantitative evidence set. Seven older
+README entries for which complete supporting artefacts were not available for
+re-audit are not counted as validated results.
 
-20 systems validated across 4 calculators.
+EMT results are included primarily as inexpensive workflow and implementation
+checks. MACE-MP-0 and QE/PBE values reflect the behavior of those calculators
+for the stated systems; agreement or disagreement with literature barriers
+must not be interpreted as an intrinsic accuracy measure of NEBwalk itself.
 
-| System | Calculator | Purpose | Barrier | Reference | Error |
-|---|---|---|---|---|---|
-| Morse H3 collinear | Morse (analytical) | algorithm test | 0.200 eV | 0.193 eV (exact) | 4% |
-| Al adatom / Al(100) | EMT | speed test | 0.237 eV | ~0.40 eV (DFT-PBE) | finite-size slab |
-| Cu adatom / Cu(100) | EMT | speed test | 0.418 eV | ~0.44 eV (DFT-PBE) | 4.6% |
-| Ni adatom / Ni(100) | EMT | speed test | 0.555 eV | ~0.63 eV (DFT-GGA) | 12%§ |
-| Ethane C–C torsion | Egret-1t | ML organic | 0.113 eV | 0.126 eV (exp.) | 10% |
-| Al vacancy / FCC Al | MACE-MP-0 | benchmark | 0.508 eV | 0.61 eV (DFT-PBE) | 17%† |
-| Mg vacancy / HCP Mg | MACE-MP-0 | benchmark | 0.508 eV | ~0.52 eV (DFT-PBE) | 2% |
-| Li vacancy / Li₂O | MACE-MP-0 | benchmark | 0.284 eV | ~0.28 eV (DFT-GGA) | 1.4% |
-| Mg vacancy / MgO | MACE-MP-0 | benchmark | 2.254 eV | ~2.20 eV (DFT-PBE) | 2.5% |
-| H diffusion / Cu(111) | MACE-MP-0 | benchmark | 0.126 eV | ~0.15 eV (DFT-PBE) | ~16%¶ |
-| Cu vacancy / FCC Cu | EMT | speed test | 0.755 eV | ~0.70 eV (DFT-PBE) | 7.9% |
-| Ni vacancy / FCC Ni | EMT | speed test | 1.095 eV | ~1.04 eV (DFT-PBE) | 5.3% |
-| Pd vacancy / FCC Pd | EMT | speed test | 0.839 eV | ~0.91 eV (DFT-PBE) | 7.8% |
-| Ag vacancy / FCC Ag | EMT | speed test | 0.682 eV | ~0.66 eV (DFT-PBE) | 3.3% |
-| Pt vacancy / FCC Pt | EMT | speed test | 0.971 eV | ~1.49 eV (DFT-PBE) | 34.8%‡ |
-| Au vacancy / FCC Au | EMT | speed test | 0.590 eV | ~0.68 eV (DFT-PBE) | 13.3% |
-| Au vacancy / FCC Au | MACE-MP-0 | benchmark | 0.725 eV | ~0.68 eV (DFT-PBE) | 6.7% |
-| Al vacancy / FCC Al | QE/PBE     | benchmark | 0.564 eV | ~0.61 eV (DFT-PBE) | 7.6% |
-| W vacancy / BCC W   | QE/PBE     | benchmark | 1.561 eV | ~1.66 eV (DFT-PBE) | 5.9% |
-| Mo vacancy / BCC Mo | QE/PBE     | benchmark | 1.281 eV | ~1.35 eV (DFT-PBE) | 5.1% |
+| System | Calculator | NEBwalk barrier | External comparator | Interpretation |
+|---|---|---:|---:|---|
+| Morse H3 collinear | analytical Morse | 0.200 eV | 0.193 eV analytical scale | algorithm/path check |
+| Al adatom / Al(100) | EMT | 0.237 eV | — | lightweight periodic workflow check |
+| Al vacancy / FCC Al | MACE-MP-0 | 0.508 eV | 0.58 eV | calculator benchmark |
+| H diffusion / Cu(111) | MACE-MP-0 | 0.126 eV | 0.13–0.15 eV literature scale | surface-diffusion scale check |
+| Cu vacancy / FCC Cu | EMT | 0.755 eV | 0.72 eV | calculator/workflow check |
+| Ni vacancy / FCC Ni | EMT | 1.095 eV | 1.08 eV (magnetic reference) | calculator/workflow check |
+| Pd vacancy / FCC Pd | EMT | 0.839 eV | 0.95 eV | calculator/workflow check |
+| Ag vacancy / FCC Ag | EMT | 0.682 eV | 0.70 eV | calculator/workflow check |
+| Pt vacancy / FCC Pt | EMT | 0.971 eV | 1.24 eV | known calculator limitation |
+| Au vacancy / FCC Au | EMT | 0.590 eV | 0.53 eV | calculator/workflow check |
+| Au vacancy / FCC Au | MACE-MP-0 | 0.725 eV | 0.53 eV | calculator limitation/candidate refinement case |
+| W vacancy / BCC W | QE/PBE | 1.561 eV | 1.78 eV | DFT-backed benchmark |
+| Mo vacancy / BCC Mo | QE/PBE | 1.281 eV | 1.28 eV | DFT-backed benchmark |
 
-† In the vacancy-migration systems benchmarked here, MACE-MP-0 underestimates
-several reported barriers by roughly 10-20%, but the sign and size of the
-error are system dependent (e.g. Au vacancy with MACE-MP-0 is +6.7%, in the
-opposite direction). This reflects calculator behavior on this benchmark
-set, not a NEBwalk bug, and should not be read as a general, universal
-MACE-MP-0 correction factor.
+The seven historical entries excluded from the audited quantitative set are:
+Cu-adatom/Cu(100) EMT, Ni-adatom/Ni(100) EMT, ethane/Egret-1t,
+Mg-vacancy/HCP-Mg MACE-MP-0, Li-vacancy/Li2O MACE-MP-0,
+Mg-vacancy/MgO MACE-MP-0, and Al-vacancy/QE-PBE. Their presence in older
+release documentation should be read as historical workflow provenance, not as
+part of the present quantitative validation claim.
 
-‡ EMT does not capture relativistic effects in Pt. NEB converged cleanly
-in 60 steps — error is from the calculator.
-
-§ Ni adatom on Ni(100): EMT underestimates barriers due to d-band character
-at the Ni(100) saddle-point geometry. Profile shape and convergence correct.
-
-¶ H/Cu(111): surface diffusion benchmark. Error reflects MACE-MP-0 surface
-accuracy limitations, not a library bug.
+The separate NEBwalk-versus-ASE implementation-consistency benchmark is in
+`benchmarks/ase_comparison/`. With matched physical/path inputs, both tested
+systems converge under both implementations. The current recorded comparison
+gives identical Morse-H3 barriers and an Al/Al(100) barrier difference of about
+0.035 meV with a maximum converged-path geometry difference of about 0.0021 Å.
+The two implementations retain their own default FIRE time-step parameters, so
+optimizer step counts are not used as a performance comparison.
 
 ---
 
@@ -463,7 +460,7 @@ python examples/al_diffusion_qe.py
 python examples/al_vacancy_qe.py
 ```
 
-A larger benchmark suite (38 systems, EMT/MACE/Egret) is available in `examples/v8/`.
+A 38-system prospective benchmark scaffold was also defined during development. It is not an executed 38-system validation set and is not included in the quantitative claims above.
 
 Organic Egret-1t/MACE-OFF23 disagreement-selection runs, per-image diagnostics,
 and literature-scale torsional-barrier comparisons are in
