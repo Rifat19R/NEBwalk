@@ -8,6 +8,16 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+- Architecture and ownership reference (`docs/reference/architecture.md`). It
+  separates the NEB core, the NEB-specific MLIP-to-DFT handoff layer, and the
+  transitional generic ML-lifecycle layer, and records the compatibility
+  policy for any future relocation and the parallel policies kept on purpose.
+- Tests that pin the v0.11.0 public API, check that `import NEBwalk` does not
+  load PyTorch or MACE, and enforce the module dependency direction.
+- API reference pages for `NEBwalk.selection`, `NEBwalk.finetune`, and
+  `NEBwalk.validate`.
+
 ### Fixed
 - `label_selected_images()` no longer pairs a DFT label with the wrong
   geometry. When a QE geometry-instability retry displaced atoms, the energy

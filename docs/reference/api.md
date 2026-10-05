@@ -18,9 +18,15 @@
 
 ::: NEBwalk.active
 
+::: NEBwalk.selection
+
 ::: NEBwalk.uncertainty
 
 ::: NEBwalk.label
+
+::: NEBwalk.finetune
+
+::: NEBwalk.validate
 
 ::: NEBwalk.labeling
 

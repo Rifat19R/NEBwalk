@@ -19,6 +19,7 @@ nav:
   - Reference:
       - API reference: reference/api.md
       - Dataset schema: reference/dataset_schema.md
+      - Architecture and boundaries: reference/architecture.md
       - Scientific guidance: reference/scientific-guidance.md
       - Contributing: reference/contributing.md
 markdown_extensions:
