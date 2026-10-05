@@ -16,6 +16,11 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   are now reported as failed and listed in
   `metadata["geometry_changed_during_recovery_indices"]`. Parameter-only
   recoveries (for example SCF mixing changes) are unaffected.
+- `nebwalk_version` in MLIP-selection and DFT-labeling metadata now comes
+  from `NEBwalk.__version__`, as in reproducibility bundles. It previously
+  came from installed distribution metadata with hard-coded `0.7.1`/`0.10.0`
+  fallbacks, which could record the wrong version (for example under a stale
+  editable install).
 
 ## [0.11.0] — 2026-10-05
 

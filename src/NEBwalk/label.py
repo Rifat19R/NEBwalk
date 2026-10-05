@@ -13,7 +13,6 @@ from __future__ import annotations
 import json
 from collections.abc import Callable, Sequence
 from dataclasses import asdict, dataclass, field
-from importlib import metadata as importlib_metadata
 from pathlib import Path
 from typing import Any
 
@@ -106,10 +105,11 @@ class NEBLabelingResult:
 
 
 def _nebwalk_version() -> str:
-    try:
-        return importlib_metadata.version("NEBwalk")
-    except importlib_metadata.PackageNotFoundError:
-        return "0.10.0"
+    # Same single source as NEBwalk.reproduce: installed distribution metadata
+    # can be stale under editable installs, and a hard-coded fallback drifts.
+    from . import __version__
+
+    return __version__
 
 
 def single_point_with_recovery(

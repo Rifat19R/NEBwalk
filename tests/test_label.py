@@ -367,3 +367,16 @@ def test_label_selected_images_accepts_parameter_only_recovery():
     assert [label.index for label in label_result.labels] == [0, 1]
     assert label_result.metadata["geometry_changed_during_recovery_indices"] == []
     assert label_result.labels[1].dft_relative_energy_eV == pytest.approx(1.0)
+
+
+def test_label_metadata_records_running_package_version():
+    import NEBwalk
+
+    _images, result = _two_image_result()
+    calcs = iter([ConstantCalculator(-1.0, np.zeros((1, 3))) for _ in range(2)])
+
+    label_result = label_selected_images(
+        result, dft_calculator_factory=lambda: next(calcs)
+    )
+
+    assert label_result.metadata["nebwalk_version"] == NEBwalk.__version__
