@@ -18,6 +18,16 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - API reference pages for `NEBwalk.selection`, `NEBwalk.finetune`, and
   `NEBwalk.validate`.
 
+### Changed
+- `paper/paper.md` now matches the audited evidence. The validation section
+  uses the 13 re-audited benchmark cases and the NEBwalk-versus-ASE
+  consistency benchmark, replacing the older 20-case table (W/Mo
+  comparators, error percentages, and four entries that were not
+  re-audited). The fixed test count is gone. The MLIP-to-DFT and
+  disagreement claims are bounded (sparse single points are not a full DFT
+  NEB, and disagreement is an uncertainty proxy). The unpublished MXene study
+  is no longer presented as a demonstration.
+
 ### Fixed
 - `label_selected_images()` no longer pairs a DFT label with the wrong
   geometry. When a QE geometry-instability retry displaced atoms, the energy

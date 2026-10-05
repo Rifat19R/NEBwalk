@@ -42,9 +42,10 @@ Egret-1t machine-learned potentials for cheap screening, and Quantum ESPRESSO
 that wavefunction files from different images do not overwrite each other.
 
 NEBwalk also includes a two-stage workflow for combining machine-learned
-potentials with DFT. It runs the NEB once with a fast potential, picks out the
-few images that matter most for the barrier, and writes them to disk ready for
-DFT single-point checks or for an active-learning dataset. A separate module
+potentials with DFT. It runs the NEB once with a fast potential, picks out a
+few images near the barrier (or where two potentials disagree most), and
+writes them to disk ready for DFT single-point checks or for an
+active-learning dataset. A separate module
 saves a full record of any run, including structures, settings, results,
 trajectory, file checksums, and a script to repeat the calculation.
 
@@ -57,11 +58,12 @@ to find them, but most NEB code is locked to one engine. The neb.x tool in
 Quantum ESPRESSO only drives pw.x. The NEB inside VASP only works with VASP.
 Getting a machine-learned potential into either of these takes real effort.
 
-ASE [@larsen2017] ships its own NEB, which is more flexible, but its default
-optimizer is L-BFGS. That choice is not ideal here, because the NEB force is
-not the gradient of a single energy function and quasi-Newton methods assume
-that it is [@bitzek2006]. NEBwalk uses FIRE everywhere instead, which does not
-make that assumption.
+ASE [@larsen2017] ships its own NEB, which is more flexible, and leaves the
+choice of optimizer to the user. Quasi-Newton optimizers such as L-BFGS are a
+common choice but are not ideal here, because the NEB force is not the
+gradient of a single energy function and quasi-Newton methods assume that it
+is [@bitzek2006]. NEBwalk uses FIRE everywhere instead, which does not make
+that assumption.
 
 The other gap is more recent. Universal machine-learned potentials like
 MACE-MP-0 [@batatia2024] are now fast enough that running a full NEB on a
@@ -72,11 +74,14 @@ chemistry. The common fix, rerunning the whole NEB in DFT, is expensive and
 usually overkill. What is actually needed is a way to use the cheap result to
 decide which images deserve a DFT calculation.
 
-NEBwalk does this. It runs the cheap NEB, selects the three to five images that
-carry the most information about the barrier, and exports them in a form ready
-for DFT or for active learning. Anyone who wants the speed of a machine-learned
-potential together with the accuracy of DFT can use this without writing their
-own glue code.
+NEBwalk does this. It runs the cheap NEB, selects a small number of images
+(by default the highest-energy image and its neighbours; optionally the images
+where two potentials disagree most), and exports them in a form ready for DFT
+or for active learning. This lets a user check a machine-learned path against
+DFT where it matters for the barrier without writing their own glue code.
+Sparse DFT single points on a machine-learned path are a check of that path,
+not a full DFT NEB, and disagreement between potentials is an uncertainty
+proxy, not calibrated uncertainty.
 
 The library is small on purpose. The force routine maps line for line onto the
 equations in @henkelman2000a, so it is also useful for teaching the method or
@@ -113,8 +118,9 @@ DFT validation or active learning.
 # Implementation
 
 NEBwalk is pure Python and depends on ASE [@larsen2017], NumPy, SciPy, and
-Matplotlib. MACE and Egret are optional and are only imported if the user's own
-calculator factory imports them. Quantum ESPRESSO support goes through ASE's
+Matplotlib. MACE and Egret are optional: importing NEBwalk does not import
+PyTorch or MACE, and they are loaded only by the user's calculator factory or
+the optional MACE fine-tuning backend. Quantum ESPRESSO support goes through ASE's
 Espresso interface and needs a working pw.x and UPF pseudopotential files.
 
 The force routine computes the improved tangent [@henkelman2000a], projects out
@@ -145,10 +151,12 @@ a clearly marked spot for the user to put the factory back. This is more honest
 than trying to capture arbitrary source code and more likely to actually work
 on another machine.
 
-The test suite has 157 tests. They cover interpolation, the force projection,
-the tangent construction, minimum-image handling, variable springs, the
-two-stage workflow, the reproducibility bundles, and the QE interface. The
-package is on PyPI and is tested on every push through GitHub Actions.
+The automated test suite covers interpolation, the force projection, the
+tangent construction, minimum-image handling, variable springs, the two-stage
+workflow, the reproducibility bundles, and the QE interface and its failure
+recovery. Independent regression tests compare NEBwalk's improved-tangent and
+climbing-image forces with ASE's NEB implementation. The package is on PyPI and
+is tested on every push through GitHub Actions.
 
 # Software design
 
@@ -165,35 +173,45 @@ NEBwalk does not need to know whether that calculator is EMT, a machine-learned
 potential, or a DFT wrapper. File-writing code is similarly separated from the
 optimization loop, so validation examples can write plots, CSV files,
 trajectories, and reproducibility bundles without changing the NEB force
-routine.
+routine. The optional active-learning and fine-tuning modules form outer
+layers that the NEB core does not import, a rule the test suite enforces.
 
 # Validation
 
-Twenty system-calculator combinations across the four backends were checked
-against DFT-PBE or experimental references. A few are shown below; the full set
-with per-system notes is in the repository README. Where the error is large,
-such as the Pt vacancy with EMT (34.8%) or the Al vacancy with MACE-MP-0 (17%),
-the cause is the calculator, not the NEB. EMT has no relativistic terms for Pt,
-and in this benchmark set MACE-MP-0 underestimates several vacancy migration
-barriers, though the effect is system dependent rather than universal (see
-the README benchmark table). In every case
-the path converged and the two endpoints came out equal to within 1 meV for
-symmetric hops, which is the internal check that the optimization itself is
-sound.
+Two kinds of evidence are kept separate.
 
-| System | Calculator | Barrier | Reference | Error |
-|--------|-----------|---------|-----------|-------|
-| Al vacancy / FCC Al | QE/PBE | 0.564 eV | ~0.61 eV | 7.6% |
-| W vacancy / BCC W | QE/PBE | 1.561 eV | ~1.66 eV | 5.9% |
-| Mo vacancy / BCC Mo | QE/PBE | 1.281 eV | ~1.35 eV | 5.1% |
-| Li vacancy / Li₂O | MACE-MP-0 | 0.284 eV | ~0.28 eV | 1.4% |
-| Mg vacancy / MgO | MACE-MP-0 | 2.254 eV | ~2.20 eV | 2.5% |
-| Ethane C–C torsion | Egret-1t | 0.113 eV | 0.126 eV | 10% |
+**Implementation consistency.** A reproducible benchmark in
+`benchmarks/ase_comparison/` runs NEBwalk and ASE's NEB on matched inputs. For
+an analytical Morse-H3 collinear path the two give identical barriers. For a
+periodic Al adatom on Al(100) with EMT, the barriers differ by about 0.035 meV
+and the converged paths by at most about 0.0021 Å. Both implementations keep
+their own default FIRE time steps, so step counts are not compared.
 
-The three QE results cover two crystal structures, FCC aluminium and BCC
-tungsten and molybdenum, and stay within about 8% of the DFT references. The
-remaining error is mostly finite-size: the supercells are small, and a larger
-cell would bring the barriers closer to the reference values.
+**Calculator benchmarks.** The quantitative benchmark claims were re-audited
+against the surviving output files in September 2026. Thirteen cases were
+reconfirmed (below). Seven older entries could not be re-audited from complete
+artefacts and are not counted as validated results.
+
+| System | Calculator | NEBwalk barrier | External comparator | Interpretation |
+|---|---|---:|---:|---|
+| Morse H3 collinear | analytical Morse | 0.200 eV | 0.193 eV analytical scale | algorithm/path check |
+| Al adatom / Al(100) | EMT | 0.237 eV | — | periodic workflow check |
+| Al vacancy / FCC Al | MACE-MP-0 | 0.508 eV | 0.58 eV | calculator benchmark |
+| H diffusion / Cu(111) | MACE-MP-0 | 0.126 eV | 0.13–0.15 eV | surface-diffusion scale check |
+| Cu vacancy / FCC Cu | EMT | 0.755 eV | 0.72 eV | calculator/workflow check |
+| Ni vacancy / FCC Ni | EMT | 1.095 eV | 1.08 eV | calculator/workflow check |
+| Pd vacancy / FCC Pd | EMT | 0.839 eV | 0.95 eV | calculator/workflow check |
+| Ag vacancy / FCC Ag | EMT | 0.682 eV | 0.70 eV | calculator/workflow check |
+| Pt vacancy / FCC Pt | EMT | 0.971 eV | 1.24 eV | known calculator limitation |
+| Au vacancy / FCC Au | EMT | 0.590 eV | 0.53 eV | calculator/workflow check |
+| Au vacancy / FCC Au | MACE-MP-0 | 0.725 eV | 0.53 eV | calculator limitation |
+| W vacancy / BCC W | QE/PBE | 1.561 eV | 1.78 eV | DFT-backed benchmark |
+| Mo vacancy / BCC Mo | QE/PBE | 1.281 eV | 1.28 eV | DFT-backed benchmark |
+
+The EMT cases are inexpensive workflow and implementation checks. The
+MACE-MP-0 and QE/PBE values show how those calculators behave on these systems.
+Agreement or disagreement with the literature reflects the calculator and
+setup, and is not a measure of the accuracy of NEBwalk itself.
 
 # Research impact statement
 
@@ -204,10 +222,9 @@ images, and reserve DFT for the small number of structures that control the
 barrier. This is useful for vacancy migration, surface diffusion, catalytic
 elementary steps, and other materials problems where the same transition search
 must be repeated across many sites, compositions, or adsorbates.
-An ongoing study of hydrogen migration on Ti₃C₂O₂, Ti₃C₂(OH)₂, and Ti₃C₂F₂
-MXene surfaces uses NEBwalk to manage the QE/PBE NEB workflow and extract
-termination-dependent activation barriers, which demonstrates the library's
-applicability to realistic periodic slab systems.
+NEBwalk is being used in an ongoing study of hydrogen migration on Ti₃C₂O₂,
+Ti₃C₂(OH)₂, and Ti₃C₂F₂ MXene surfaces with QE/PBE. That study is not yet
+published and is not part of the validation reported here.
 
 The package also has educational value. The implementation keeps the tangent
 construction, force projection, climbing-image modification, and FIRE update in
