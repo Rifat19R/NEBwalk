@@ -8,6 +8,15 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Fixed
+- `label_selected_images()` no longer pairs a DFT label with the wrong
+  geometry. When a QE geometry-instability retry displaced atoms, the energy
+  and forces belonged to the displaced structure but were reported, compared
+  against the MLIP, and exported for the undisplaced MLIP image. Such images
+  are now reported as failed and listed in
+  `metadata["geometry_changed_during_recovery_indices"]`. Parameter-only
+  recoveries (for example SCF mixing changes) are unaffected.
+
 ## [0.11.0] — 2026-10-05
 
 ### Added

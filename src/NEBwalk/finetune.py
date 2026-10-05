@@ -30,8 +30,7 @@ from ase.io import read, write
 from numpy.typing import NDArray
 
 from .datasets import DatasetArtifact, compute_structure_hash, write_dataset
-from .label import DFTLabel
-from .recovery import NoOpRecoveryStrategy, run_with_recovery
+from .label import DFTLabel, single_point_with_recovery
 
 FloatArray = NDArray[np.float64]
 
@@ -92,21 +91,16 @@ def _dft_single_point(
     dft_calculator_factory: Callable[[], Any],
     recovery_strategy: Any | None,
 ) -> tuple[float, FloatArray]:
-    """Single-point DFT energy+forces at a fixed geometry, with QE recovery."""
-    evaluated = atoms.copy()
-    evaluated.calc = dft_calculator_factory()
-    strategy = (
-        recovery_strategy
-        or getattr(evaluated.calc, "recovery_strategy", None)
-        or NoOpRecoveryStrategy()
+    """Single-point DFT energy+forces with QE recovery, for one isolated atom.
+
+    Delegates to :func:`NEBwalk.label.single_point_with_recovery`. Unlike NEB
+    image labels, a geometry-instability retry is accepted here: rigidly
+    displacing a lone atom in a vacuum cell does not change its energy.
+    """
+    energy, forces, _evaluated = single_point_with_recovery(
+        atoms, dft_calculator_factory, recovery_strategy
     )
-
-    def compute_fn(eval_atoms: Atoms, _params: dict) -> tuple[float, FloatArray]:
-        energy = float(eval_atoms.get_potential_energy())
-        forces = np.asarray(eval_atoms.get_forces(), dtype=float)
-        return energy, forces
-
-    return run_with_recovery(compute_fn, strategy, evaluated, {}, 0, [])
+    return energy, forces
 
 
 def compute_isolated_atom_reference(

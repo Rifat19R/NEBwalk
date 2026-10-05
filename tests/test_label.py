@@ -280,3 +280,90 @@ def test_dft_label_to_json_serializes_forces_as_list():
 
     assert payload["forces_eV_A"] == [[1.0, 2.0, 3.0]]
     assert json.dumps(payload)  # must be JSON-serializable
+
+
+class _FailOnceCalculator(ConstantCalculator):
+    """Raises on the first energy request, then returns fixed results."""
+
+    def __init__(self, energy: float, forces: np.ndarray) -> None:
+        super().__init__(energy, forces)
+        self.failed = False
+
+    def get_potential_energy(self, atoms=None, force_consistent=False):
+        if not self.failed:
+            self.failed = True
+            raise RuntimeError("transient QE failure")
+        return self.energy
+
+
+class _RetryStrategy(NoOpRecoveryStrategy):
+    """Retries once, optionally displacing atoms like a geometry retry."""
+
+    def __init__(self, failure_type: FailureType, displacement: float) -> None:
+        self.failure_type = failure_type
+        self.displacement = displacement
+
+    def classify(self, error, raw_output=None):
+        return self.failure_type
+
+    def propose_retry(self, failure_type, attempt, atoms, calc_params):
+        moved = atoms.copy()
+        moved.calc = atoms.calc
+        moved.positions = moved.positions + self.displacement
+        return dict(calc_params), moved
+
+    def validate_recovered_geometry(self, recovered_atoms, target_atoms):
+        return True
+
+
+def _two_image_result():
+    images = [
+        _mlip_image(-10.0, np.zeros((1, 3))),
+        _mlip_image(-9.0, np.zeros((1, 3))),
+    ]
+    selected = (SelectedImage(index=1, energy=-9.0, relative_energy=1.0),)
+    return images, _fake_result(images, selected)
+
+
+def test_label_selected_images_rejects_geometry_changing_recovery():
+    images, result = _two_image_result()
+    original = [image.positions.copy() for image in images]
+    calcs = iter(
+        [
+            ConstantCalculator(-100.0, np.zeros((1, 3))),
+            _FailOnceCalculator(-99.0, np.zeros((1, 3))),
+        ]
+    )
+
+    label_result = label_selected_images(
+        result,
+        dft_calculator_factory=lambda: next(calcs),
+        recovery_strategy=_RetryStrategy(FailureType.GEOMETRY_INSTABILITY, 0.01),
+    )
+
+    assert label_result.failed_indices == (1,)
+    assert [label.index for label in label_result.labels] == [0]
+    assert label_result.metadata["geometry_changed_during_recovery_indices"] == [1]
+    for image, positions in zip(images, original):
+        np.testing.assert_array_equal(image.positions, positions)
+
+
+def test_label_selected_images_accepts_parameter_only_recovery():
+    _images, result = _two_image_result()
+    calcs = iter(
+        [
+            ConstantCalculator(-100.0, np.zeros((1, 3))),
+            _FailOnceCalculator(-99.0, np.zeros((1, 3))),
+        ]
+    )
+
+    label_result = label_selected_images(
+        result,
+        dft_calculator_factory=lambda: next(calcs),
+        recovery_strategy=_RetryStrategy(FailureType.CONVERGENCE_FAILURE, 0.0),
+    )
+
+    assert label_result.failed_indices == ()
+    assert [label.index for label in label_result.labels] == [0, 1]
+    assert label_result.metadata["geometry_changed_during_recovery_indices"] == []
+    assert label_result.labels[1].dft_relative_energy_eV == pytest.approx(1.0)

@@ -5,8 +5,7 @@ selection in :mod:`NEBwalk.active`). It computes reference energies and
 forces at the *exact* MLIP-relaxed geometry of each selected image, so the
 label scores the same configuration the MLIP actually got wrong. It does not
 re-relax structures, build a fine-tuning-ready training set, or retrain any
-model -- see the module docstring in a future ``NEBwalk.finetune`` for those
-stages.
+model -- see :mod:`NEBwalk.finetune` for training-set export.
 """
 
 from __future__ import annotations
@@ -45,6 +44,17 @@ LABELING_DISCLOSURE = (
 )
 
 
+class GeometryChangedDuringRecovery(RuntimeError):
+    """A recovered DFT single-point no longer matches the MLIP image geometry."""
+
+    def __init__(self, image_index: int) -> None:
+        self.image_index = image_index
+        super().__init__(
+            f"image {image_index}: QE recovery changed the geometry; the DFT "
+            "label would not correspond to the MLIP-relaxed image"
+        )
+
+
 @dataclass(frozen=True)
 class DFTLabel:
     """One DFT single-point label for a selected NEB image.
@@ -55,6 +65,11 @@ class DFTLabel:
     is each method's energy zeroed against its own value at the labeling
     run's reference image, matching the convention in
     :func:`NEBwalk.uncertainty.compute_cross_model_disagreement`.
+
+    ``max_force_disagreement_eV_A`` is the largest absolute Cartesian
+    *component* of ``F_DFT - F_MLIP``. It is not the atom-wise vector norm
+    stored by :class:`NEBwalk.uncertainty.DisagreementResult`, so the two
+    values are not interchangeable.
     """
 
     index: int
@@ -97,18 +112,25 @@ def _nebwalk_version() -> str:
         return "0.10.0"
 
 
-def _label_one_image(
+def single_point_with_recovery(
     atoms: Atoms,
-    index: int,
     dft_calculator_factory: Callable[[], Any],
     recovery_strategy: Any | None,
-) -> tuple[float, FloatArray]:
-    """Single-point DFT energy+forces at a fixed geometry, with QE recovery."""
-    labeled = atoms.copy()
-    labeled.calc = dft_calculator_factory()
+    index: int = 0,
+) -> tuple[float, FloatArray, Atoms]:
+    """Single-point DFT energy+forces on a copy of ``atoms``, with QE recovery.
+
+    Returns the energy, the forces, and the evaluated copy. A
+    geometry-instability retry may displace atoms, so the copy's positions
+    are the geometry the energy and forces actually belong to; callers that
+    require the input geometry must compare positions themselves. ``atoms``
+    itself is never mutated.
+    """
+    evaluated = atoms.copy()
+    evaluated.calc = dft_calculator_factory()
     strategy = (
         recovery_strategy
-        or getattr(labeled.calc, "recovery_strategy", None)
+        or getattr(evaluated.calc, "recovery_strategy", None)
         or NoOpRecoveryStrategy()
     )
 
@@ -117,7 +139,28 @@ def _label_one_image(
         forces = np.asarray(eval_atoms.get_forces(), dtype=float)
         return energy, forces
 
-    return run_with_recovery(compute_fn, strategy, labeled, {}, index, [])
+    energy, forces = run_with_recovery(compute_fn, strategy, evaluated, {}, index, [])
+    return energy, forces, evaluated
+
+
+def _label_one_image(
+    atoms: Atoms,
+    index: int,
+    dft_calculator_factory: Callable[[], Any],
+    recovery_strategy: Any | None,
+) -> tuple[float, FloatArray]:
+    """Single-point DFT label at exactly the MLIP geometry of ``atoms``.
+
+    Raises :class:`GeometryChangedDuringRecovery` if recovery displaced any
+    atom: the label would then describe a different configuration from the
+    MLIP image it is paired with and compared against.
+    """
+    energy, forces, evaluated = single_point_with_recovery(
+        atoms, dft_calculator_factory, recovery_strategy, index
+    )
+    if not np.array_equal(evaluated.positions, atoms.positions):
+        raise GeometryChangedDuringRecovery(index)
+    return energy, forces
 
 
 def label_selected_images(
@@ -145,7 +188,12 @@ def label_selected_images(
     QE images that fail are retried through the same recovery machinery used
     during NEB optimization (see :mod:`NEBwalk.recovery`); images that are
     still unrecoverable are reported in ``NEBLabelingResult.failed_indices``
-    rather than aborting the whole batch.
+    rather than aborting the whole batch. An image whose only successful
+    recovery displaced atoms (a geometry-instability retry) is also reported
+    as failed and listed in
+    ``metadata["geometry_changed_during_recovery_indices"]``, because its
+    energy and forces would not belong to the MLIP geometry they are paired
+    with.
     """
     images = result.neb_result.neb.images
     if not (0 <= reference_index < len(images)):
@@ -158,6 +206,7 @@ def label_selected_images(
 
     dft_energy_forces: dict[int, tuple[float, FloatArray]] = {}
     failed: list[int] = []
+    geometry_changed: list[int] = []
     for index in sorted(requested_indices):
         try:
             dft_energy_forces[index] = _label_one_image(
@@ -165,6 +214,9 @@ def label_selected_images(
             )
         except RecoveryExhausted:
             failed.append(index)
+        except GeometryChangedDuringRecovery:
+            failed.append(index)
+            geometry_changed.append(index)
 
     labels: list[DFTLabel] = []
     if reference_index in dft_energy_forces:
@@ -209,6 +261,7 @@ def label_selected_images(
         "labeled_count": len(labels),
         "requested_count": len(requested_indices),
         "failed_indices": failed,
+        "geometry_changed_during_recovery_indices": geometry_changed,
     }
 
     out_dir = None
@@ -261,6 +314,7 @@ def _export_labels(
 
 __all__ = [
     "DFTLabel",
+    "GeometryChangedDuringRecovery",
     "NEBLabelingResult",
     "label_selected_images",
 ]
