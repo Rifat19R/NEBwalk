@@ -178,6 +178,13 @@ layers that the NEB core does not import, a rule the test suite enforces.
 
 # Validation
 
+This manuscript describes NEBwalk v0.11.0 with audited post-release
+corrections through the current repository commit. The archived v0.11.0 tag
+and PyPI release are unchanged; the corrections, listed under "Unreleased" in
+the changelog, concern DFT-label bookkeeping and QE failure recovery, not the
+NEB force projection or optimizer. The benchmark values below are frozen
+outputs and were not regenerated for these corrections.
+
 Two kinds of evidence are kept separate.
 
 **Implementation consistency.** A reproducible benchmark in

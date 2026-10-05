@@ -112,17 +112,19 @@ def run_with_recovery(
     attempt = 0
     current_atoms, current_params = atoms, calc_params
     last_failure_type: FailureType | None = None
+    # Sticky: a later parameter-only retry keeps the displaced geometry, so
+    # the result still belongs to it and must be validated and synced back.
+    geometry_retried = False
     while True:
         try:
             result = compute_fn(current_atoms, current_params)
-            if (
-                last_failure_type == FailureType.GEOMETRY_INSTABILITY
-                and not _geometry_is_valid(strategy, current_atoms, atoms)
+            if geometry_retried and not _geometry_is_valid(
+                strategy, current_atoms, atoms
             ):
                 raise RuntimeError(
                     "Recovered geometry drifted beyond the allowed tolerance."
                 )
-            if last_failure_type == FailureType.GEOMETRY_INSTABILITY:
+            if geometry_retried:
                 _sync_recovered_geometry(current_atoms, atoms)
             return result
         except Exception as exc:
@@ -206,6 +208,8 @@ def run_with_recovery(
             params_before = current_params
             current_params, current_atoms = proposal
             last_failure_type = failure_type
+            if failure_type == FailureType.GEOMETRY_INSTABILITY:
+                geometry_retried = True
             log.append(
                 RecoveryAttempt(
                     image_index,

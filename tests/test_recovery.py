@@ -316,6 +316,50 @@ def test_geometry_retry_success_updates_original_atoms_positions() -> None:
     np.testing.assert_allclose(atoms.positions, [[0.05, 0.0, 0.0]])
 
 
+def test_geometry_retry_then_parameter_retry_still_syncs_and_validates() -> None:
+    class GeometryThenConvergenceStrategy:
+        def __init__(self, valid: bool) -> None:
+            self.calls = 0
+            self.valid = valid
+
+        def classify(self, error, raw_output=None):
+            if "atoms too close" in str(error):
+                return FailureType.GEOMETRY_INSTABILITY
+            return FailureType.CONVERGENCE_FAILURE
+
+        def propose_retry(self, failure_type, attempt, atoms, calc_params):
+            if failure_type == FailureType.GEOMETRY_INSTABILITY:
+                recovered = atoms.copy()
+                recovered.positions += [0.05, 0.0, 0.0]
+                return calc_params, recovered
+            return {**calc_params, "mixing_beta": 0.3}, atoms
+
+        def validate_recovered_geometry(self, recovered_atoms, target_atoms):
+            return self.valid
+
+    def run(strategy):
+        atoms = Atoms("H", positions=[[0.0, 0.0, 0.0]])
+
+        def compute_fn(eval_atoms, calc_params):
+            strategy.calls += 1
+            if strategy.calls == 1:
+                raise RuntimeError("atoms too close")
+            if strategy.calls == 2:
+                raise RuntimeError("convergence NOT achieved")
+            return "ok"
+
+        return atoms, run_with_recovery(compute_fn, strategy, atoms, {}, 1, [])
+
+    # The result belongs to the displaced geometry even though the last retry
+    # only changed parameters, so the caller's atoms must be synced to it.
+    atoms, result = run(GeometryThenConvergenceStrategy(valid=True))
+    assert result == "ok"
+    np.testing.assert_allclose(atoms.positions, [[0.05, 0.0, 0.0]])
+
+    with pytest.raises(RecoveryExhausted):
+        run(GeometryThenConvergenceStrategy(valid=False))
+
+
 def test_apply_calc_params_clears_stale_results_without_reset() -> None:
     class FakeCalc:
         def __init__(self) -> None:

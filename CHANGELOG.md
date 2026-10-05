@@ -8,6 +8,10 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+Audited corrections made after the v0.11.0 release. The `v0.11.0` tag and
+PyPI release are unchanged, and the package still reports version 0.11.0
+until the next release.
+
 ### Added
 - Architecture and ownership reference (`docs/reference/architecture.md`). It
   separates the NEB core, the NEB-specific MLIP-to-DFT handoff layer, and the
@@ -41,6 +45,14 @@ Versioning: [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   came from installed distribution metadata with hard-coded `0.7.1`/`0.10.0`
   fallbacks, which could record the wrong version (for example under a stale
   editable install).
+- `run_with_recovery()` now validates and syncs the recovered geometry
+  whenever any retry in the chain displaced atoms. Previously, a
+  geometry-instability retry followed by a parameter-only retry (for example
+  an SCF mixing change) skipped both steps, so the result of the displaced
+  structure was returned for the caller's undisplaced atoms. This affected NEB
+  image recovery, `label_selected_images()` (which could then accept the
+  label), and `QEReferenceLabeler` (which could record
+  `geometry_changed_during_recovery` as false).
 
 ## [0.11.0] — 2026-10-05
 
