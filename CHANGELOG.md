@@ -103,6 +103,11 @@ until the next release.
   recovery chain the sequence is unchanged (`base * 0.5`, `0.25`, `0.125`).
   The cached result of the recovered evaluation is kept, so post-run readers
   do not trigger a new calculation.
+- Documentation: `DFTLabel.max_force_disagreement_eV_A` is now documented
+  (docstring, label README disclosure, architecture reference) as an
+  operational constrained-force disagreement metric, computed after the
+  image's ASE constraints are applied to both force sets. It is not a raw
+  DFT-force disagreement. The stored label forces are raw.
 
 ## [0.11.0] — 2026-10-05
 

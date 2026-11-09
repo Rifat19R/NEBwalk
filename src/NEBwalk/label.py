@@ -44,7 +44,13 @@ LABELING_DISCLOSURE = (
     "against its own value at the reference image) and\n"
     "relative_energy_disagreement_eV are physically meaningful for judging\n"
     "how wrong the MLIP is. max_force_disagreement_eV_A needs no such\n"
-    "zeroing -- forces have no reference-energy ambiguity."
+    "zeroing -- forces have no reference-energy ambiguity.\n\n"
+    "forces_eV_A (and the extxyz forces) are the raw, unconstrained DFT\n"
+    "forces. max_force_disagreement_eV_A is an operational\n"
+    "constrained-force disagreement metric: it is computed after the\n"
+    "image's ASE constraints (e.g. FixAtoms) are applied to BOTH force sets,\n"
+    "so constrained atoms contribute zero. It is not a raw DFT-force\n"
+    "disagreement."
 )
 
 
@@ -74,6 +80,13 @@ class DFTLabel:
     *component* of ``F_DFT - F_MLIP``. It is not the atom-wise vector norm
     stored by :class:`NEBwalk.uncertainty.DisagreementResult`, so the two
     values are not interchangeable.
+
+    ``forces_eV_A`` are the raw, unconstrained calculator (DFT) forces.
+    ``max_force_disagreement_eV_A`` is an *operational constrained-force
+    disagreement metric*: both the DFT and MLIP forces have the image's ASE
+    constraints applied first (e.g. ``FixAtoms`` atoms contribute zero), so it
+    measures disagreement on the degrees of freedom the NEB moves. It is not a
+    raw DFT-force disagreement and must not be reported as one.
     """
 
     index: int

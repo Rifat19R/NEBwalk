@@ -504,3 +504,23 @@ def test_label_stores_raw_forces_not_fixatoms_zeroed_forces(tmp_path):
     exported = read(tmp_path / "labels" / "dft_label_01.xyz")
     np.testing.assert_array_equal(exported.calc.results["forces"], raw)
     assert any(isinstance(c, FixAtoms) for c in exported.constraints)
+
+
+def test_force_disagreement_is_documented_as_constrained_not_raw(tmp_path):
+    from NEBwalk.label import LABELING_DISCLOSURE, DFTLabel
+
+    for text in (LABELING_DISCLOSURE, DFTLabel.__doc__ or ""):
+        flat = " ".join(text.split())
+        assert "constrained-force disagreement metric" in flat
+        assert "not a raw DFT-force disagreement" in flat
+        assert "raw, unconstrained" in flat
+
+    _images, result = _two_image_result()
+    calcs = iter([ConstantCalculator(-1.0, np.zeros((1, 3))) for _ in range(2)])
+    label_selected_images(
+        result,
+        dft_calculator_factory=lambda: next(calcs),
+        output_dir=tmp_path / "labels",
+    )
+    readme = " ".join((tmp_path / "labels" / "README.md").read_text().split())
+    assert "constrained-force disagreement metric" in readme
