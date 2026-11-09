@@ -5,10 +5,16 @@ import json
 import numpy as np
 import pytest
 from ase import Atoms
+from ase.calculators.calculator import Calculator
 from ase.calculators.emt import EMT
 
 from NEBwalk import NEBRunConfig, run_neb_calculation
-from NEBwalk.optimize import _apply_and_verify_calc_params, _apply_calc_params
+from NEBwalk.optimize import (
+    _apply_and_verify_calc_params,
+    _apply_calc_params,
+    _eval_all,
+    _eval_image,
+)
 from NEBwalk.qe import QERecoveryStrategy
 from NEBwalk.recovery import (
     FailureType,
@@ -692,3 +698,114 @@ def test_qe_beta_retry_after_geometry_retry_keeps_attempt_indexing() -> None:
     )
     assert result == "ok"
     assert seen == [0.3, 0.3, 0.075]
+
+
+class _ScriptedQECalc(Calculator):
+    """QE-like calculator: records each SCF's ``input_data`` and fails on cue.
+
+    ``failures`` is the number of leading calculations that raise a QE
+    convergence failure; every later calculation succeeds.
+    """
+
+    implemented_properties = ["energy", "forces"]
+
+    def __init__(self, failures: int = 0, electrons=None) -> None:
+        super().__init__()
+        self.parameters["input_data"] = {
+            "electrons": dict({"mixing_beta": 0.3} if electrons is None else electrons),
+            "system": {"degauss": 0.02},
+        }
+        self.failures = failures
+        self.seen: list[dict] = []
+
+    def calculate(self, atoms=None, properties=None, system_changes=None):
+        super().calculate(atoms, properties, system_changes)
+        data = self.parameters["input_data"]
+        self.seen.append(
+            {
+                "mixing_beta": data["electrons"].get("mixing_beta"),
+                "degauss": data["system"].get("degauss"),
+            }
+        )
+        if self.failures > 0:
+            self.failures -= 1
+            error = RuntimeError("pw.x failed")
+            error.qe_output = "convergence NOT achieved"
+            raise error
+        self.results = {
+            "energy": float(self.atoms.positions[0, 0]),
+            "forces": np.zeros((len(self.atoms), 3)),
+        }
+
+
+def _scripted_image(failures: int = 0, electrons=None) -> Atoms:
+    atoms = Atoms("H", positions=[[0.0, 0.0, 0.0]], cell=[5, 5, 5], pbc=True)
+    atoms.calc = _ScriptedQECalc(failures, electrons)
+    return atoms
+
+
+def test_neb_retry_chain_reduces_beta_then_next_step_starts_from_baseline():
+    img = _scripted_image(failures=2)
+    calc = img.calc
+    log: list = []
+    _eval_image(img, 1, recovery_strategy=QERecoveryStrategy(), recovery_log=log)
+    # Within one recovery chain: frozen base-relative sequence.
+    assert [s["mixing_beta"] for s in calc.seen] == [0.3, 0.15, 0.075]
+    assert [a.params_after["mixing_beta"] for a in log] == [0.15, 0.075]
+    # Recovery parameters are attempt-local: baseline restored afterwards.
+    assert calc.parameters["input_data"]["electrons"]["mixing_beta"] == 0.3
+    # The restore does not discard the result the optimizer just used, so
+    # post-run readers (profiles, trajectories) do not trigger a new pw.x run.
+    img.get_potential_energy()
+    assert len(calc.seen) == 3
+
+    # Next independent NEB evaluation (moved image) starts from baseline.
+    img.positions = img.positions + [0.01, 0.0, 0.0]
+    _eval_image(img, 1, recovery_strategy=QERecoveryStrategy(), recovery_log=log)
+    assert calc.seen[-1] == {"mixing_beta": 0.3, "degauss": 0.02}
+    assert len(calc.seen) == 4
+
+
+def test_neb_retry_after_carried_state_would_have_compounded():
+    # A second recovery chain in a later step must restart from the
+    # baseline sequence (0.15, 0.075, ...), not from the last retry's beta.
+    img = _scripted_image(failures=1)
+    calc = img.calc
+    _eval_image(img, 1, recovery_strategy=QERecoveryStrategy(), recovery_log=[])
+    calc.failures = 1
+    img.positions = img.positions + [0.01, 0.0, 0.0]
+    _eval_image(img, 1, recovery_strategy=QERecoveryStrategy(), recovery_log=[])
+    assert [s["mixing_beta"] for s in calc.seen] == [0.3, 0.15, 0.3, 0.15]
+
+
+def test_neb_retry_state_restored_after_exhaustion_including_degauss():
+    img = _scripted_image(failures=10)
+    calc = img.calc
+    with pytest.raises(RecoveryExhausted):
+        _eval_image(img, 1, recovery_strategy=QERecoveryStrategy(), recovery_log=[])
+    assert calc.seen[-1] == {"mixing_beta": 0.0375, "degauss": 0.03}
+    assert calc.parameters["input_data"]["electrons"]["mixing_beta"] == 0.3
+    assert calc.parameters["input_data"]["system"]["degauss"] == 0.02
+
+
+def test_neb_retry_added_parameter_is_removed_after_recovery():
+    # Baseline relies on the pw.x default mixing_beta (key absent); the
+    # retry's explicit value must not persist into later evaluations.
+    img = _scripted_image(failures=1, electrons={})
+    calc = img.calc
+    _eval_image(img, 1, recovery_strategy=QERecoveryStrategy(), recovery_log=[])
+    assert [s["mixing_beta"] for s in calc.seen] == [None, 0.35]
+    assert "mixing_beta" not in calc.parameters["input_data"]["electrons"]
+    img.positions = img.positions + [0.01, 0.0, 0.0]
+    _eval_image(img, 1, recovery_strategy=QERecoveryStrategy(), recovery_log=[])
+    assert calc.seen[-1]["mixing_beta"] is None
+
+
+def test_eval_all_each_neb_step_starts_from_baseline():
+    images = [_scripted_image() for _ in range(3)]
+    images[1].calc.failures = 1
+    _eval_all(images, 1, recovery_strategy=QERecoveryStrategy(), recovery_log=[])
+    for img in images:
+        img.positions = img.positions + [0.01, 0.0, 0.0]
+    _eval_all(images, 1, recovery_strategy=QERecoveryStrategy(), recovery_log=[])
+    assert [s["mixing_beta"] for s in images[1].calc.seen] == [0.3, 0.15, 0.3]

@@ -93,6 +93,16 @@ until the next release.
   that identifies `Program PWSCF` with a version, regardless of exit status.
   QE 7.4.1 prints the banner and then exits with status 1, which previously
   made environment validation fail. Output without the banner still fails.
+- NEB image recovery parameters are now attempt-local. After each image
+  evaluation (recovered or exhausted), the calculator's retry-managed
+  parameters (`mixing_beta`, `conv_thr`, `degauss`) are restored to their
+  pre-recovery values, and a parameter a retry added is removed again.
+  Previously a successful retry left, for example, `mixing_beta=0.15` on the
+  calculator, so every later NEB step ran with the reduced value and used it
+  as the base of its own retry sequence (0.15 -> 0.075 -> ...). Within one
+  recovery chain the sequence is unchanged (`base * 0.5`, `0.25`, `0.125`).
+  The cached result of the recovered evaluation is kept, so post-run readers
+  do not trigger a new calculation.
 
 ## [0.11.0] — 2026-10-05
 

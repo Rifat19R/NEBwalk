@@ -137,6 +137,13 @@ def _extract_calc_params(calc: Any) -> dict:
     return params
 
 
+# Calculator parameters a recovery retry may change, by pw.x namelist section.
+_RETRY_PARAM_SECTIONS = {
+    "electrons": ("conv_thr", "mixing_beta"),
+    "system": ("degauss",),
+}
+
+
 def _apply_calc_params(calc: Any, calc_params: dict) -> None:
     parameters = getattr(calc, "parameters", None)
     if not isinstance(parameters, MutableMapping):
@@ -145,12 +152,8 @@ def _apply_calc_params(calc: Any, calc_params: dict) -> None:
     if not isinstance(input_data, MutableMapping):
         return
 
-    sections = {
-        "electrons": {"conv_thr", "mixing_beta"},
-        "system": {"degauss"},
-    }
     changed = False
-    for section_name, names in sections.items():
+    for section_name, names in _RETRY_PARAM_SECTIONS.items():
         section = input_data.setdefault(section_name, {})
         if not isinstance(section, MutableMapping):
             continue
@@ -162,6 +165,36 @@ def _apply_calc_params(calc: Any, calc_params: dict) -> None:
         calc.reset()
     elif changed and hasattr(calc, "results"):
         calc.results.clear()
+
+
+def _restore_calc_params(calc: Any, baseline: dict) -> None:
+    """Restore retry-managed parameters on ``calc`` to ``baseline``.
+
+    Recovery parameters are attempt-local: after an NEB image evaluation
+    (successful or not) the calculator must hold its pre-recovery settings so
+    the next independent evaluation starts from them. A parameter absent from
+    ``baseline`` (pw.x default) is removed again if a retry added it.
+
+    Cached results are left in place: they are the values the optimizer just
+    used, computed under the retry parameters recorded in the recovery log.
+    Any new geometry is recomputed under the restored settings.
+    """
+    parameters = getattr(calc, "parameters", None)
+    if not isinstance(parameters, MutableMapping):
+        return
+    input_data = parameters.get("input_data")
+    if not isinstance(input_data, MutableMapping):
+        return
+    for section_name, names in _RETRY_PARAM_SECTIONS.items():
+        section = input_data.get(section_name)
+        if not isinstance(section, MutableMapping):
+            continue
+        for name in names:
+            if name in baseline:
+                if section.get(name) != baseline[name]:
+                    section[name] = baseline[name]
+            elif name in section:
+                del section[name]
 
 
 # Retry parameters that only steer the SCF iteration; the converged result is
@@ -231,14 +264,19 @@ def _eval_image(
         forces = np.asarray(eval_atoms.get_forces(), dtype=float)
         return energy, forces
 
-    return run_with_recovery(
-        compute_fn,
-        strategy,
-        img,
-        calc_params,
-        image_index,
-        log,
-    )
+    try:
+        return run_with_recovery(
+            compute_fn,
+            strategy,
+            img,
+            calc_params,
+            image_index,
+            log,
+        )
+    finally:
+        # Retry parameters must not leak into the next NEB step's evaluation.
+        if calc is not None:
+            _restore_calc_params(calc, calc_params)
 
 
 def _warn_if_gpu_calculator(images: Sequence[Atoms], n_workers: int) -> None:
