@@ -369,6 +369,93 @@ def test_label_selected_images_accepts_parameter_only_recovery():
     assert label_result.labels[1].dft_relative_energy_eV == pytest.approx(1.0)
 
 
+class _QELikeFailOnce:
+    """Mock QE calculator: ``input_data`` parameters, SCF fails ``fails`` times."""
+
+    def __init__(self, energy: float, fails: int = 1) -> None:
+        self.energy = energy
+        self.fails = fails
+        self.parameters = {
+            "input_data": {
+                "electrons": {"mixing_beta": 0.3, "conv_thr": 1e-8},
+                "system": {"degauss": 0.02},
+            }
+        }
+        self.results: dict = {}
+        self.seen: list[tuple[float, float]] = []
+
+    def get_potential_energy(self, atoms=None, force_consistent=False):
+        data = self.parameters["input_data"]
+        self.seen.append((data["electrons"]["mixing_beta"], data["system"]["degauss"]))
+        if self.fails:
+            self.fails -= 1
+            error = RuntimeError("pw.x failed")
+            error.qe_output = "convergence NOT achieved"
+            raise error
+        return self.energy
+
+    def get_forces(self, atoms=None):
+        return np.zeros((1, 3))
+
+
+def test_label_rejects_convergence_retry_that_moves_atoms():
+    # A custom strategy's convergence retry may also move atoms; detection
+    # must follow the actual positions, not the failure type.
+    _images, result = _two_image_result()
+    calcs = iter(
+        [
+            ConstantCalculator(-100.0, np.zeros((1, 3))),
+            _FailOnceCalculator(-99.0, np.zeros((1, 3))),
+        ]
+    )
+
+    label_result = label_selected_images(
+        result,
+        dft_calculator_factory=lambda: next(calcs),
+        recovery_strategy=_RetryStrategy(FailureType.CONVERGENCE_FAILURE, 0.01),
+    )
+
+    assert label_result.failed_indices == (1,)
+    assert label_result.metadata["geometry_changed_during_recovery_indices"] == [1]
+
+
+def test_label_convergence_retry_really_applies_mixing_beta():
+    from NEBwalk.qe import QERecoveryStrategy
+
+    _images, result = _two_image_result()
+    retried = _QELikeFailOnce(-99.0, fails=1)
+    calcs = iter([_QELikeFailOnce(-100.0, fails=0), retried])
+
+    label_result = label_selected_images(
+        result,
+        dft_calculator_factory=lambda: next(calcs),
+        recovery_strategy=QERecoveryStrategy(),
+    )
+
+    assert label_result.failed_indices == ()
+    # Halved from the calculator's own 0.3, not from a 0.7 fallback.
+    assert retried.seen == [(0.3, 0.02), (0.15, 0.02)]
+
+
+def test_label_refuses_degauss_retry_instead_of_mislabeling():
+    from NEBwalk.qe import QERecoveryStrategy
+
+    _images, result = _two_image_result()
+    retried = _QELikeFailOnce(-99.0, fails=99)
+    calcs = iter([_QELikeFailOnce(-100.0, fails=0), retried])
+
+    label_result = label_selected_images(
+        result,
+        dft_calculator_factory=lambda: next(calcs),
+        recovery_strategy=QERecoveryStrategy(),
+    )
+
+    assert label_result.failed_indices == (1,)
+    # Attempt 3 would raise degauss to 0.03; it must never be run.
+    assert all(degauss == 0.02 for _beta, degauss in retried.seen)
+    assert len(retried.seen) == 3
+
+
 def test_label_metadata_records_running_package_version():
     import NEBwalk
 
@@ -380,3 +467,60 @@ def test_label_metadata_records_running_package_version():
     )
 
     assert label_result.metadata["nebwalk_version"] == NEBwalk.__version__
+
+
+def test_label_stores_raw_forces_not_fixatoms_zeroed_forces(tmp_path):
+    from ase.constraints import FixAtoms
+    from ase.io import read
+
+    raw = np.array([[0.5, -0.25, 0.125], [0.1, 0.2, -0.3]])
+    images = []
+    for energy in (-10.0, -9.0):
+        atoms = Atoms("H2", positions=[[0.0, 0.0, 0.0], [0.0, 0.0, 0.8]])
+        atoms.set_constraint(FixAtoms(indices=[0]))
+        atoms.calc = ConstantCalculator(energy, np.zeros((2, 3)))
+        images.append(atoms)
+    selected = (SelectedImage(index=1, energy=-9.0, relative_energy=1.0),)
+    result = _fake_result(images, selected)
+
+    probe = images[1].copy()
+    probe.calc = ConstantCalculator(-99.0, raw)
+    constrained = probe.get_forces()
+    assert not np.array_equal(constrained, raw)
+    np.testing.assert_array_equal(constrained[0], 0.0)
+
+    label_result = label_selected_images(
+        result,
+        dft_calculator_factory=lambda: ConstantCalculator(-99.0, raw),
+        output_dir=tmp_path / "labels",
+    )
+
+    label = {lab.index: lab for lab in label_result.labels}[1]
+    np.testing.assert_array_equal(label.forces_eV_A, raw)
+    # The disagreement metric keeps its constraint-applied convention.
+    assert label.max_force_disagreement_eV_A == pytest.approx(
+        float(np.max(np.abs(constrained)))
+    )
+    exported = read(tmp_path / "labels" / "dft_label_01.xyz")
+    np.testing.assert_array_equal(exported.calc.results["forces"], raw)
+    assert any(isinstance(c, FixAtoms) for c in exported.constraints)
+
+
+def test_force_disagreement_is_documented_as_constrained_not_raw(tmp_path):
+    from NEBwalk.label import LABELING_DISCLOSURE, DFTLabel
+
+    for text in (LABELING_DISCLOSURE, DFTLabel.__doc__ or ""):
+        flat = " ".join(text.split())
+        assert "constrained-force disagreement metric" in flat
+        assert "not a raw DFT-force disagreement" in flat
+        assert "raw, unconstrained" in flat
+
+    _images, result = _two_image_result()
+    calcs = iter([ConstantCalculator(-1.0, np.zeros((1, 3))) for _ in range(2)])
+    label_selected_images(
+        result,
+        dft_calculator_factory=lambda: next(calcs),
+        output_dir=tmp_path / "labels",
+    )
+    readme = " ".join((tmp_path / "labels" / "README.md").read_text().split())
+    assert "constrained-force disagreement metric" in readme

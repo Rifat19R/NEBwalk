@@ -84,11 +84,22 @@ class QERecoveryStrategy:
             return FailureType.GEOMETRY_INSTABILITY
         return FailureType.PROCESS_FAILURE
 
-    def propose_retry(self, failure_type, attempt, atoms, calc_params):
+    def propose_retry(
+        self, failure_type, attempt, atoms, calc_params, base_params=None
+    ):
+        """Propose retry parameters/geometry for ``attempt`` (1-based).
+
+        Convergence retries use a fixed, base-relative sequence
+        ``mixing_beta = base * 0.5**attempt`` where ``base`` is the
+        pre-recovery value (``base_params``; ``calc_params`` when omitted).
+        :func:`~NEBwalk.recovery.run_with_recovery` passes ``base_params`` so
+        the reduction is not compounded with the previous retry's value.
+        """
         new_params = dict(calc_params)
+        base = calc_params if base_params is None else base_params
 
         if failure_type == FailureType.CONVERGENCE_FAILURE:
-            base_beta = calc_params.get("mixing_beta", 0.7)
+            base_beta = base.get("mixing_beta", 0.7)
             new_params["mixing_beta"] = base_beta * (0.5**attempt)
             if attempt >= MAX_RETRIES:
                 new_params["degauss"] = calc_params.get("degauss", 0.01) + 0.01

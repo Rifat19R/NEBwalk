@@ -53,6 +53,61 @@ until the next release.
   image recovery, `label_selected_images()` (which could then accept the
   label), and `QEReferenceLabeler` (which could record
   `geometry_changed_during_recovery` as false).
+- Recovery geometry synchronization now compares actual atomic positions
+  instead of trusting the failure type, so any retry that moves atoms
+  (including one that mutates the input in place) is validated and synced.
+  The synced positions are written without applying constraints, so atoms
+  under `FixAtoms` that a retry displaced keep the positions the calculation
+  used, and a sync that does not reproduce them exactly raises an error.
+- Retry parameters proposed by a recovery strategy are now verified after
+  they are applied. If the calculator does not hold the requested values,
+  recovery stops with `RecoveryExhausted` instead of re-running the
+  calculation. Previously such a retry could silently repeat the identical
+  calculation under the original settings.
+- Labeling retries (`single_point_with_recovery()` and
+  `QEReferenceLabeler`) now fail closed on any retry parameter other than
+  `mixing_beta` that would differ from the configured settings (for example
+  the recovery-raised `degauss`), because the label records the configured
+  QE settings hash. NEB image recovery keeps its existing retry parameters.
+- Retry parameters are now applied to ASE Espresso calculators after their
+  first run. ASE replaces `parameters["input_data"]` with a `Namelist`
+  (a `UserDict`, not a `dict`) when it writes `espresso.pwi`; the parameter
+  helpers accepted only `dict`, so no retry parameter was ever written to a
+  later pw.x input. They now accept any `Mapping`/`MutableMapping`.
+- QE convergence retries now follow the documented base-relative sequence
+  `mixing_beta = base * 0.5**attempt` (base 0.3: 0.15, 0.075, 0.0375).
+  `run_with_recovery()` previously passed each retry's already-reduced value
+  back as the base, compounding the reduction (0.15, 0.0375, 0.0046875).
+  `QERecoveryStrategy.propose_retry()` takes an optional `base_params`,
+  which `run_with_recovery()` supplies to strategies that accept it. The
+  final-attempt `degauss` increase is unchanged (and still refused by the
+  labeling paths).
+- Reference labels (`single_point_with_recovery()`, `label_selected_images()`
+  and `QEReferenceLabeler` `REF_forces`) now store the raw calculator forces.
+  They were read through `Atoms.get_forces()`, which zeroes atoms under
+  `FixAtoms`, so constrained atoms were stored with zero DFT force although
+  pw.x reports nonzero forces for them. Constraints remain on the stored
+  structures as geometry metadata. `max_force_disagreement_eV_A` keeps its
+  existing constraint-applied convention.
+- `QEReferenceLabeler` QE version detection accepts `pw.x -version` output
+  that identifies `Program PWSCF` with a version, regardless of exit status.
+  QE 7.4.1 prints the banner and then exits with status 1, which previously
+  made environment validation fail. Output without the banner still fails.
+- NEB image recovery parameters are now attempt-local. After each image
+  evaluation (recovered or exhausted), the calculator's retry-managed
+  parameters (`mixing_beta`, `conv_thr`, `degauss`) are restored to their
+  pre-recovery values, and a parameter a retry added is removed again.
+  Previously a successful retry left, for example, `mixing_beta=0.15` on the
+  calculator, so every later NEB step ran with the reduced value and used it
+  as the base of its own retry sequence (0.15 -> 0.075 -> ...). Within one
+  recovery chain the sequence is unchanged (`base * 0.5`, `0.25`, `0.125`).
+  The cached result of the recovered evaluation is kept, so post-run readers
+  do not trigger a new calculation.
+- Documentation: `DFTLabel.max_force_disagreement_eV_A` is now documented
+  (docstring, label README disclosure, architecture reference) as an
+  operational constrained-force disagreement metric, computed after the
+  image's ASE constraints are applied to both force sets. It is not a raw
+  DFT-force disagreement. The stored label forces are raw.
 
 ## [0.11.0] — 2026-10-05
 

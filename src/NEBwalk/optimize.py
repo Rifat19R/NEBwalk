@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from collections.abc import Sequence
+from collections.abc import Mapping, MutableMapping, Sequence
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any
 
@@ -13,7 +13,11 @@ from ase.constraints import FixAtoms
 from numpy.typing import NDArray
 
 from .forces import compute_neb_forces, validate_calculators, variable_spring_constants
-from .recovery import NoOpRecoveryStrategy, run_with_recovery
+from .recovery import (
+    NoOpRecoveryStrategy,
+    RetryParametersNotApplied,
+    run_with_recovery,
+)
 
 logger = logging.getLogger(__name__)
 FloatArray = NDArray[np.float64]
@@ -114,38 +118,44 @@ def _image_recovery_strategy(img: Atoms, recovery_strategy: Any | None) -> Any:
 
 
 def _extract_calc_params(calc: Any) -> dict:
+    # ASE's Espresso template replaces ``parameters["input_data"]`` (and each
+    # section) with a ``Namelist`` (a ``UserDict``, not a ``dict``) the first
+    # time it writes an input file, so these helpers accept any Mapping.
     params: dict[str, Any] = {}
     calc_params = getattr(calc, "parameters", None)
-    if isinstance(calc_params, dict):
+    if isinstance(calc_params, Mapping):
         input_data = calc_params.get("input_data")
     else:
         input_data = getattr(calc_params, "input_data", None)
-    if not isinstance(input_data, dict):
+    if not isinstance(input_data, Mapping):
         return params
 
     for section_name in ("electrons", "system"):
         section = input_data.get(section_name)
-        if isinstance(section, dict):
+        if isinstance(section, Mapping):
             params.update(section)
     return params
 
 
+# Calculator parameters a recovery retry may change, by pw.x namelist section.
+_RETRY_PARAM_SECTIONS = {
+    "electrons": ("conv_thr", "mixing_beta"),
+    "system": ("degauss",),
+}
+
+
 def _apply_calc_params(calc: Any, calc_params: dict) -> None:
     parameters = getattr(calc, "parameters", None)
-    if not isinstance(parameters, dict):
+    if not isinstance(parameters, MutableMapping):
         return
     input_data = parameters.get("input_data")
-    if not isinstance(input_data, dict):
+    if not isinstance(input_data, MutableMapping):
         return
 
-    sections = {
-        "electrons": {"conv_thr", "mixing_beta"},
-        "system": {"degauss"},
-    }
     changed = False
-    for section_name, names in sections.items():
+    for section_name, names in _RETRY_PARAM_SECTIONS.items():
         section = input_data.setdefault(section_name, {})
-        if not isinstance(section, dict):
+        if not isinstance(section, MutableMapping):
             continue
         for name in names:
             if name in calc_params and section.get(name) != calc_params[name]:
@@ -155,6 +165,82 @@ def _apply_calc_params(calc: Any, calc_params: dict) -> None:
         calc.reset()
     elif changed and hasattr(calc, "results"):
         calc.results.clear()
+
+
+def _restore_calc_params(calc: Any, baseline: dict) -> None:
+    """Restore retry-managed parameters on ``calc`` to ``baseline``.
+
+    Recovery parameters are attempt-local: after an NEB image evaluation
+    (successful or not) the calculator must hold its pre-recovery settings so
+    the next independent evaluation starts from them. A parameter absent from
+    ``baseline`` (pw.x default) is removed again if a retry added it.
+
+    Cached results are left in place: they are the values the optimizer just
+    used, computed under the retry parameters recorded in the recovery log.
+    Any new geometry is recomputed under the restored settings.
+    """
+    parameters = getattr(calc, "parameters", None)
+    if not isinstance(parameters, MutableMapping):
+        return
+    input_data = parameters.get("input_data")
+    if not isinstance(input_data, MutableMapping):
+        return
+    for section_name, names in _RETRY_PARAM_SECTIONS.items():
+        section = input_data.get(section_name)
+        if not isinstance(section, MutableMapping):
+            continue
+        for name in names:
+            if name in baseline:
+                if section.get(name) != baseline[name]:
+                    section[name] = baseline[name]
+            elif name in section:
+                del section[name]
+
+
+# Retry parameters that only steer the SCF iteration; the converged result is
+# the same to within conv_thr. Labeling paths allow only these to differ from
+# the configured settings, so a label never carries a settings hash that does
+# not describe how it was computed (e.g. a recovery-raised degauss).
+_SCF_ONLY_RETRY_PARAMS = frozenset({"mixing_beta"})
+
+
+def _apply_and_verify_calc_params(
+    calc: Any,
+    calc_params: dict,
+    *,
+    baseline: dict | None = None,
+    allowed_changes: frozenset[str] | None = None,
+) -> None:
+    """Apply ``calc_params`` to ``calc`` and verify the calculator holds them.
+
+    Raises :class:`RetryParametersNotApplied` if any requested parameter is
+    not present with the requested value afterwards, or if ``allowed_changes``
+    is given and a parameter outside it differs from ``baseline``.
+    """
+    if allowed_changes is not None:
+        reference = baseline or {}
+        disallowed = sorted(
+            name
+            for name, value in calc_params.items()
+            if name not in allowed_changes
+            and (name not in reference or reference[name] != value)
+        )
+        if disallowed:
+            raise RetryParametersNotApplied(
+                "parameter change(s) not permitted here because they would "
+                f"differ from the recorded settings: {disallowed}"
+            )
+    _apply_calc_params(calc, calc_params)
+    effective = _extract_calc_params(calc)
+    unapplied = sorted(
+        name
+        for name, value in calc_params.items()
+        if name not in effective or effective[name] != value
+    )
+    if unapplied:
+        raise RetryParametersNotApplied(
+            f"calculator {type(calc).__name__} did not take parameter(s) {unapplied}"
+        )
 
 
 def _eval_image(
@@ -173,19 +259,24 @@ def _eval_image(
         if eval_atoms.calc is None:
             eval_atoms.calc = calc
         if eval_atoms.calc is not None:
-            _apply_calc_params(eval_atoms.calc, params)
+            _apply_and_verify_calc_params(eval_atoms.calc, params)
         energy = float(eval_atoms.get_potential_energy())
         forces = np.asarray(eval_atoms.get_forces(), dtype=float)
         return energy, forces
 
-    return run_with_recovery(
-        compute_fn,
-        strategy,
-        img,
-        calc_params,
-        image_index,
-        log,
-    )
+    try:
+        return run_with_recovery(
+            compute_fn,
+            strategy,
+            img,
+            calc_params,
+            image_index,
+            log,
+        )
+    finally:
+        # Retry parameters must not leak into the next NEB step's evaluation.
+        if calc is not None:
+            _restore_calc_params(calc, calc_params)
 
 
 def _warn_if_gpu_calculator(images: Sequence[Atoms], n_workers: int) -> None:

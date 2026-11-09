@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
+import inspect
 import time
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Optional, Protocol
+
+import numpy as np
 
 
 class FailureType(Enum):
@@ -80,6 +83,52 @@ class RecoveryExhausted(RuntimeError):
         super().__init__(reasoning)
 
 
+class RetryParametersNotApplied(RuntimeError):
+    """Proposed retry parameters could not be applied and verified.
+
+    Raised by a ``compute_fn`` when the calculator cannot take the proposed
+    parameters, or when they are not permitted in that context. It is never
+    classified or retried: rerunning would either repeat the identical
+    calculation or produce a result whose settings differ from the record.
+    """
+
+
+def _accepts_base_params(strategy) -> bool:
+    """Whether ``strategy.propose_retry`` takes the ``base_params`` keyword."""
+    try:
+        signature = inspect.signature(strategy.propose_retry)
+    except (TypeError, ValueError):
+        return False
+    return "base_params" in signature.parameters
+
+
+def _positions_snapshot(atoms) -> np.ndarray | None:
+    positions = getattr(atoms, "positions", None)
+    if positions is None:
+        return None
+    return np.array(positions, dtype=float, copy=True)
+
+
+def _geometry_changed(current_atoms, reference_positions) -> bool:
+    current = getattr(current_atoms, "positions", None)
+    if current is None:
+        return True
+    return not np.array_equal(np.asarray(current, dtype=float), reference_positions)
+
+
+def _reference_atoms(atoms, reference_positions):
+    """Copy of ``atoms`` at its pre-recovery positions, for validation."""
+    copy = getattr(atoms, "copy", None)
+    if not callable(copy):
+        raise RuntimeError(
+            "Recovery mutated the input geometry in place and it cannot be "
+            "validated against the original positions."
+        )
+    reference = copy()
+    reference.positions = reference_positions
+    return reference
+
+
 def _geometry_is_valid(strategy, current_atoms, target_atoms) -> bool:
     validator = getattr(strategy, "validate_recovered_geometry", None)
     if validator is None:
@@ -92,8 +141,20 @@ def _sync_recovered_geometry(current_atoms, target_atoms) -> None:
         return
     set_positions = getattr(target_atoms, "set_positions", None)
     positions = getattr(current_atoms, "positions", None)
-    if callable(set_positions) and positions is not None:
+    if not callable(set_positions) or positions is None:
+        return
+    # The result belongs to the evaluated positions, including any
+    # constrained atom a geometry retry displaced, so constraints must not
+    # adjust the synced copy.
+    try:
+        set_positions(positions, apply_constraint=False)
+    except TypeError:
         set_positions(positions)
+    synced = getattr(target_atoms, "positions", None)
+    if synced is not None and not np.array_equal(synced, positions):
+        raise RuntimeError(
+            "Recovered geometry could not be synced exactly to the caller's atoms."
+        )
 
 
 def run_with_recovery(
@@ -112,21 +173,53 @@ def run_with_recovery(
     attempt = 0
     current_atoms, current_params = atoms, calc_params
     last_failure_type: FailureType | None = None
-    # Sticky: a later parameter-only retry keeps the displaced geometry, so
-    # the result still belongs to it and must be validated and synced back.
+    # Compare actual positions rather than trusting the failure type: any
+    # retry (including a custom convergence retry, or one that mutates the
+    # input in place) may move atoms, and the result then belongs to the
+    # moved geometry, which must be validated and synced back.
+    reference_positions = _positions_snapshot(atoms)
+    base_aware = _accepts_base_params(strategy)
     geometry_retried = False
     while True:
         try:
             result = compute_fn(current_atoms, current_params)
-            if geometry_retried and not _geometry_is_valid(
-                strategy, current_atoms, atoms
-            ):
+            if reference_positions is None:
+                changed = geometry_retried
+                target = atoms
+            else:
+                changed = _geometry_changed(current_atoms, reference_positions)
+                target = (
+                    _reference_atoms(atoms, reference_positions)
+                    if changed and current_atoms is atoms
+                    else atoms
+                )
+            if changed and not _geometry_is_valid(strategy, current_atoms, target):
                 raise RuntimeError(
                     "Recovered geometry drifted beyond the allowed tolerance."
                 )
-            if geometry_retried:
+            if changed:
                 _sync_recovered_geometry(current_atoms, atoms)
             return result
+        except RetryParametersNotApplied as exc:
+            failure_type = last_failure_type or FailureType.UNKNOWN
+            reasoning = (
+                f"Image {image_index}: retry parameters were not applied, so the "
+                f"retry was not run. {exc}"
+            )
+            log.append(
+                RecoveryAttempt(
+                    image_index,
+                    attempt,
+                    failure_type,
+                    current_params,
+                    None,
+                    "not_retryable",
+                    reasoning,
+                )
+            )
+            raise RecoveryExhausted(
+                image_index, failure_type, attempt, reasoning
+            ) from exc
         except Exception as exc:
             raw_output = getattr(exc, "qe_output", None)
             failure_type = strategy.classify(exc, raw_output)
@@ -178,11 +271,15 @@ def run_with_recovery(
                     image_index, failure_type, attempt, reasoning
                 ) from exc
 
+            # Strategies that support it receive the pre-recovery parameters
+            # so they can compute a base-relative (not compounding) retry.
+            retry_kwargs = {"base_params": calc_params} if base_aware else {}
             proposal = strategy.propose_retry(
                 failure_type,
                 attempt,
                 current_atoms,
                 current_params,
+                **retry_kwargs,
             )
             if proposal is None:
                 reasoning = (

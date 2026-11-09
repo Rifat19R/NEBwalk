@@ -76,7 +76,12 @@ documented rather than unified.
 - **Force disagreement.** `DisagreementResult.force_disagreement` is the
   largest atom-wise vector norm of the force difference.
   `DFTLabel.max_force_disagreement_eV_A` is the largest absolute Cartesian
-  component. Committee diagnostics report standard deviations
+  component, and is an operational *constrained-force* disagreement metric:
+  the image's ASE constraints (e.g. `FixAtoms`) are applied to both the DFT
+  and MLIP forces first, so constrained atoms contribute zero. It is not a raw
+  DFT-force disagreement. The stored label forces (`DFTLabel.forces_eV_A`,
+  extxyz `forces`, campaign `REF_forces`) are the raw, unconstrained DFT
+  forces. Committee diagnostics report standard deviations
   (`max_atom_force_std`, `rms_force_disagreement`). These metrics cannot be
   compared directly.
 - **Peak selection.** `selection.select_peak_plus_neighbors()` excludes the
