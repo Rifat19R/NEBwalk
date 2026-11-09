@@ -23,6 +23,11 @@ from ase.io import write
 from numpy.typing import NDArray
 
 from .active import MLIPActiveNEBResult
+from .optimize import (
+    _SCF_ONLY_RETRY_PARAMS,
+    _apply_and_verify_calc_params,
+    _extract_calc_params,
+)
 from .recovery import NoOpRecoveryStrategy, RecoveryExhausted, run_with_recovery
 
 FloatArray = NDArray[np.float64]
@@ -112,6 +117,18 @@ def _nebwalk_version() -> str:
     return __version__
 
 
+def _apply_constraints_to_forces(atoms: Atoms, forces: FloatArray) -> FloatArray:
+    """Return a copy of ``forces`` adjusted by ``atoms``' constraints.
+
+    Mirrors ``Atoms.get_forces(apply_constraint=True)`` for externally
+    supplied forces, without touching ``atoms`` or its calculator.
+    """
+    adjusted = np.array(forces, dtype=float, copy=True)
+    for constraint in atoms.constraints:
+        constraint.adjust_forces(atoms, adjusted)
+    return adjusted
+
+
 def single_point_with_recovery(
     atoms: Atoms,
     dft_calculator_factory: Callable[[], Any],
@@ -125,6 +142,12 @@ def single_point_with_recovery(
     are the geometry the energy and forces actually belong to; callers that
     require the input geometry must compare positions themselves. ``atoms``
     itself is never mutated.
+
+    Retry parameters proposed by the strategy are applied to the calculator
+    and verified. Only SCF-steering parameters (``mixing_beta``) may differ
+    from the calculator's configured settings; any other proposed change, or
+    one the calculator cannot take, ends recovery with
+    :class:`~NEBwalk.recovery.RecoveryExhausted` instead of being run.
     """
     evaluated = atoms.copy()
     evaluated.calc = dft_calculator_factory()
@@ -134,12 +157,30 @@ def single_point_with_recovery(
         or NoOpRecoveryStrategy()
     )
 
-    def compute_fn(eval_atoms: Atoms, _params: dict) -> tuple[float, FloatArray]:
+    calc = evaluated.calc
+    configured = _extract_calc_params(calc)
+
+    def compute_fn(eval_atoms: Atoms, params: dict) -> tuple[float, FloatArray]:
+        if eval_atoms.calc is None:
+            eval_atoms.calc = calc
+        # Retry parameters are really applied; only SCF-steering ones may
+        # depart from the configured settings the label is recorded under.
+        _apply_and_verify_calc_params(
+            eval_atoms.calc,
+            params,
+            baseline=configured,
+            allowed_changes=_SCF_ONLY_RETRY_PARAMS,
+        )
         energy = float(eval_atoms.get_potential_energy())
-        forces = np.asarray(eval_atoms.get_forces(), dtype=float)
+        # Reference labels are the raw calculator forces. ``Atoms.get_forces``
+        # would apply constraints (e.g. zero FixAtoms atoms), which are not
+        # DFT forces; constraints stay on the atoms as geometry metadata.
+        forces = np.asarray(eval_atoms.get_forces(apply_constraint=False), dtype=float)
         return energy, forces
 
-    energy, forces = run_with_recovery(compute_fn, strategy, evaluated, {}, index, [])
+    energy, forces = run_with_recovery(
+        compute_fn, strategy, evaluated, dict(configured), index, []
+    )
     return energy, forces, evaluated
 
 
@@ -233,6 +274,10 @@ def label_selected_images(
                 else float(images[index].get_potential_energy())
             )
             mlip_forces = np.asarray(images[index].get_forces(), dtype=float)
+            # The disagreement metric keeps its existing convention (both
+            # force sets with the image's constraints applied); the stored
+            # label forces stay raw.
+            dft_forces_constrained = _apply_constraints_to_forces(images[index], forces)
             dft_relative = energy - dft_ref_energy
             mlip_relative = mlip_energy - mlip_ref_energy
             labels.append(
@@ -245,7 +290,7 @@ def label_selected_images(
                     mlip_relative_energy_eV=mlip_relative,
                     relative_energy_disagreement_eV=dft_relative - mlip_relative,
                     max_force_disagreement_eV_A=float(
-                        np.max(np.abs(forces - mlip_forces))
+                        np.max(np.abs(dft_forces_constrained - mlip_forces))
                     ),
                     is_reference=(index == reference_index),
                 )

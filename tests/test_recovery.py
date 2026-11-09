@@ -8,13 +8,14 @@ from ase import Atoms
 from ase.calculators.emt import EMT
 
 from NEBwalk import NEBRunConfig, run_neb_calculation
-from NEBwalk.optimize import _apply_calc_params
+from NEBwalk.optimize import _apply_and_verify_calc_params, _apply_calc_params
 from NEBwalk.qe import QERecoveryStrategy
 from NEBwalk.recovery import (
     FailureType,
     NoOpRecoveryStrategy,
     RecoveryAttempt,
     RecoveryExhausted,
+    RetryParametersNotApplied,
     run_with_recovery,
 )
 from NEBwalk.reproduce import save_bundle
@@ -378,3 +379,316 @@ def test_apply_calc_params_clears_stale_results_without_reset() -> None:
     assert calc.parameters["input_data"]["electrons"]["mixing_beta"] == 0.15
     assert calc.parameters["input_data"]["system"]["degauss"] == 0.03
     assert calc.results == {}
+
+
+class _ParamCalc:
+    """Mock QE-like calculator exposing ASE Espresso-style ``input_data``."""
+
+    def __init__(self, extra_electrons=None) -> None:
+        self.parameters = {
+            "input_data": {
+                "electrons": {"mixing_beta": 0.3, **(extra_electrons or {})},
+                "system": {"degauss": 0.02},
+            }
+        }
+        self.results: dict = {}
+
+
+class _DisplacingConvergenceStrategy:
+    """Custom strategy whose *convergence* retry also moves atoms."""
+
+    def __init__(self, shift: float, valid: bool = True) -> None:
+        self.shift = shift
+        self.valid = valid
+
+    def classify(self, error, raw_output=None):
+        return FailureType.CONVERGENCE_FAILURE
+
+    def propose_retry(self, failure_type, attempt, atoms, calc_params):
+        moved = atoms.copy()
+        moved.positions = moved.positions + [self.shift, 0.0, 0.0]
+        return dict(calc_params), moved
+
+    def validate_recovered_geometry(self, recovered_atoms, target_atoms):
+        return self.valid
+
+
+def _fail_once():
+    calls = {"n": 0}
+
+    def compute_fn(eval_atoms, calc_params):
+        calls["n"] += 1
+        if calls["n"] == 1:
+            raise RuntimeError("convergence NOT achieved")
+        return float(eval_atoms.positions[0, 0])
+
+    return compute_fn
+
+
+def test_convergence_retry_that_moves_atoms_is_validated_and_synced() -> None:
+    atoms = Atoms("H", positions=[[0.0, 0.0, 0.0]])
+    result = run_with_recovery(
+        _fail_once(), _DisplacingConvergenceStrategy(0.05), atoms, {}, 1, []
+    )
+    # The result was computed at x=0.05; the caller's atoms must say so.
+    assert result == pytest.approx(0.05)
+    np.testing.assert_allclose(atoms.positions, [[0.05, 0.0, 0.0]])
+
+    atoms = Atoms("H", positions=[[0.0, 0.0, 0.0]])
+    with pytest.raises(RecoveryExhausted):
+        run_with_recovery(
+            _fail_once(),
+            _DisplacingConvergenceStrategy(0.05, valid=False),
+            atoms,
+            {},
+            1,
+            [],
+        )
+
+
+def test_in_place_geometry_mutation_is_validated_against_original() -> None:
+    class InPlaceStrategy:
+        def __init__(self) -> None:
+            self.targets: list[np.ndarray] = []
+
+        def classify(self, error, raw_output=None):
+            return FailureType.CONVERGENCE_FAILURE
+
+        def propose_retry(self, failure_type, attempt, atoms, calc_params):
+            atoms.positions += [0.4, 0.0, 0.0]
+            return dict(calc_params), atoms
+
+        def validate_recovered_geometry(self, recovered_atoms, target_atoms):
+            self.targets.append(target_atoms.positions.copy())
+            return QERecoveryStrategy(mic_tolerance_A=0.3).validate_recovered_geometry(
+                recovered_atoms, target_atoms
+            )
+
+    strategy = InPlaceStrategy()
+    atoms = Atoms("H", positions=[[0.0, 0.0, 0.0]], cell=[10, 10, 10], pbc=True)
+    with pytest.raises(RecoveryExhausted):
+        run_with_recovery(_fail_once(), strategy, atoms, {}, 1, [])
+    np.testing.assert_allclose(strategy.targets[0], [[0.0, 0.0, 0.0]])
+
+
+def test_geometry_sync_includes_constrained_atoms() -> None:
+    from ase.constraints import FixAtoms
+
+    class ShiftAllStrategy(_DisplacingConvergenceStrategy):
+        def classify(self, error, raw_output=None):
+            return FailureType.GEOMETRY_INSTABILITY
+
+    atoms = Atoms("H2", positions=[[0.0, 0.0, 0.0], [1.0, 0.0, 0.0]])
+    atoms.set_constraint(FixAtoms(indices=[0]))
+    evaluated: list[np.ndarray] = []
+
+    def compute_fn(eval_atoms, calc_params):
+        if not evaluated:
+            evaluated.append(eval_atoms.positions.copy())
+            raise RuntimeError("atoms too close")
+        evaluated.append(eval_atoms.positions.copy())
+        return "ok"
+
+    run_with_recovery(compute_fn, ShiftAllStrategy(0.02), atoms, {}, 1, [])
+    # Energy/forces came from evaluated[-1]; the recorded geometry must match.
+    np.testing.assert_array_equal(atoms.positions, evaluated[-1])
+
+
+def test_unapplied_retry_parameters_are_not_retried_even_after_geometry_retry():
+    class GeometryThenParams:
+        def __init__(self) -> None:
+            self.proposals = 0
+
+        def classify(self, error, raw_output=None):
+            if "atoms too close" in str(error):
+                return FailureType.GEOMETRY_INSTABILITY
+            # Would be promoted to GEOMETRY_INSTABILITY (retryable) if the
+            # unapplied-parameter error were classified like other errors.
+            return FailureType.UNKNOWN
+
+        def propose_retry(self, failure_type, attempt, atoms, calc_params):
+            self.proposals += 1
+            return {**calc_params, "electron_maxstep": 200}, atoms
+
+    calc = _ParamCalc()
+    calls = {"n": 0}
+
+    def compute_fn(eval_atoms, calc_params):
+        calls["n"] += 1
+        _apply_and_verify_calc_params(calc, calc_params)
+        if calls["n"] == 1:
+            raise RuntimeError("atoms too close")
+        return "ran with unapplied parameters"
+
+    log: list = []
+    strategy = GeometryThenParams()
+    with pytest.raises(RecoveryExhausted, match="electron_maxstep"):
+        run_with_recovery(
+            compute_fn,
+            strategy,
+            Atoms("H", positions=[[0.0, 0.0, 0.0]]),
+            {},
+            1,
+            log,
+        )
+    assert strategy.proposals == 1
+    assert [entry.outcome for entry in log] == ["retrying", "not_retryable"]
+
+
+def test_apply_and_verify_calc_params_applies_and_rejects() -> None:
+    calc = _ParamCalc()
+    _apply_and_verify_calc_params(calc, {"mixing_beta": 0.15, "degauss": 0.02})
+    assert calc.parameters["input_data"]["electrons"]["mixing_beta"] == 0.15
+
+    # Unsupported key: silently ignored by _apply_calc_params before.
+    with pytest.raises(RetryParametersNotApplied, match="electron_maxstep"):
+        _apply_and_verify_calc_params(_ParamCalc(), {"electron_maxstep": 200})
+
+    # Calculator without input_data cannot take any parameter.
+    class PlainCalc:
+        parameters: dict = {}
+
+    _apply_and_verify_calc_params(PlainCalc(), {})
+    with pytest.raises(RetryParametersNotApplied, match="mixing_beta"):
+        _apply_and_verify_calc_params(PlainCalc(), {"mixing_beta": 0.15})
+
+    # Restricted context: degauss may not depart from the configured value.
+    configured = {"mixing_beta": 0.3, "degauss": 0.02}
+    calc = _ParamCalc()
+    _apply_and_verify_calc_params(
+        calc,
+        {"mixing_beta": 0.15, "degauss": 0.02},
+        baseline=configured,
+        allowed_changes=frozenset({"mixing_beta"}),
+    )
+    with pytest.raises(RetryParametersNotApplied, match="degauss"):
+        _apply_and_verify_calc_params(
+            calc,
+            {"mixing_beta": 0.075, "degauss": 0.03},
+            baseline=configured,
+            allowed_changes=frozenset({"mixing_beta"}),
+        )
+    assert calc.parameters["input_data"]["system"]["degauss"] == 0.02
+
+
+def test_param_helpers_accept_mapping_sections() -> None:
+    from collections import UserDict
+
+    from NEBwalk.optimize import _extract_calc_params
+
+    class UserDictCalc:
+        def __init__(self) -> None:
+            self.parameters = UserDict(
+                {
+                    "input_data": UserDict(
+                        {
+                            "electrons": UserDict({"mixing_beta": 0.3}),
+                            "system": UserDict({"degauss": 0.02}),
+                        }
+                    )
+                }
+            )
+            self.results = {"energy": -1.0}
+
+    calc = UserDictCalc()
+    assert _extract_calc_params(calc) == {"mixing_beta": 0.3, "degauss": 0.02}
+    _apply_and_verify_calc_params(calc, {"mixing_beta": 0.15})
+    assert calc.parameters["input_data"]["electrons"]["mixing_beta"] == 0.15
+    assert calc.results == {}
+
+
+def test_param_helpers_handle_ase_espresso_namelist_after_write_input(
+    tmp_path,
+) -> None:
+    """ASE converts ``input_data`` to a ``Namelist`` (UserDict) on first write.
+
+    A retry applied after that first write must still change the pw.x input
+    that is actually written.
+    """
+    import re
+    from collections.abc import Mapping
+
+    from ase.build import bulk
+
+    from NEBwalk.optimize import _extract_calc_params
+    from NEBwalk.qe import QEParams, make_qe_factory
+
+    pseudo_dir = tmp_path / "pseudo"
+    pseudo_dir.mkdir()
+    factory = make_qe_factory(
+        QEParams(mixing_beta=0.3, degauss=0.02),
+        pseudo_dir=pseudo_dir,
+        pseudopotentials={"Al": "Al.UPF"},
+        base_dir=tmp_path / "work",
+    )
+    calc = factory()
+    atoms = bulk("Al", "fcc", a=4.05)
+    calc.write_inputfiles(atoms, ["energy", "forces"])
+    input_data = calc.parameters["input_data"]
+    assert isinstance(input_data, Mapping) and not isinstance(input_data, dict)
+
+    def written_beta() -> float:
+        text = (calc.directory / "espresso.pwi").read_text()
+        match = re.search(r"^\s*mixing_beta\s*=\s*([-+.\deEdD]+)", text, re.M)
+        assert match is not None
+        return float(match.group(1).replace("d", "e").replace("D", "e"))
+
+    assert written_beta() == pytest.approx(0.3)
+    assert _extract_calc_params(calc)["mixing_beta"] == 0.3
+    _apply_and_verify_calc_params(calc, {"mixing_beta": 0.15})
+    calc.write_inputfiles(atoms, ["energy", "forces"])
+    assert written_beta() == pytest.approx(0.15)
+
+
+def _always_unconverged(seen):
+    def compute_fn(eval_atoms, calc_params):
+        seen.append((calc_params.get("mixing_beta"), calc_params.get("degauss")))
+        error = RuntimeError("pw.x failed")
+        error.qe_output = "convergence NOT achieved"
+        raise error
+
+    return compute_fn
+
+
+def test_qe_beta_retry_sequence_is_base_relative_not_compounded() -> None:
+    # Before the fix run_with_recovery fed each retry's beta back in as the
+    # base, giving 0.3 -> 0.15 -> 0.0375 -> 0.0046875.
+    seen: list = []
+    with pytest.raises(RecoveryExhausted):
+        run_with_recovery(
+            _always_unconverged(seen),
+            QERecoveryStrategy(),
+            Atoms("H", positions=[[0.0, 0.0, 0.0]]),
+            {"mixing_beta": 0.3, "degauss": 0.02},
+            1,
+            [],
+        )
+    assert seen == [(0.3, 0.02), (0.15, 0.02), (0.075, 0.02), (0.0375, 0.03)]
+
+
+def test_qe_beta_retry_after_geometry_retry_keeps_attempt_indexing() -> None:
+    strategy = QERecoveryStrategy(max_displacement_A=0.0)
+    seen: list = []
+    calls = {"n": 0}
+
+    def compute_fn(eval_atoms, calc_params):
+        calls["n"] += 1
+        seen.append(calc_params.get("mixing_beta"))
+        if calls["n"] == 1:
+            raise RuntimeError("S matrix not positive definite")
+        if calls["n"] == 2:
+            error = RuntimeError("pw.x failed")
+            error.qe_output = "convergence NOT achieved"
+            raise error
+        return "ok"
+
+    result = run_with_recovery(
+        compute_fn,
+        strategy,
+        Atoms("H", positions=[[0.0, 0.0, 0.0]], cell=[5, 5, 5], pbc=True),
+        {"mixing_beta": 0.3, "degauss": 0.02},
+        1,
+        [],
+    )
+    assert result == "ok"
+    assert seen == [0.3, 0.3, 0.075]

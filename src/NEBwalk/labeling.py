@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import re
 import shlex
 import subprocess
 import tempfile
@@ -22,6 +23,11 @@ from .datasets import (
     compute_structure_hash,
     load_dataset,
     write_dataset,
+)
+from .optimize import (
+    _SCF_ONLY_RETRY_PARAMS,
+    _apply_and_verify_calc_params,
+    _extract_calc_params,
 )
 from .qe import QEParams, make_qe_factory, validate_qe_setup
 from .recovery import RecoveryAttempt, run_with_recovery
@@ -82,6 +88,29 @@ class ReferenceLabeler(Protocol):
         output_dir: Path,
         metadata: dict[str, Any] | None = None,
     ) -> LabelingResult: ...
+
+
+_PWSCF_BANNER = re.compile(r"Program\s+PWSCF\s+(v\.?\s*\d+(?:\.\d+)*\S*)")
+
+
+def _parse_pwscf_version(output: str, returncode: int) -> str:
+    """Return ``"Program PWSCF v.X.Y.Z"`` from ``pw.x -version`` output.
+
+    The exit status alone is not a validity signal: QE 7.4.1 prints its
+    banner and then exits with status 1 (``MPI_ABORT``) for ``-version``.
+    The executable is accepted only if its output identifies PWSCF with a
+    version token; a nonzero status without that banner is an error.
+    """
+    match = _PWSCF_BANNER.search(output)
+    if match is None:
+        if returncode != 0:
+            raise RuntimeError(
+                f"QE version command failed with code {returncode} and its "
+                "output did not identify Program PWSCF"
+            )
+        raise RuntimeError("QE version output did not identify Program PWSCF")
+    version = re.sub(r"\s+", "", match.group(1))
+    return f"Program PWSCF {version}"
 
 
 def _json_safe(value: Any) -> Any:
@@ -149,6 +178,7 @@ class QEReferenceLabeler:
             completed = subprocess.run(
                 argv,
                 shell=False,
+                stdin=subprocess.DEVNULL,
                 capture_output=True,
                 text=True,
                 check=False,
@@ -156,16 +186,9 @@ class QEReferenceLabeler:
             )
         except (OSError, subprocess.TimeoutExpired) as exc:
             raise RuntimeError(f"could not query QE version: {exc}") from exc
-        output = f"{completed.stdout}\n{completed.stderr}"
-        if completed.returncode != 0:
-            raise RuntimeError(
-                f"QE version command failed with code {completed.returncode}"
-            )
-        for line in output.splitlines():
-            if "Program PWSCF" in line:
-                words = line.strip().split()
-                return " ".join(words[:3])
-        raise RuntimeError("QE version output did not identify Program PWSCF")
+        return _parse_pwscf_version(
+            f"{completed.stdout}\n{completed.stderr}", completed.returncode
+        )
 
     def settings_payload(self) -> dict[str, Any]:
         """Return canonical QE settings used for provenance and compatibility."""
@@ -272,20 +295,41 @@ class QEReferenceLabeler:
                 if strategy is None:
                     raise RuntimeError("QE calculator has no recovery strategy")
                 start_log = len(recovery_log)
+                calc = candidate.calc
+                configured = _extract_calc_params(calc)
 
                 def compute(
-                    eval_atoms: Atoms, _params: dict[str, Any]
+                    eval_atoms: Atoms,
+                    params: dict[str, Any],
+                    calc: Any = calc,
+                    configured: dict[str, Any] = configured,
                 ) -> tuple[float, np.ndarray]:
+                    if eval_atoms.calc is None:
+                        eval_atoms.calc = calc
+                    # Labels carry the configured settings hash, so only
+                    # SCF-steering retry parameters may depart from it.
+                    _apply_and_verify_calc_params(
+                        eval_atoms.calc,
+                        params,
+                        baseline=configured,
+                        allowed_changes=_SCF_ONLY_RETRY_PARAMS,
+                    )
+                    # REF_forces must be the raw QE forces, never forces
+                    # zeroed by ASE constraints (e.g. FixAtoms); constraints
+                    # remain on the frame as geometry metadata only.
                     return (
                         float(eval_atoms.get_potential_energy()),
-                        np.asarray(eval_atoms.get_forces(), dtype=float),
+                        np.asarray(
+                            eval_atoms.get_forces(apply_constraint=False),
+                            dtype=float,
+                        ),
                     )
 
                 energy, forces = run_with_recovery(
                     compute,
                     strategy,
                     candidate,
-                    {},
+                    dict(configured),
                     input_index,
                     recovery_log,
                 )
