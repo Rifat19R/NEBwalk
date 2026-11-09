@@ -87,6 +87,9 @@ examples/h_diffusion_pd_macemp.py
 examples/cu_vacancy_macemp.py
 examples/test_idpp_ethane.py
 
+# Local verification evidence (QE smoke inputs/outputs, audits) -- local only
+evidence/
+
 # Local briefing documents
 MENTOR_CLAUDE_v2.md
 
